@@ -913,7 +913,7 @@ button.btn-header { font-family: var(--font-mono); }
         <span class="panel-label" style="color:#ffd700;margin-bottom:0;">▸ MMDVMNXDN.ini</span>
         <div style="display:flex;gap:.5rem;">
           <button onclick="nxdnIniLoad('mmdvmnxdn')" style="font-family:var(--font-mono);font-size:.65rem;color:#ffd700;border:1px solid rgba(255,215,0,.3);background:transparent;border-radius:3px;padding:.2rem .6rem;cursor:pointer;transition:background .2s;" onmouseover="this.style.background='rgba(255,215,0,.08)'" onmouseout="this.style.background='transparent'">↺ Recargar</button>
-          <button onclick="nxdnIniEdit('mmdvmnxdn')" style="font-family:var(--font-mono);font-size:.65rem;color:#ffc400;border:1px solid rgba(255,196,0,.3);background:transparent;border-radius:3px;padding:.2rem .6rem;cursor:pointer;transition:background .2s;" onmouseover="this.style.background='rgba(255,196,0,.08)'" onmouseout="this.style.background='transparent'">✏ Editar</button>
+          <a href="edit_ini.php?file=mmdvmnxdn" style="font-family:var(--font-mono);font-size:.65rem;color:#ffc400;border:1px solid rgba(255,196,0,.3);background:transparent;border-radius:3px;padding:.2rem .6rem;cursor:pointer;transition:background .2s;text-decoration:none;display:inline-flex;align-items:center;" onmouseover="this.style.background='rgba(255,196,0,.08)'" onmouseout="this.style.background='transparent'">✏ Editar</a>
         </div>
       </div>
       <div id="nxdnIniMmdvm" style="font-family:var(--font-mono);font-size:.72rem;line-height:1.55;color:#7a9ab5;background:var(--surface);border:1px solid #4a4a00;border-radius:4px;padding:.8rem 1rem;height:320px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;">Cargando…</div>
@@ -924,7 +924,7 @@ button.btn-header { font-family: var(--font-mono); }
         <span class="panel-label" style="color:#ffd700;margin-bottom:0;">▸ NXDNGateway.ini</span>
         <div style="display:flex;gap:.5rem;">
           <button onclick="nxdnIniLoad('nxdngateway')" style="font-family:var(--font-mono);font-size:.65rem;color:#ffd700;border:1px solid rgba(255,215,0,.3);background:transparent;border-radius:3px;padding:.2rem .6rem;cursor:pointer;transition:background .2s;" onmouseover="this.style.background='rgba(255,215,0,.08)'" onmouseout="this.style.background='transparent'">↺ Recargar</button>
-          <button onclick="nxdnIniEdit('nxdngateway')" style="font-family:var(--font-mono);font-size:.65rem;color:#ffc400;border:1px solid rgba(255,196,0,.3);background:transparent;border-radius:3px;padding:.2rem .6rem;cursor:pointer;transition:background .2s;" onmouseover="this.style.background='rgba(255,196,0,.08)'" onmouseout="this.style.background='transparent'">✏ Editar</button>
+          <a href="edit_ini.php?file=nxdngateway" style="font-family:var(--font-mono);font-size:.65rem;color:#ffc400;border:1px solid rgba(255,196,0,.3);background:transparent;border-radius:3px;padding:.2rem .6rem;cursor:pointer;transition:background .2s;text-decoration:none;display:inline-flex;align-items:center;" onmouseover="this.style.background='rgba(255,196,0,.08)'" onmouseout="this.style.background='transparent'">✏ Editar</a>
         </div>
       </div>
       <div id="nxdnIniGateway" style="font-family:var(--font-mono);font-size:.72rem;line-height:1.55;color:#7a9ab5;background:var(--surface);border:1px solid #4a4a00;border-radius:4px;padding:.8rem 1rem;height:320px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;">Cargando…</div>
@@ -1148,9 +1148,7 @@ async function nxdnIniLoad(which){
     }
 }
 
-function nxdnIniEdit(which){
-    feditOpen(NXDN_INI_PATHS[which]);
-}
+// ── Fin NXDN ──
 
 function updateNXDNClock(){if(!nxdnCurrentlyActive){const now=new Date();const clk=document.getElementById('nxdnNxClock');if(clk){clk.textContent=now.toLocaleTimeString('es-ES');document.getElementById('nxdnNxDate').textContent=now.toLocaleDateString('es-ES',{weekday:'short',day:'2-digit',month:'short',year:'numeric'}).toUpperCase();}}}
 setInterval(updateNXDNClock,1000);updateNXDNClock();
