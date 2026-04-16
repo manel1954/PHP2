@@ -10,6 +10,8 @@ $files = [
     'displaydriver'=> '/home/pi/Display-Driver/DisplayDriver.ini',
     'dstargateway' => '/home/pi/DStarGateway/DStarGateway.ini',
     'mmdvmdstar'   => '/home/pi/MMDVMHost/MMDVMDSTAR.ini',
+    'mmdvmnxdn'    => '/home/pi/MMDVMHost/MMDVMNXDN.ini',
+    'nxdngateway'  => '/home/pi/NXDNClients/NXDNGateway/NXDNGateway.ini',
 ];
 
 $key  = $_GET['file'] ?? '';
