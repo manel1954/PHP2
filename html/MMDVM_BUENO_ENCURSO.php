@@ -71,7 +71,6 @@ if ($action === 'terminal') {
 
     $cmd = trim($_POST['cmd'] ?? '');
 
-    // Bloquear solo comandos interactivos reales (nano ya NO aquí)
     if (preg_match('/^\s*(vim|vi|less|more|top|htop|su)\s*/i', $cmd)) {
         header('Content-Type: application/json');
         echo json_encode([
@@ -80,7 +79,6 @@ if ($action === 'terminal') {
         exit;
     }
 
-    // Seguridad extra: evitar cosas peligrosas básicas
     if (preg_match('/(rm\s+-rf|shutdown|reboot|mkfs|dd\s+if=)/i', $cmd)) {
         header('Content-Type: application/json');
         echo json_encode([
@@ -89,7 +87,6 @@ if ($action === 'terminal') {
         exit;
     }
 
-    // Ejecutar comando como usuario pi (sin password)
     $out = $cmd !== ''
         ? (shell_exec('/usr/bin/sudo -n -u pi -H bash -c ' . escapeshellarg($cmd) . ' 2>&1') ?? '')
         : '';
@@ -127,7 +124,6 @@ if ($action === 'station-info') {
     $ysfIpRaw  = trim($ysfIni['General']['Address'] ?? '');
     $ysfIp     = ($ysfIpRaw !== '' && $ysfIpRaw !== '0.0.0.0') ? $ysfIpRaw : $ip;
 
-    // ── Datos desde MMDVMDSTAR.ini ────────────────────────────────
     $dstarIniPath = '/home/pi/MMDVMHost/MMDVMDSTAR.ini';
     $dstarIni = parseMMDVMIni($dstarIniPath);
     $dstarPort  = $dstarIni['Modem']['UARTPort'] ?? ($dstarIni['modem']['UARTPort'] ?? '—');
@@ -137,8 +133,25 @@ if ($action === 'station-info') {
     $dstarFreqTX = formatFreq($dstarTxHz);
     $dstarIpRaw = trim($dstarIni['General']['Address'] ?? '');
     $dstarIp    = ($dstarIpRaw !== '' && $dstarIpRaw !== '0.0.0.0') ? $dstarIpRaw : $ip;
+
+    $nxdnIniPath = '/home/pi/MMDVMHost/MMDVMNXDN.ini';
+    $nxdnIni = parseMMDVMIni($nxdnIniPath);
+    $nxdnPort   = $nxdnIni['Modem']['UARTPort'] ?? ($nxdnIni['modem']['UARTPort'] ?? '—');
+    $nxdnRxHz   = $nxdnIni['Info']['RXFrequency'] ?? '0';
+    $nxdnTxHz   = $nxdnIni['Info']['TXFrequency'] ?? '0';
+    $nxdnFreqRX = formatFreq($nxdnRxHz);
+    $nxdnFreqTX = formatFreq($nxdnTxHz);
+    $nxdnIpRaw  = trim($nxdnIni['General']['Address'] ?? '');
+    $nxdnIp     = ($nxdnIpRaw !== '' && $nxdnIpRaw !== '0.0.0.0') ? $nxdnIpRaw : $ip;
+
     header('Content-Type: application/json');
-    echo json_encode(['callsign'=>strtoupper(trim($callsign)),'dmrid'=>trim($dmrid),'freq'=>$freq,'freqRX'=>$freqRX,'port'=>$port?:'—','ip'=>$ip,'locator'=>$locator,'location'=>trim($location),'desc'=>trim($desc),'lat'=>$lat,'lon'=>$lon,'ysfPort'=>$ysfPort?:'—','ysfFreqRX'=>$ysfFreqRX,'ysfFreqTX'=>$ysfFreqTX,'ysfIp'=>$ysfIp?:'—','dstarPort'=>$dstarPort?:'—','dstarFreqRX'=>$dstarFreqRX,'dstarFreqTX'=>$dstarFreqTX,'dstarIp'=>$dstarIp?:'—']);
+    echo json_encode([
+        'callsign'=>strtoupper(trim($callsign)),'dmrid'=>trim($dmrid),'freq'=>$freq,'freqRX'=>$freqRX,
+        'port'=>$port?:'—','ip'=>$ip,'locator'=>$locator,'location'=>trim($location),'desc'=>trim($desc),'lat'=>$lat,'lon'=>$lon,
+        'ysfPort'=>$ysfPort?:'—','ysfFreqRX'=>$ysfFreqRX,'ysfFreqTX'=>$ysfFreqTX,'ysfIp'=>$ysfIp?:'—',
+        'dstarPort'=>$dstarPort?:'—','dstarFreqRX'=>$dstarFreqRX,'dstarFreqTX'=>$dstarFreqTX,'dstarIp'=>$dstarIp?:'—',
+        'nxdnPort'=>$nxdnPort?:'—','nxdnFreqRX'=>$nxdnFreqRX,'nxdnFreqTX'=>$nxdnFreqTX,'nxdnIp'=>$nxdnIp?:'—'
+    ]);
     exit;
 }
 
@@ -284,7 +297,6 @@ if ($action === 'dstar-transmission') {
         if (preg_match('/received (RF|network) header from\s+([A-Z0-9\/]+)/i', $line, $m)) { $active = true; $source = strtoupper($m[1]); $callsign = strtoupper(trim($m[2])); break; }
     }
     if ($callsign) { $info = lookupCall(preg_replace('/\/.*$/', '', $callsign)); $name = $info['name']; }
-    // Últimos escuchados DStar
     $lastHeard = []; $seen = [];
     foreach ($lines as $line) {
         $cs = ''; $src = ''; $time = '';
@@ -333,6 +345,72 @@ if ($action === 'ysf-transmission') {
     }
     header('Content-Type: application/json');
     echo json_encode(['active'=>$active,'callsign'=>$callsign,'name'=>$name,'dest'=>$dest,'source'=>$source,'lastHeard'=>$lastHeard]); exit;
+}
+
+// ── NXDN ──────────────────────────────────────────────────────────────────────
+if ($action === 'nxdn-status') {
+    $gw  = trim(shell_exec('systemctl is-active nxdngateway 2>/dev/null'));
+    $mmd = trim(shell_exec('systemctl is-active mmdvmnxdn 2>/dev/null'));
+    header('Content-Type: application/json');
+    echo json_encode(['gateway'=>$gw,'mmdvm'=>$mmd]);
+    exit;
+}
+if ($action === 'nxdn-start') {
+    shell_exec('sudo systemctl start mmdvmnxdn 2>/dev/null');
+    sleep(2);
+    shell_exec('sudo systemctl start nxdngateway 2>/dev/null');
+    header('Content-Type: application/json');
+    echo json_encode(['ok'=>true]);
+    exit;
+}
+if ($action === 'nxdn-stop') {
+    shell_exec('sudo systemctl stop nxdngateway 2>/dev/null');
+    sleep(1);
+    shell_exec('sudo systemctl stop mmdvmnxdn 2>/dev/null');
+    header('Content-Type: application/json');
+    echo json_encode(['ok'=>true]);
+    exit;
+}
+if ($action === 'nxdn-logs') {
+    $lines = intval($_GET['lines'] ?? 15);
+    $gw  = shell_exec("sudo journalctl -u nxdngateway -n {$lines} --no-pager --output=short 2>/dev/null");
+    $mmd = shell_exec("sudo journalctl -u mmdvmnxdn  -n {$lines} --no-pager --output=short 2>/dev/null");
+    header('Content-Type: application/json');
+    echo json_encode(['gateway'=>htmlspecialchars($gw??''),'mmdvm'=>htmlspecialchars($mmd??'')]);
+    exit;
+}
+if ($action === 'nxdn-transmission') {
+    $log = shell_exec("sudo journalctl -u mmdvmnxdn -n 300 --no-pager --output=short 2>/dev/null");
+    $lines = array_reverse(explode("\n", $log ?? ''));
+    $active = false; $callsign = ''; $source = ''; $name = ''; $tg = '';
+    foreach ($lines as $line) {
+        if (preg_match('/NXDN.*(end of|lost RF|watchdog|finished|timeout)/i', $line)) { $active = false; break; }
+        if (preg_match('/NXDN.*received (RF|network).*from\s+([A-Z0-9]+).*to\s+(\d+)/i', $line, $m)) {
+            $active = true; $source = strtoupper($m[1]); $callsign = strtoupper(trim($m[2])); $tg = $m[3]; break;
+        }
+        if (preg_match('/NXDN.*received (RF|network).*from\s+([A-Z0-9]+)/i', $line, $m)) {
+            $active = true; $source = strtoupper($m[1]); $callsign = strtoupper(trim($m[2])); break;
+        }
+    }
+    if ($callsign) { $info = lookupCall($callsign); $name = $info['name']; }
+    $lastHeard = []; $seen = [];
+    foreach ($lines as $line) {
+        $cs = ''; $src = ''; $time = ''; $tgr = '';
+        if (preg_match('/(\d{2}:\d{2}:\d{2}).*NXDN.*received (RF|network).*from\s+([A-Z0-9]+).*to\s+(\d+)/i', $line, $m)) {
+            $time=$m[1]; $src=strtoupper($m[2]); $cs=strtoupper(trim($m[3])); $tgr=$m[4];
+        } elseif (preg_match('/(\d{2}:\d{2}:\d{2}).*NXDN.*received (RF|network).*from\s+([A-Z0-9]+)/i', $line, $m)) {
+            $time=$m[1]; $src=strtoupper($m[2]); $cs=strtoupper(trim($m[3]));
+        }
+        if ($cs && !in_array($cs, $seen)) {
+            $inf = lookupCall($cs);
+            $lastHeard[] = ['callsign'=>$cs,'name'=>$inf['name'],'tg'=>$tgr,'source'=>$src,'time'=>$time];
+            $seen[] = $cs;
+            if (count($lastHeard) >= 5) break;
+        }
+    }
+    header('Content-Type: application/json');
+    echo json_encode(['active'=>$active,'callsign'=>$callsign,'name'=>$name,'tg'=>$tg,'source'=>$source,'lastHeard'=>$lastHeard]);
+    exit;
 }
 ?>
 <!DOCTYPE html>
@@ -394,6 +472,8 @@ button.btn-header { font-family: var(--font-mono); }
 .sw-knob { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; background: #e95c04; box-shadow: 0 1px 4px rgba(0,0,0,.5); transition: transform .3s cubic-bezier(.4,0,.2,1), background .3s, box-shadow .3s; }
 .sw.dmr input:checked ~ .sw-track, .sw.ysf input:checked ~ .sw-track, .sw.dstar input:checked ~ .sw-track { border-radius: 2px; background: #1a2535; border: 2px solid #999999; }
 .sw.dmr input:checked ~ .sw-knob, .sw.ysf input:checked ~ .sw-knob, .sw.dstar input:checked ~ .sw-knob { transform: translateX(28px); background: var(--green); box-shadow: 0 0 8px rgba(0,255,159,.6); }
+.sw#swNXDN input:checked ~ .sw-knob { transform: translateX(28px); background: #ffd700; box-shadow: 0 0 8px rgba(255,215,0,.6); }
+.sw#swNXDN input:checked ~ .sw-track { border-color: #999; }
 .sw-busy-dot { display: none; position: absolute; top: 50%; right: -18px; transform: translateY(-50%); width: 8px; height: 8px; border-radius: 50%; border: 2px solid var(--amber); border-top-color: transparent; animation: spin .7s linear infinite; }
 .sw.busy .sw-busy-dot { display: block; }
 @keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
@@ -442,17 +522,22 @@ button.btn-header { font-family: var(--font-mono); }
 .nx-vu-bar.lit-r { background: var(--red); box-shadow: 0 0 4px var(--red); }
 .nx-vu-bar.lit-v { background: var(--violet); box-shadow: 0 0 4px var(--violet); }
 .nx-vu-bar.lit-vd { background: #d4a8ff; box-shadow: 0 0 4px #d4a8ff; }
+.nx-vu-bar.lit-y { background: #ffd700; box-shadow: 0 0 4px #ffd700; }
+.nx-vu-bar.lit-ya { background: #ffc400; box-shadow: 0 0 4px #ffc400; }
 .nx-txbar { position: absolute; bottom: 28px; left: 0; right: 0; height: 3px; }
 .nx-txbar.active { background: linear-gradient(90deg,transparent,var(--green),transparent); background-size: 200% 100%; animation: scan 1.4s linear infinite; }
 .nx-txbar.active-ysf { background: linear-gradient(90deg,transparent,var(--violet),transparent); background-size: 200% 100%; animation: scan 1.4s linear infinite; }
+.nx-txbar.active-nxdn { background: linear-gradient(90deg,transparent,#ffd700,transparent); background-size: 200% 100%; animation: scan 1.4s linear infinite; }
 @keyframes scan { from{background-position:200% 0} to{background-position:-200% 0} }
 .nx-center { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .15rem; z-index: 1; }
 .nx-clock { font-family: var(--font-orb); font-size: 4rem; font-weight: 700; color: #f5bd06; letter-spacing: .06em; line-height: 1; }
 .nx-date { font-family: var(--font-mono); font-size: .7rem; color: #ff0; letter-spacing: .12em; text-transform: uppercase; margin-top: .2rem; }
 .nx-callsign { font-family: var(--font-orb); font-size: 3.4rem; font-weight: 900; letter-spacing: .04em; line-height: 1; color: var(--green); text-shadow: 0 0 20px rgba(0,255,159,.55); }
 .nx-callsign.ysf { color: var(--violet); text-shadow: 0 0 20px rgba(181,122,255,.6); }
+.nx-callsign.nxdn { color: #ffd700; text-shadow: 0 0 20px rgba(255,215,0,.6); }
 .nx-name { font-family: var(--font-ui); font-weight: 500; font-size: 1.2rem; color: var(--cyan); letter-spacing: .18em; text-transform: uppercase; opacity: .9; margin-top: .15rem; }
 .nx-name.ysf { color: #d4a8ff; }
+.nx-name.nxdn { color: #ffc400; }
 .nx-infobar { position: absolute; top: 30px; left: 0; right: 0; height: 26px; background: rgba(0,0,0,.35); border-bottom: 1px solid #0d2030; display: flex; align-items: center; justify-content: space-around; padding: 0 3rem; gap: 1rem; z-index: 2; }
 .nx-info-item { display: flex; align-items: center; gap: .4rem; }
 .nx-info-lbl { font-family: var(--font-mono); font-size: .58rem; color: var(--text-dim); letter-spacing: .12em; text-transform: uppercase; }
@@ -472,6 +557,15 @@ button.btn-header { font-family: var(--font-mono); }
 .nx-infobar-dstar { background: rgba(0,0,0,.4); border-bottom: 1px solid #003040; }
 .nx-callsign.dstar { color: #00e5ff; text-shadow: 0 0 20px rgba(0,229,255,.6); }
 .nx-name.dstar { color: #80f0ff; }
+/* ── Nextion NXDN ── */
+.nextion-nxdn { background: #0e0e06; border: 2px solid #4a4a00; border-radius: 6px; box-shadow: 0 0 0 1px #303000, inset 0 0 40px rgba(255,215,0,.04), 0 0 30px rgba(255,215,0,.12); position: relative; overflow: hidden; height: 240px; display: flex; align-items: center; justify-content: center; }
+.nextion-nxdn::before,.nextion-nxdn::after { content: '◈'; position: absolute; font-size: .6rem; color: #4a4a00; }
+.nextion-nxdn::before { top: .5rem; left: .7rem; }
+.nextion-nxdn::after { bottom: .5rem; right: .7rem; }
+.nx-topbar.nxdn-bar { background: #1a1a0a; border-bottom: 1px solid #4a4a00; color: #707000; }
+.nx-topbar.nxdn-bar .nx-mode { color: #ffd700; opacity: .8; }
+.nx-botbar.nxdn-bar { background: #0e0e06; border-top: 1px solid #4a4a00; color: #707000; }
+.nx-infobar-nxdn { background: rgba(0,0,0,.4); border-bottom: 1px solid #303000; }
 .lh-panel { background: var(--surface); border: 3px solid #1a3a4a; border-radius: 6px; display: flex; flex-direction: column; }
 .lh-header { background: #1c1c24; border-bottom: 1px solid var(--border); padding: .4rem 1rem; display: grid; grid-template-columns: 1.1fr 1.5fr .7fr .7fr .5fr; gap: .3rem; font-family: var(--font-mono); font-size: .6rem; color: var(--text-dim); letter-spacing: .1em; text-transform: uppercase; }
 .lh-body { flex: 1; overflow-y: auto; }
@@ -499,6 +593,15 @@ button.btn-header { font-family: var(--font-mono); }
 .lh-row-ysf.lh-active { background: rgba(181,122,255,.08); }
 .lh-tx-dot-ysf { width: 6px; height: 6px; border-radius: 50%; background: var(--violet); box-shadow: 0 0 6px var(--violet); animation: pulse 1s infinite; flex-shrink: 0; }
 .lh-call-ysf { font-family: var(--font-mono); font-size: .82rem; color: var(--violet); letter-spacing: .05em; font-weight: bold; }
+/* NXDN last heard */
+.lh-panel-nxdn { background: var(--surface); border: 3px solid #4a4a00; border-radius: 6px; display: flex; flex-direction: column; }
+.lh-header-nxdn { background: #1a1a0a; border-bottom: 1px solid #4a4a00; padding: .4rem 1rem; display: grid; grid-template-columns: 1.2fr 1.8fr .8fr 1fr .6fr; gap: .3rem; font-family: var(--font-mono); font-size: .6rem; color: #707000; letter-spacing: .1em; text-transform: uppercase; }
+.lh-row-nxdn { display: grid; grid-template-columns: 1.2fr 1.8fr .8fr 1fr .6fr; gap: .3rem; padding: .45rem 1rem; border-bottom: 1px solid rgba(74,74,0,.5); align-items: center; transition: background .2s; }
+.lh-row-nxdn:last-child { border-bottom: none; }
+.lh-row-nxdn:hover { background: rgba(255,215,0,.04); }
+.lh-row-nxdn.lh-active { background: rgba(255,215,0,.08); }
+.lh-tx-dot-nxdn { width: 6px; height: 6px; border-radius: 50%; background: #ffd700; box-shadow: 0 0 6px #ffd700; animation: pulse 1s infinite; flex-shrink: 0; }
+.lh-call-nxdn { font-family: var(--font-mono); font-size: .82rem; color: #ffd700; letter-spacing: .05em; font-weight: bold; }
 #ysfLastHeardPanel { grid-column: 2; }
 #ysfDisplayPanel { grid-column: 2; }
 @media (max-width:900px) { #ysfLastHeardPanel { grid-column: 1; } #ysfDisplayPanel { grid-column: 1; } }
@@ -552,7 +655,6 @@ button.btn-header { font-family: var(--font-mono); }
 .update-console .ok { color: var(--green); }
 .update-console .err { color: var(--red); }
 .update-console .inf { color: #7a9ab5; }
-/* ── Terminal ── */
 .xterm-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:9600; align-items:center; justify-content:center; }
 .xterm-modal.open { display:flex; }
 .xterm-box { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:1.5rem; width:780px; max-width:95vw; }
@@ -563,7 +665,6 @@ button.btn-header { font-family: var(--font-mono); }
 .xterm-pr { font-family:var(--font-mono); font-size:.78rem; color:#00ff9f; white-space:nowrap; }
 .xterm-inp { flex:1; background:transparent; border:none; outline:none; font-family:var(--font-mono); font-size:.78rem; color:#c9d1d9; caret-color:#00ff9f; }
 .xt-cmd{color:#c9d1d9;} .xt-out{color:#7a9ab5;} .xt-err{color:#f85149;}
-/* ── Editor ficheros ── */
 .fedit-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9700;align-items:center;justify-content:center;}
 .fedit-modal.open{display:flex;}
 .fedit-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1.5rem;width:900px;max-width:96vw;display:flex;flex-direction:column;gap:.8rem;}
@@ -596,7 +697,6 @@ button.btn-header { font-family: var(--font-mono); }
 </div>
 <button class="btn-header cyan" onclick="xtTtydOpen()">⌨ Terminal</button>
 <button id="btnReboot" class="btn-header red" onclick="rebootPi()">⏻ Reiniciar Pi</button>
-
 </div>
 </header>
 <main class="ctrl-body">
@@ -610,6 +710,8 @@ button.btn-header { font-family: var(--font-mono); }
     <div class="station-meta-item"><span class="station-meta-label">💿 Disco usado</span><span class="station-meta-value" id="siDisk" style="color:var(--amber);">—</span></div>
     <div class="station-meta-item"><span class="station-meta-label">💿 Disco libre</span><span class="station-meta-value" id="siDiskFree" style="color:var(--green);">—</span></div>
 </div>
+
+<!-- Status bar -->
 <div class="status-bar">
 <div class="status-item"><div class="dot" id="dot-mosquitto"></div><span>Mosquitto</span></div>
 <div class="status-item"><div class="dot" id="dot-mmdvm"></div><span>MMDVMHost</span></div>
@@ -620,8 +722,14 @@ button.btn-header { font-family: var(--font-mono); }
 <div class="section-divider"></div>
 <div class="status-item"><div class="dot" id="dot-dstarmmd"></div><span style="color:#00e5ff">MMDVMDStar</span></div>
 <div class="status-item"><div class="dot" id="dot-dstargw"></div><span style="color:#00e5ff">DStarGateway</span></div>
+<div class="section-divider"></div>
+<div class="status-item"><div class="dot" id="dot-nxdnmmd"></div><span style="color:#ffd700">MMDVMHost NXDN</span></div>
+<div class="status-item"><div class="dot" id="dot-nxdngw"></div><span style="color:#ffd700">NXDNGateway</span></div>
 </div>
+
+<!-- Service cards -->
 <div class="controls-section">
+  <!-- DMR -->
   <div class="service-card">
     <div class="service-card-label dmr">▸ DMR · MMDVMHost + DMRGateway</div>
     <div class="toggle-row">
@@ -639,6 +747,7 @@ button.btn-header { font-family: var(--font-mono); }
       <a href="edit_ini.php?file=dmrgateway" class="ini-btn view" style="flex:1;justify-content:center;color:var(--amber);border-color:rgba(255,179,0,.3);">📄 EDITAR FICHERO DMRGateway.ini</a>
     </div>
   </div>
+  <!-- C4FM -->
   <div class="service-card">
     <div class="service-card-label ysf">▸ C4FM · MMDVMHOST + YSFGATEWAY</div>
     <div class="toggle-row">
@@ -656,6 +765,7 @@ button.btn-header { font-family: var(--font-mono); }
       <a href="edit_ini.php?file=ysfgateway" class="ini-btn view ysf" style="flex:1;justify-content:center;">📄 editar fichero YSFGateway.ini</a>
     </div>
   </div>
+  <!-- D-STAR -->
   <div class="service-card" style="border-color:rgba(0,229,255,.25);">
     <div class="service-card-label" style="color:#00ff9f;">▸ D-STAR · MMDVMHost + DStarGateway</div>
     <div class="toggle-row">
@@ -673,7 +783,29 @@ button.btn-header { font-family: var(--font-mono); }
       <a href="edit_ini.php?file=dstargateway" class="ini-btn view" style="flex:1;justify-content:center;color:#00ff9f;border-color:rgba(0,255,159,.3);">📄 editar fichero DStarGateway.ini</a>
     </div>
   </div>
+  <!-- NXDN -->
+  <div class="service-card" style="border-color:rgba(255,215,0,.25);">
+    <div class="service-card-label" style="color:#ffd700;">▸ NXDN · MMDVMHost + NXDNGateway</div>
+    <div class="toggle-row">
+      <span class="toggle-label" id="nxdnToggleLabel">NXDN</span>
+      <label class="sw" id="swNXDN">
+        <input type="checkbox" id="chkNXDN" onchange="toggleNXDN(this)">
+        <span class="sw-track"></span><span class="sw-knob"></span><span class="sw-busy-dot"></span>
+      </label>
+      <span class="toggle-status" id="nxdnToggleStatus">OFF</span>
+    </div>
+    <div class="auto-badge" id="nxdnRefreshBadge" style="display:none;color:#ffd700;"><div class="dot-sm" style="background:#ffd700;"></div> NXDN activo</div>
+    <div class="service-card-btns" style="margin-top:.6rem;">
+      <a href="mmdvmnxdn_config.php" class="ini-btn edit" style="flex:1;justify-content:center;color:#ffd700;border-color:rgba(255,215,0,.3);">⚙ MMDVMNXDN CONFIG</a>
+      <a href="nxdngateway_config.php" class="ini-btn edit" style="flex:1;justify-content:center;color:#ffc400;border-color:rgba(255,196,0,.3);">⚙ NXDNGATEWAY CONFIG</a>
+    </div>
+    <div class="service-card-btns" style="margin-top:.4rem;">
+      <a href="edit_ini.php?file=mmdvmnxdn" class="ini-btn view" style="flex:1;justify-content:center;color:#ffd700;border-color:rgba(255,215,0,.3);">📄 editar fichero MMDVMNXDN.ini</a>
+      <a href="edit_ini.php?file=nxdngateway" class="ini-btn view" style="flex:1;justify-content:center;color:#ffc400;border-color:rgba(255,196,0,.3);">📄 editar fichero NXDNGateway.ini</a>
+    </div>
+  </div>
 </div>
+
 <!-- ── Row 1: DMR Display ── -->
 <div class="display-row">
   <div id="dmrDisplayPanel">
@@ -715,6 +847,21 @@ button.btn-header { font-family: var(--font-mono); }
   </div>
 </div>
 
+<!-- ── Row 3: NXDN Display ── -->
+<div class="display-row" style="margin-top:1.2rem;" id="nxdnDisplayRow" style="display:none;">
+  <div id="nxdnDisplayPanel" style="display:none;">
+    <div class="panel-label" style="color:#ffd700;">▸ NXDN Display</div>
+    <div class="nextion-nxdn">
+      <div class="nx-topbar nxdn-bar"><span class="nx-mode">NXDN · DIGITAL</span><span style="color:#707000" id="nxdnStationLabel">EA3EIZ · ADER</span><span style="color:#ffd700;opacity:.85;min-width:5rem;text-align:right;font-size:.6rem;" id="nxdnTGLabel">—</span></div>
+      <div class="nx-infobar nx-infobar-nxdn"><span class="nx-info-item"><span class="nx-info-lbl">PORT</span><span class="nx-info-val" id="nxdnNxPort">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">FRX</span><span class="nx-info-val" style="color:#ffd700" id="nxdnNxFrx">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">FTX</span><span class="nx-info-val" style="color:#ffc400" id="nxdnNxFtx">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">IP</span><span class="nx-info-val" style="color:#ffe066" id="nxdnNxIp">—</span></span></div>
+      <div class="nx-vu" id="nxdnVuLeft"></div><div class="nx-vu right" id="nxdnVuRight"></div>
+      <div class="nx-center" id="nxdnNxCenter"><div class="nx-clock" id="nxdnNxClock" style="color:#ffd700;">00:00:00</div><div class="nx-date" id="nxdnNxDate" style="color:#b8a000;">—</div></div>
+      <div class="nx-txbar" id="nxdnTxBar"></div>
+      <div class="nx-botbar nxdn-bar"><span style="color:#707000;font-family:var(--font-mono);font-size:.65rem;">NXDN · DIGITAL VOICE</span><span style="color:#707000;font-family:var(--font-mono);font-size:.65rem;">NXDN REF 21465</span><span class="nx-source" id="nxdnSource"></span></div>
+    </div>
+  </div>
+</div>
+
 <!-- ── Últimos escuchados DMR ── -->
 <div class="display-row" style="margin-top:1rem;">
   <div id="dmrLastHeardPanel">
@@ -746,6 +893,17 @@ button.btn-header { font-family: var(--font-mono); }
   </div>
 </div>
 
+<!-- ── Últimos escuchados NXDN ── -->
+<div class="display-row" style="margin-top:1rem;" id="nxdnLastHeardRow" style="display:none;">
+  <div id="nxdnLastHeardPanel" style="display:none;">
+    <div class="panel-label" style="color:#ffd700;">▸ Últimos escuchados NXDN</div>
+    <div class="lh-panel-nxdn">
+      <div class="lh-header-nxdn"><span>Indicativo</span><span>Nombre</span><span>TG</span><span>Hora</span><span>Src</span></div>
+      <div class="lh-body" id="nxdnLhBody"><div class="lh-empty">Sin actividad NXDN</div></div>
+    </div>
+  </div>
+</div>
+
 <!-- ── Logs ── -->
 <div class="log-grid" style="margin-top:2rem;">
 <div id="dmrLogPanels" style="display:contents;">
@@ -758,6 +916,8 @@ button.btn-header { font-family: var(--font-mono); }
 </div>
 <div id="dstarPanelMmd" class="log-panel" style="display:none;"><div class="log-panel-header"><span class="svc-name" style="color:#80f0ff;">▸ MMDVMHost DStar</span><button class="btn-clear" onclick="clearLog('logDstarMmd')">limpiar</button></div><div class="log-output" id="logDstarMmd">Esperando MMDVMHost DStar…</div></div>
 <div id="dstarPanelGw" class="log-panel" style="display:none;"><div class="log-panel-header"><span class="svc-name" style="color:#00e5ff;">▸ DStarGateway</span><button class="btn-clear" onclick="clearLog('logDstarGw')">limpiar</button></div><div class="log-output" id="logDstarGw">Esperando DStarGateway…</div></div>
+<div id="nxdnPanelMmd" class="log-panel" style="display:none;"><div class="log-panel-header"><span class="svc-name" style="color:#ffd700;">▸ MMDVMHost NXDN</span><button class="btn-clear" onclick="clearLog('logNxdnMmd')">limpiar</button></div><div class="log-output" id="logNxdnMmd">Esperando MMDVMHost NXDN…</div></div>
+<div id="nxdnPanelGw" class="log-panel" style="display:none;"><div class="log-panel-header"><span class="svc-name" style="color:#ffc400;">▸ NXDNGateway</span><button class="btn-clear" onclick="clearLog('logNxdnGw')">limpiar</button></div><div class="log-output" id="logNxdnGw">Esperando NXDNGateway…</div></div>
 </div>
 </main>
 
@@ -775,7 +935,7 @@ button.btn-header { font-family: var(--font-mono); }
 </div>
 </div>
 
-<!-- Modal Terminal ttyd (iframe) -->
+<!-- Modal Terminal ttyd -->
 <div id="xtTtydModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9800;align-items:center;justify-content:center;">
   <div style="background:#0a0e14;border:1px solid #1e2d3d;border-radius:8px;width:960px;max-width:96vw;height:620px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;">
     <div style="display:flex;align-items:center;justify-content:space-between;padding:.7rem 1.2rem;background:#111720;border-bottom:1px solid #1e2d3d;flex-shrink:0;">
@@ -837,20 +997,24 @@ button.btn-header { font-family: var(--font-mono); }
 <div id="installMsg" class="restore-msg"></div>
 </div>
 </div>
+
 <script>
 let refreshTimer=null,txTimer=null,vuTimer=null,ysfTimer=null,mmdvmYsfTimer=null,ysfTxTimer=null,ysfVuTimer=null,dstarTimer=null;
 let running=false,ysfRunning=false,mmdvmYsfRunning=false,dstarRunning=false,currentlyActive=false,ysfCurrentlyActive=false;
 let dmrLastActiveTs=0,ysfLastActiveTs=0;
 const DMR_IDLE_TIMEOUT=12000,YSF_IDLE_TIMEOUT=12000;
 
-async function fetchStationInfo(){try{const r=await fetch('?action=station-info');const d=await r.json();document.getElementById('scCallsign').textContent='📡 '+d.callsign;const nxPort=document.getElementById('nxPort');if(nxPort)nxPort.textContent=d.port||'—';const nxFrx=document.getElementById('nxFrx');if(nxFrx)nxFrx.textContent=d.freqRX||'—';const nxFtx=document.getElementById('nxFtx');if(nxFtx)nxFtx.textContent=d.freq||'—';const nxIp=document.getElementById('nxIp');if(nxIp)nxIp.textContent=d.ip||'—';const yNxPort=document.getElementById('ysfNxPort');if(yNxPort)yNxPort.textContent=d.ysfPort||'—';const yNxFrx=document.getElementById('ysfNxFrx');if(yNxFrx)yNxFrx.textContent=d.ysfFreqRX||'—';const yNxFtx=document.getElementById('ysfNxFtx');if(yNxFtx)yNxFtx.textContent=d.ysfFreqTX||'—';const yNxIp=document.getElementById('ysfNxIp');if(yNxIp)yNxIp.textContent=d.ysfIp||'—';const label=d.callsign+' · ADER';const nx=document.getElementById('nxStationLabel');if(nx)nx.textContent=label;const yx=document.getElementById('ysfStationLabel');if(yx)yx.textContent=label;const dx=document.getElementById('dstarStationLabel');if(dx)dx.textContent=label;const dNxPort=document.getElementById('dstarNxPort');if(dNxPort)dNxPort.textContent=d.dstarPort||'—';const dNxFrx=document.getElementById('dstarNxFrx');if(dNxFrx)dNxFrx.textContent=d.dstarFreqRX||'—';const dNxFtx=document.getElementById('dstarNxFtx');if(dNxFtx)dNxFtx.textContent=d.dstarFreqTX||'—';const dNxIp=document.getElementById('dstarNxIp');if(dNxIp)dNxIp.textContent=d.dstarIp||'—';}catch(e){console.warn('station-info error:',e);}}
+async function fetchStationInfo(){try{const r=await fetch('?action=station-info');const d=await r.json();document.getElementById('scCallsign').textContent='📡 '+d.callsign;const nxPort=document.getElementById('nxPort');if(nxPort)nxPort.textContent=d.port||'—';const nxFrx=document.getElementById('nxFrx');if(nxFrx)nxFrx.textContent=d.freqRX||'—';const nxFtx=document.getElementById('nxFtx');if(nxFtx)nxFtx.textContent=d.freq||'—';const nxIp=document.getElementById('nxIp');if(nxIp)nxIp.textContent=d.ip||'—';const yNxPort=document.getElementById('ysfNxPort');if(yNxPort)yNxPort.textContent=d.ysfPort||'—';const yNxFrx=document.getElementById('ysfNxFrx');if(yNxFrx)yNxFrx.textContent=d.ysfFreqRX||'—';const yNxFtx=document.getElementById('ysfNxFtx');if(yNxFtx)yNxFtx.textContent=d.ysfFreqTX||'—';const yNxIp=document.getElementById('ysfNxIp');if(yNxIp)yNxIp.textContent=d.ysfIp||'—';const label=d.callsign+' · ADER';const nx=document.getElementById('nxStationLabel');if(nx)nx.textContent=label;const yx=document.getElementById('ysfStationLabel');if(yx)yx.textContent=label;const dx=document.getElementById('dstarStationLabel');if(dx)dx.textContent=label;const nxdnLbl=document.getElementById('nxdnStationLabel');if(nxdnLbl)nxdnLbl.textContent=label;const dNxPort=document.getElementById('dstarNxPort');if(dNxPort)dNxPort.textContent=d.dstarPort||'—';const dNxFrx=document.getElementById('dstarNxFrx');if(dNxFrx)dNxFrx.textContent=d.dstarFreqRX||'—';const dNxFtx=document.getElementById('dstarNxFtx');if(dNxFtx)dNxFtx.textContent=d.dstarFreqTX||'—';const dNxIp=document.getElementById('dstarNxIp');if(dNxIp)dNxIp.textContent=d.dstarIp||'—';const nNxPort=document.getElementById('nxdnNxPort');if(nNxPort)nNxPort.textContent=d.nxdnPort||'—';const nNxFrx=document.getElementById('nxdnNxFrx');if(nNxFrx)nNxFrx.textContent=d.nxdnFreqRX||'—';const nNxFtx=document.getElementById('nxdnNxFtx');if(nNxFtx)nNxFtx.textContent=d.nxdnFreqTX||'—';const nNxIp=document.getElementById('nxdnNxIp');if(nNxIp)nNxIp.textContent=d.nxdnIp||'—';}catch(e){console.warn('station-info error:',e);}}
 
 function getFlagByCall(callsign){if(!callsign)return'';const cs=callsign.toUpperCase().trim();const prefixes=[{re:/^EA[0-9]|EB|EC|ED|EE|EF|EG|EH/,flag:'🇪🇸'},{re:/^CT|CU|CV|CQ/,flag:'🇵🇹'},{re:/^F[A-Z]|FT[0-9A-Z]|FM|FO|FH|FJ|FK|FL|FP|FR|FS/,flag:'🇫🇷'},{re:/^I[0-9]|IK|IW|IZ/,flag:'🇮🇹'},{re:/^G[0-9]|M[0-9]|2E[0-9]|2[0-9]|GB|MJ|MU/,flag:'🇬🇧'},{re:/^D[ALM]|DA|DB|DC|DD|DE|DF|DG|DH|DI|DJ|DK|DL|DM|DN|DO|DP|DQ|DR/,flag:'🇩🇪'},{re:/^K[0-9]|W[0-9]|N[0-9]|AA|AB|AC|AD|AE|AF/,flag:'🇺🇸'},{re:/^VE[0-9]|VA[0-9]|VO[0-9]|VY[0-9]/,flag:'🇨🇦'},{re:/^PY[0-9]|PU|PV|PW|PX/,flag:'🇧🇷'},{re:/^LU[0-9]|LV|LW|LX/,flag:'🇦🇷'},{re:/^JA[0-9]|JB|JC|JD|JE|JF|JG|JH|JI|JJ|JK|JL|JM|JN|JO|JP|JQ|JR|JS|JT|JU|JV|JW|JX|JY|JZ/,flag:'🇯🇵'},{re:/^VK[0-9]|VL|VM|VN|VO|VP|VQ|VR|VS|VT|VU|VV|VW|VX|VY|VZ/,flag:'🇦🇺'},{re:/^ZS[0-9]|ZT|ZU|ZV|ZW|ZX|ZY|ZZ/,flag:'🇿🇦'},{re:/^OH[0-9]|OG|OI|OJ|OK|OL|OM|ON|OO|OP|OQ|OR|OS|OT|OU|OV|OW|OX|OY|OZ/,flag:'🇫🇮'},{re:/^PA[0-9]|PB|PC|PD|PE|PF|PG|PH|PI|PJ|PK|PL|PM|PN|PO|PP|PQ|PR|PS|PT|PU|PV|PW|PX|PY|PZ/,flag:'🇳🇱'},{re:/^HB[0-9]|HB9/,flag:'🇨🇭'},{re:/^OE[0-9]/,flag:'🇦🇹'},{re:/^SP[0-9]|SQ|SR/,flag:'🇵🇱'},{re:/^UA[0-9]|UB|UC|UD|UE|UF|UG|UH|UI|UJ|UK|UL|UM|UN|UO|UP|UQ|UR|US|UT|UU|UV|UW|UX|UY|UZ/,flag:'🇷🇺'},{re:/^SV[0-9]|SW|SX|SY|SZ/,flag:'🇬🇷'},{re:/^LY[0-9]|LZ/,flag:'🇱🇹'},{re:/^9A[0-9]/,flag:'🇭🇷'}];for(const p of prefixes){if(p.re.test(cs))return p.flag;}return'🌐';}
 
 function buildVU(id){const el=document.getElementById(id);for(let i=0;i<18;i++){const d=document.createElement('div');d.className='nx-vu-bar';d.id=`${id}-${i}`;el.appendChild(d);}}
-buildVU('vuLeft');buildVU('vuRight');buildVU('ysfVuLeft');buildVU('ysfVuRight');
+buildVU('vuLeft');buildVU('vuRight');buildVU('ysfVuLeft');buildVU('ysfVuRight');buildVU('nxdnVuLeft');buildVU('nxdnVuRight');
 
 function animateVU(on,prefix){clearInterval(prefix==='ysf'?ysfVuTimer:vuTimer);const ids=prefix==='ysf'?['ysfVuLeft','ysfVuRight']:['vuLeft','vuRight'];ids.forEach(id=>{for(let i=0;i<18;i++)document.getElementById(`${id}-${i}`).className='nx-vu-bar';});if(!on)return;const timer=setInterval(()=>{ids.forEach(id=>{const lvl=Math.floor(Math.random()*16)+1;for(let i=0;i<18;i++){let cls='nx-vu-bar';if(i<lvl)cls+=prefix==='ysf'?(i<10?' lit-v':i<14?' lit-vd':' lit-r'):(i<10?' lit-g':i<14?' lit-a':' lit-r');document.getElementById(`${id}-${i}`).className=cls;}});},80);if(prefix==='ysf')ysfVuTimer=timer;else vuTimer=timer;}
+
+let nxdnVuTimerAnim=null;
+function animateNXDNVU(on){clearInterval(nxdnVuTimerAnim);['nxdnVuLeft','nxdnVuRight'].forEach(id=>{for(let i=0;i<18;i++)document.getElementById(`${id}-${i}`).className='nx-vu-bar';});if(!on)return;nxdnVuTimerAnim=setInterval(()=>{['nxdnVuLeft','nxdnVuRight'].forEach(id=>{const lvl=Math.floor(Math.random()*16)+1;for(let i=0;i<18;i++){let cls='nx-vu-bar';if(i<lvl)cls+=i<10?' lit-y':i<14?' lit-ya':' lit-r';document.getElementById(`${id}-${i}`).className=cls;}});},80);}
 
 function updateClock(){const now=new Date();const hms=now.toLocaleTimeString('es-ES');const date=now.toLocaleDateString('es-ES',{weekday:'short',day:'2-digit',month:'short',year:'numeric'}).toUpperCase();if(!currentlyActive){const clk=document.getElementById('nxClock');if(clk){clk.textContent=hms;document.getElementById('nxDate').textContent=date;}}if(!ysfCurrentlyActive){const yClk=document.getElementById('ysfNxClock');if(yClk){yClk.textContent=hms;document.getElementById('ysfNxDate').textContent=date;}}}
 setInterval(updateClock,1000);updateClock();
@@ -882,10 +1046,10 @@ let dstarVuTimer=null,dstarCurrentlyActive=false,dstarTxTimer2=null;
 function buildDStarVU(){['dstarVuLeft','dstarVuRight'].forEach(id=>{const el=document.getElementById(id);for(let i=0;i<18;i++){const d=document.createElement('div');d.className='nx-vu-bar';d.id=`${id}-${i}`;el.appendChild(d);}});}
 buildDStarVU();
 function animateDStarVU(on){clearInterval(dstarVuTimer);['dstarVuLeft','dstarVuRight'].forEach(id=>{for(let i=0;i<18;i++)document.getElementById(`${id}-${i}`).className='nx-vu-bar';});if(!on)return;dstarVuTimer=setInterval(()=>{['dstarVuLeft','dstarVuRight'].forEach(id=>{const lvl=Math.floor(Math.random()*16)+1;for(let i=0;i<18;i++){let cls='nx-vu-bar';if(i<lvl)cls+=i<10?' lit-g':i<14?' lit-a':' lit-r';document.getElementById(`${id}-${i}`).className=cls;}});},80);}
-function showDStarIdle(){dstarCurrentlyActive=false;animateDStarVU(false);document.getElementById('dstarTxBar').className='nx-txbar';const src=document.getElementById('dstarSource');src.textContent='';src.className='nx-source';document.getElementById('dstarNxCenter').innerHTML='<div class="nx-clock" id="dstarNxClock" style="color:#00e5ff;">00:00:00</div><div class="nx-date" id="dstarNxDate" style="color:#009090;">—</div>';updateDStarClock();}
-function showDStarActive(d){dstarCurrentlyActive=true;animateDStarVU(true);document.getElementById('dstarTxBar').className='nx-txbar active';document.getElementById('dstarTxBar').style.background='linear-gradient(90deg,transparent,#00e5ff,transparent)';const src=document.getElementById('dstarSource');if(d.source==='RF'){src.textContent='RF';src.className='nx-source rf';}else{src.textContent='NET';src.className='nx-source net';}const flag=getFlagByCall(d.callsign.replace(/\/.*$/,''));document.getElementById('dstarNxCenter').innerHTML=`<div class="nx-callsign dstar">${flag} ${esc(d.callsign)}</div>`+(d.name?`<div class="nx-name dstar">${esc(d.name)}</div>`:'');}
 function updateDStarClock(){if(!dstarCurrentlyActive){const now=new Date();const clk=document.getElementById('dstarNxClock');if(clk){clk.textContent=now.toLocaleTimeString('es-ES');document.getElementById('dstarNxDate').textContent=now.toLocaleDateString('es-ES',{weekday:'short',day:'2-digit',month:'short',year:'numeric'}).toUpperCase();}}}
 setInterval(updateDStarClock,1000);updateDStarClock();
+function showDStarIdle(){dstarCurrentlyActive=false;animateDStarVU(false);document.getElementById('dstarTxBar').className='nx-txbar';const src=document.getElementById('dstarSource');src.textContent='';src.className='nx-source';document.getElementById('dstarNxCenter').innerHTML='<div class="nx-clock" id="dstarNxClock" style="color:#00e5ff;">00:00:00</div><div class="nx-date" id="dstarNxDate" style="color:#009090;">—</div>';updateDStarClock();}
+function showDStarActive(d){dstarCurrentlyActive=true;animateDStarVU(true);document.getElementById('dstarTxBar').className='nx-txbar active';document.getElementById('dstarTxBar').style.background='linear-gradient(90deg,transparent,#00e5ff,transparent)';const src=document.getElementById('dstarSource');if(d.source==='RF'){src.textContent='RF';src.className='nx-source rf';}else{src.textContent='NET';src.className='nx-source net';}const flag=getFlagByCall(d.callsign.replace(/\/.*$/,''));document.getElementById('dstarNxCenter').innerHTML=`<div class="nx-callsign dstar">${flag} ${esc(d.callsign)}</div>`+(d.name?`<div class="nx-name dstar">${esc(d.name)}</div>`:'');}
 function renderDStarLastHeard(list,activeCall){const body=document.getElementById('dstarLhBody');if(!list||list.length===0){body.innerHTML='<div class="lh-empty">Sin actividad D-STAR</div>';return;}body.innerHTML=list.map(r=>{const isActive=activeCall&&r.callsign===activeCall;const srcCls=r.source==='RF'?'rf':'net',srcLbl=r.source==='RF'?'RF':'NET';const dot=isActive?'<span class="lh-tx-dot" style="background:#00e5ff;box-shadow:0 0 6px #00e5ff;"></span>':'';const flag=getFlagByCall(r.callsign.replace(/\/.*$/,''));return`<div class="lh-row${isActive?' lh-active':''}"><div class="lh-call-wrap">${dot}<span class="lh-call" style="color:#00e5ff;">${flag} ${esc(r.callsign)}</span></div><span class="lh-name">${esc(r.name||'—')}</span><span class="lh-time">${esc(r.time||'—')}</span><span class="lh-src ${srcCls}">${srcLbl}</span></div>`;}).join('');}
 async function fetchDStarTransmission(){try{const r=await fetch('?action=dstar-transmission');const d=await r.json();if(d.active)showDStarActive(d);else showDStarIdle();renderDStarLastHeard(d.lastHeard||[],d.active?d.callsign:null);}catch(e){}}
 function startDStarTransmissionPoll(){fetchDStarTransmission();dstarTxTimer2=setInterval(fetchDStarTransmission,4000);}
@@ -895,6 +1059,57 @@ async function toggleDStar(chk){const wasOn=!chk.checked;const sw=document.getEl
 async function fetchDStarLogs(){try{const r=await fetch('?action=dstar-logs&lines=15');const d=await r.json();['logDstarGw:gateway','logDstarMmd:mmdvm'].forEach(pair=>{const[id,key]=pair.split(':');const el=document.getElementById(id);const atBot=el.scrollHeight-el.clientHeight<=el.scrollTop+10;el.innerHTML=colorize(d[key]);if(atBot)el.scrollTop=el.scrollHeight;});}catch(e){}}
 function startDStarLogs(){fetchDStarLogs();dstarTimer=setInterval(fetchDStarLogs,5000);}
 function stopDStarLogs(){clearInterval(dstarTimer);dstarTimer=null;}
+
+// ── NXDN ──────────────────────────────────────────────────────────────────────
+let nxdnRunning=false,nxdnTimer=null,nxdnTxTimer=null,nxdnCurrentlyActive=false,nxdnLastActiveTs=0;
+const NXDN_IDLE_TIMEOUT=12000;
+
+function setNXDNToggle(on){
+    const chk=document.getElementById('chkNXDN'),lbl=document.getElementById('nxdnToggleLabel'),sta=document.getElementById('nxdnToggleStatus');
+    chk.checked=on;lbl.style.color=on?'#ffd700':'';
+    sta.className='toggle-status'+(on?' on':'');sta.textContent=on?'ON':'OFF';
+    document.getElementById('nxdnRefreshBadge').style.display=on?'flex':'none';
+    document.getElementById('nxdnPanelMmd').style.display=on?'':'none';
+    document.getElementById('nxdnPanelGw').style.display=on?'':'none';
+    document.getElementById('nxdnDisplayPanel').style.display=on?'':'none';
+    document.getElementById('nxdnLastHeardPanel').style.display=on?'':'none';
+}
+
+function updateNXDNClock(){if(!nxdnCurrentlyActive){const now=new Date();const clk=document.getElementById('nxdnNxClock');if(clk){clk.textContent=now.toLocaleTimeString('es-ES');document.getElementById('nxdnNxDate').textContent=now.toLocaleDateString('es-ES',{weekday:'short',day:'2-digit',month:'short',year:'numeric'}).toUpperCase();}}}
+setInterval(updateNXDNClock,1000);updateNXDNClock();
+
+function showNXDNIdle(){nxdnCurrentlyActive=false;animateNXDNVU(false);document.getElementById('nxdnTxBar').className='nx-txbar';document.getElementById('nxdnTGLabel').textContent='—';const src=document.getElementById('nxdnSource');src.textContent='';src.className='nx-source';document.getElementById('nxdnNxCenter').innerHTML='<div class="nx-clock" id="nxdnNxClock" style="color:#ffd700;">00:00:00</div><div class="nx-date" id="nxdnNxDate" style="color:#b8a000;">—</div>';updateNXDNClock();}
+function showNXDNActive(d){nxdnCurrentlyActive=true;animateNXDNVU(true);document.getElementById('nxdnTxBar').className='nx-txbar active-nxdn';document.getElementById('nxdnTGLabel').textContent=d.tg?'TG '+d.tg:'—';const src=document.getElementById('nxdnSource');if(d.source==='RF'){src.textContent='RF';src.className='nx-source rf';}else{src.textContent='NET';src.className='nx-source net';}const flag=getFlagByCall(d.callsign);document.getElementById('nxdnNxCenter').innerHTML=`<div class="nx-callsign nxdn">${flag} ${esc(d.callsign)}</div>`+(d.name?`<div class="nx-name nxdn">${esc(d.name)}</div>`:'');}
+
+function renderNXDNLastHeard(list,activeCall){const body=document.getElementById('nxdnLhBody');if(!list||list.length===0){body.innerHTML='<div class="lh-empty">Sin actividad NXDN</div>';return;}body.innerHTML=list.map(r=>{const isActive=activeCall&&r.callsign===activeCall;const srcCls=r.source==='RF'?'rf':'net',srcLbl=r.source==='RF'?'RF':'NET';const dot=isActive?'<span class="lh-tx-dot-nxdn"></span>':'';const flag=getFlagByCall(r.callsign);return`<div class="lh-row-nxdn${isActive?' lh-active':''}"><div class="lh-call-wrap">${dot}<span class="lh-call-nxdn">${flag} ${esc(r.callsign)}</span></div><span class="lh-name">${esc(r.name||'—')}</span><span class="lh-tg">${esc(r.tg||'—')}</span><span class="lh-time">${esc(r.time||'—')}</span><span class="lh-src ${srcCls}">${srcLbl}</span></div>`;}).join('');}
+
+async function fetchNXDNTransmission(){try{const r=await fetch('?action=nxdn-transmission');const d=await r.json();if(d.active){nxdnLastActiveTs=Date.now();showNXDNActive(d);}else{if(nxdnCurrentlyActive&&(Date.now()-nxdnLastActiveTs)>NXDN_IDLE_TIMEOUT)showNXDNIdle();}renderNXDNLastHeard(d.lastHeard||[],d.active?d.callsign:null);}catch(e){if(nxdnCurrentlyActive&&(Date.now()-nxdnLastActiveTs)>NXDN_IDLE_TIMEOUT)showNXDNIdle();}}
+
+async function checkNXDNStatus(){try{const r=await fetch('?action=nxdn-status');const d=await r.json();const gw=d.gateway==='active',mmd=d.mmdvm==='active';setDot('dot-nxdngw',gw?'active':'off');setDot('dot-nxdnmmd',mmd?'active':'off');nxdnRunning=gw||mmd;setNXDNToggle(nxdnRunning);if(nxdnRunning){startNXDNLogs();startNXDNTxPoll();}}catch(e){}}
+
+async function toggleNXDN(chk){const wasOn=!chk.checked;const sw=document.getElementById('swNXDN');chk.checked=wasOn;sw.classList.add('busy');
+try{
+    await fetch(wasOn?'?action=nxdn-stop':'?action=nxdn-start');
+    let ok=false;
+    for(let i=0;i<15;i++){
+        await new Promise(r=>setTimeout(r,1000));
+        const r=await fetch('?action=nxdn-status');
+        const d=await r.json();
+        const gw=d.gateway==='active',mmd=d.mmdvm==='active';
+        const isOn=gw||mmd;
+        if(wasOn&&!isOn){ok=true;setDot('dot-nxdngw','off');setDot('dot-nxdnmmd','off');nxdnRunning=false;setNXDNToggle(false);stopNXDNLogs();stopNXDNTxPoll();showNXDNIdle();clearLog('logNxdnGw');clearLog('logNxdnMmd');break;}
+        if(!wasOn&&isOn){ok=true;setDot('dot-nxdngw',gw?'active':'off');setDot('dot-nxdnmmd',mmd?'active':'off');nxdnRunning=true;setNXDNToggle(true);startNXDNLogs();startNXDNTxPoll();break;}
+    }
+    if(!ok)await checkNXDNStatus();
+}catch(e){console.warn('toggleNXDN error:',e);}
+finally{sw.classList.remove('busy');}}
+
+async function fetchNXDNLogs(){try{const r=await fetch('?action=nxdn-logs&lines=15');const d=await r.json();[['logNxdnGw','gateway'],['logNxdnMmd','mmdvm']].forEach(([id,key])=>{const el=document.getElementById(id);const atBot=el.scrollHeight-el.clientHeight<=el.scrollTop+10;el.innerHTML=colorize(d[key]);if(atBot)el.scrollTop=el.scrollHeight;});}catch(e){}}
+function startNXDNLogs(){fetchNXDNLogs();nxdnTimer=setInterval(fetchNXDNLogs,5000);}
+function stopNXDNLogs(){clearInterval(nxdnTimer);nxdnTimer=null;}
+function startNXDNTxPoll(){fetchNXDNTransmission();nxdnTxTimer=setInterval(fetchNXDNTransmission,4000);}
+function stopNXDNTxPoll(){clearInterval(nxdnTxTimer);nxdnTxTimer=null;}
+// ── Fin NXDN ──────────────────────────────────────────────────────────────────
 
 async function toggleServices(chk){const wasOn=!chk.checked;const sw=document.getElementById('swDMR');chk.checked=wasOn;sw.classList.add('busy');try{await fetch(wasOn?'?action=stop':'?action=start');await new Promise(r=>setTimeout(r,2200));const r=await fetch('?action=status');const d=await r.json();const gw=d.gateway==='active',mmd=d.mmdvm==='active';running=gw||mmd;setDot('dot-gateway',gw?'active':'off');setDot('dot-mmdvm',mmd?'active':'off');setDot('dot-mosquitto',gw?'active':'off');setDMRToggle(running);if(wasOn){stopRefresh();clearLog('logGw');clearLog('logMmd');showIdle();document.getElementById('lhBody').innerHTML='<div class="lh-empty">Sin actividad reciente</div>';}else startRefresh();}finally{sw.classList.remove('busy');}}
 async function toggleYSF(chk){const wasOn=!chk.checked;const sw=document.getElementById('swYSF');chk.checked=wasOn;sw.classList.add('busy');try{if(wasOn){await fetch('?action=ysf-stop');await new Promise(r=>setTimeout(r,1000));await fetch('?action=mmdvmysf-stop');await new Promise(r=>setTimeout(r,2000));clearLog('logYsf');clearLog('logMmdvmYsf');stopYSFLogs();stopMMDVMYSFLogs();showYSFIdle();document.getElementById('ysfLhBody').innerHTML='<div class="lh-empty">Sin actividad C4FM</div>';}else{await fetch('?action=mmdvmysf-start');await new Promise(r=>setTimeout(r,2000));await fetch('?action=ysf-start');await new Promise(r=>setTimeout(r,1500));startYSFLogs();startMMDVMYSFLogs();}await checkYSFStatus();await checkMMDVMYSFStatus();}finally{sw.classList.remove('busy');}}
@@ -956,7 +1171,7 @@ async function feditSave(){
 }
 function feditClose(){document.getElementById('feditModal').classList.remove('open');}
 
-/* ── Terminal ttyd (iframe modal) ── */
+/* ── Terminal ttyd ── */
 function xtTtydOpen(){
     var url='http://'+window.location.hostname+':7681';
     document.getElementById('xtTtydFrame').src=url;
@@ -970,130 +1185,41 @@ function xtTtydClose(){
 /* ── Terminal ── */
 (function(){
 var xtHist=[],xtHidx=-1,xtCwd='/home/pi';
-
-function xtPr(){
-    return 'pi@raspberry:'+xtCwd.replace('/home/pi','~')+'$';
-}
-
-function xtApp(html){
-    var o=document.getElementById('xtOut');
-    o.innerHTML+=html+'\n';
-    o.scrollTop=o.scrollHeight;
-}
-
-function xtEsc(s){
-    return String(s||'')
-        .replace(/&/g,'&amp;')
-        .replace(/</g,'&lt;')
-        .replace(/>/g,'&gt;');
-}
-
-window.xtOpen=function(){
-    document.getElementById('xtModal').classList.add('open');
-    setTimeout(function(){
-        document.getElementById('xtInp').focus();
-    },80);
-};
-
-window.xtClose=function(){
-    document.getElementById('xtModal').classList.remove('open');
-};
-
+function xtPr(){return 'pi@raspberry:'+xtCwd.replace('/home/pi','~')+'$';}
+function xtApp(html){var o=document.getElementById('xtOut');o.innerHTML+=html+'\n';o.scrollTop=o.scrollHeight;}
+function xtEsc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+window.xtOpen=function(){document.getElementById('xtModal').classList.add('open');setTimeout(function(){document.getElementById('xtInp').focus();},80);};
+window.xtClose=function(){document.getElementById('xtModal').classList.remove('open');};
 document.getElementById('xtInp').addEventListener('keydown',async function(e){
-
     if(e.key==='Escape'){xtClose();return;}
-
-    if(e.key==='ArrowUp'){
-        e.preventDefault();
-        if(xtHidx<xtHist.length-1)this.value=xtHist[++xtHidx]||'';
-        return;
-    }
-
-    if(e.key==='ArrowDown'){
-        e.preventDefault();
-        xtHidx>0?this.value=xtHist[--xtHidx]:(xtHidx=-1,this.value='');
-        return;
-    }
-
+    if(e.key==='ArrowUp'){e.preventDefault();if(xtHidx<xtHist.length-1)this.value=xtHist[++xtHidx]||'';return;}
+    if(e.key==='ArrowDown'){e.preventDefault();xtHidx>0?this.value=xtHist[--xtHidx]:(xtHidx=-1,this.value='');return;}
     if(e.key!=='Enter')return;
-
-    var cmd=this.value.trim();
-    if(!cmd)return;
-
-    xtHist.unshift(cmd);
-    xtHidx=-1;
-    this.value='';
-
+    var cmd=this.value.trim();if(!cmd)return;
+    xtHist.unshift(cmd);xtHidx=-1;this.value='';
     xtApp('<span class="xt-cmd">'+xtEsc(xtPr())+' '+xtEsc(cmd)+'</span>');
-
-    // clear
-    if(/^\s*clear\s*$/.test(cmd)){
-        document.getElementById('xtOut').innerHTML='';
-        return;
+    if(/^\s*clear\s*$/.test(cmd)){document.getElementById('xtOut').innerHTML='';return;}
+    if(/^\s*(edit|nano)(\s+\S+)?\s*$/.test(cmd)){
+        var fpath=cmd.replace(/^\s*(edit|nano)\s*/,'').trim();
+        if(!fpath)fpath=xtCwd.replace(/\/$/,'')+'/nuevo.txt';
+        if(!fpath.startsWith('/'))fpath=xtCwd.replace(/\/$/,'')+'/'+fpath;
+        xtApp('<span class="xt-out">Abriendo editor: '+xtEsc(fpath)+'</span>');
+        feditOpen(fpath);return;
     }
-
-    // edit o nano → abrir editor web
-   if(/^\s*(edit|nano)(\s+\S+)?\s*$/.test(cmd)){
-    var fpath = cmd.replace(/^\s*(edit|nano)\s*/,'').trim();
-
-    // Si no se especifica archivo → usar uno por defecto
-    if(!fpath){
-        fpath = xtCwd.replace(/\/$/,'') + '/nuevo.txt';
-    }
-
-    if(!fpath.startsWith('/')){
-        fpath = xtCwd.replace(/\/$/,'') + '/' + fpath;
-    }
-
-    xtApp('<span class="xt-out">Abriendo editor: '+xtEsc(fpath)+'</span>');
-    feditOpen(fpath);
-    return;
-}
-
-    // bloquear solo comandos realmente incompatibles
-    if(/^\s*(sudo\s+su|su\s*$|top|htop|vim|vi|less|more)\s*/.test(cmd)){
-        xtApp('<span class="xt-err">Comando interactivo no soportado. Usa: nano /ruta/fichero</span>');
-        return;
-    }
-
-    // cd
+    if(/^\s*(sudo\s+su|su\s*$|top|htop|vim|vi|less|more)\s*/.test(cmd)){xtApp('<span class="xt-err">Comando interactivo no soportado. Usa: nano /ruta/fichero</span>');return;}
     if(/^\s*cd(\s|$)/.test(cmd)){
         var t=cmd.replace(/^\s*cd\s*/,'').trim()||'~';
-
-        if(t==='~'||t===''){
-            xtCwd='/home/pi';
-        }else if(t.startsWith('/')){
-            xtCwd=t;
-        }else if(t==='..'){
-            var parts=xtCwd.split('/').filter(Boolean);
-            parts.pop();
-            xtCwd='/'+parts.join('/')||'/';
-        }else{
-            xtCwd=xtCwd.replace(/\/$/,'')+'/'+t;
-        }
-
-        document.getElementById('xtPr').textContent=xtPr();
-        return;
+        if(t==='~'||t===''){xtCwd='/home/pi';}
+        else if(t.startsWith('/')){xtCwd=t;}
+        else if(t==='..'){var parts=xtCwd.split('/').filter(Boolean);parts.pop();xtCwd='/'+parts.join('/')||'/';}
+        else{xtCwd=xtCwd.replace(/\/$/,'')+'/'+t;}
+        document.getElementById('xtPr').textContent=xtPr();return;
     }
-
-    // ejecutar comando backend
     try{
-        var resp=await fetch('?action=terminal',{
-            method:'POST',
-            headers:{'Content-Type':'application/x-www-form-urlencoded'},
-            body:'cmd='+encodeURIComponent('cd '+xtCwd+' && '+cmd)
-        });
-
+        var resp=await fetch('?action=terminal',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'cmd='+encodeURIComponent('cd '+xtCwd+' && '+cmd)});
         var dat=await resp.json();
-
-        if(dat.output){
-            xtApp('<span class="xt-out">'+dat.output+'</span>');
-        }
-
-    }catch(err){
-        xtApp('<span class="xt-err">Error: '+xtEsc(err.message)+'</span>');
-    }
-
+        if(dat.output){xtApp('<span class="xt-out">'+dat.output+'</span>');}
+    }catch(err){xtApp('<span class="xt-err">Error: '+xtEsc(err.message)+'</span>');}
 });
 })();
 
@@ -1105,18 +1231,17 @@ document.getElementById('xtInp').addEventListener('keydown',async function(e){
     await checkYSFStatus();
     await checkMMDVMYSFStatus();
     await checkDStarStatus();
+    await checkNXDNStatus();
 
     setInterval(checkStatus,10000);
     setInterval(checkYSFStatus,8000);
     setInterval(checkMMDVMYSFStatus,8000);
     setInterval(checkDStarStatus,10000);
+    setInterval(checkNXDNStatus,10000);
 
-    if(!running){
-        showIdle();
-        fetchTransmission();
-    }
-
+    if(!running){showIdle();fetchTransmission();}
     showYSFIdle();
+    showNXDNIdle();
     startYSFLogs();
     startMMDVMYSFLogs();
     startYSFTransmissionPoll();
