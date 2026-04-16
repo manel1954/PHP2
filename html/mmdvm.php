@@ -904,6 +904,34 @@ button.btn-header { font-family: var(--font-mono); }
   </div>
 </div>
 
+<!-- ── Ficheros INI NXDN ── -->
+<div id="nxdnIniPanels" style="display:none; margin-top:1rem;">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;">
+    <!-- MMDVMNXDN.ini -->
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;">
+        <span class="panel-label" style="color:#ffd700;margin-bottom:0;">▸ MMDVMNXDN.ini</span>
+        <div style="display:flex;gap:.5rem;">
+          <button onclick="nxdnIniLoad('mmdvmnxdn')" style="font-family:var(--font-mono);font-size:.65rem;color:#ffd700;border:1px solid rgba(255,215,0,.3);background:transparent;border-radius:3px;padding:.2rem .6rem;cursor:pointer;transition:background .2s;" onmouseover="this.style.background='rgba(255,215,0,.08)'" onmouseout="this.style.background='transparent'">↺ Recargar</button>
+          <button onclick="nxdnIniEdit('mmdvmnxdn')" style="font-family:var(--font-mono);font-size:.65rem;color:#ffc400;border:1px solid rgba(255,196,0,.3);background:transparent;border-radius:3px;padding:.2rem .6rem;cursor:pointer;transition:background .2s;" onmouseover="this.style.background='rgba(255,196,0,.08)'" onmouseout="this.style.background='transparent'">✏ Editar</button>
+        </div>
+      </div>
+      <div id="nxdnIniMmdvm" style="font-family:var(--font-mono);font-size:.72rem;line-height:1.55;color:#7a9ab5;background:var(--surface);border:1px solid #4a4a00;border-radius:4px;padding:.8rem 1rem;height:320px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;">Cargando…</div>
+    </div>
+    <!-- NXDNGateway.ini -->
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;">
+        <span class="panel-label" style="color:#ffd700;margin-bottom:0;">▸ NXDNGateway.ini</span>
+        <div style="display:flex;gap:.5rem;">
+          <button onclick="nxdnIniLoad('nxdngateway')" style="font-family:var(--font-mono);font-size:.65rem;color:#ffd700;border:1px solid rgba(255,215,0,.3);background:transparent;border-radius:3px;padding:.2rem .6rem;cursor:pointer;transition:background .2s;" onmouseover="this.style.background='rgba(255,215,0,.08)'" onmouseout="this.style.background='transparent'">↺ Recargar</button>
+          <button onclick="nxdnIniEdit('nxdngateway')" style="font-family:var(--font-mono);font-size:.65rem;color:#ffc400;border:1px solid rgba(255,196,0,.3);background:transparent;border-radius:3px;padding:.2rem .6rem;cursor:pointer;transition:background .2s;" onmouseover="this.style.background='rgba(255,196,0,.08)'" onmouseout="this.style.background='transparent'">✏ Editar</button>
+        </div>
+      </div>
+      <div id="nxdnIniGateway" style="font-family:var(--font-mono);font-size:.72rem;line-height:1.55;color:#7a9ab5;background:var(--surface);border:1px solid #4a4a00;border-radius:4px;padding:.8rem 1rem;height:320px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;">Cargando…</div>
+    </div>
+  </div>
+</div>
+
 <!-- ── Logs ── -->
 <div class="log-grid" style="margin-top:2rem;">
 <div id="dmrLogPanels" style="display:contents;">
@@ -1073,6 +1101,55 @@ function setNXDNToggle(on){
     document.getElementById('nxdnPanelGw').style.display=on?'':'none';
     document.getElementById('nxdnDisplayPanel').style.display=on?'':'none';
     document.getElementById('nxdnLastHeardPanel').style.display=on?'':'none';
+    document.getElementById('nxdnIniPanels').style.display=on?'':'none';
+    if(on){nxdnIniLoad('mmdvmnxdn');nxdnIniLoad('nxdngateway');}
+}
+
+const NXDN_INI_PATHS={
+    'mmdvmnxdn':  '/home/pi/MMDVMHost/MMDVMNXDN.ini',
+    'nxdngateway':'/home/pi/NXDNClients/NXDNGateway/NXDNGateway.ini'
+};
+const NXDN_INI_ELS={
+    'mmdvmnxdn':  'nxdnIniMmdvm',
+    'nxdngateway':'nxdnIniGateway'
+};
+
+function colorizeIni(text){
+    return text.split('\n').map(l=>{
+        const lt=l.trim();
+        if(lt.startsWith(';')||lt.startsWith('#'))
+            return`<span style="color:#4a5568;">${esc(l)}</span>`;
+        if(/^\[.+\]$/.test(lt))
+            return`<span style="color:#ffd700;font-weight:bold;">${esc(l)}</span>`;
+        const eq=l.indexOf('=');
+        if(eq>0){
+            const k=l.substring(0,eq);
+            const v=l.substring(eq+1);
+            return`<span style="color:#ffc400;">${esc(k)}</span><span style="color:#707000;">=</span><span style="color:#a8b9cc;">${esc(v)}</span>`;
+        }
+        return`<span style="color:#7a9ab5;">${esc(l)}</span>`;
+    }).join('\n');
+}
+
+async function nxdnIniLoad(which){
+    const el=document.getElementById(NXDN_INI_ELS[which]);
+    el.innerHTML='<span style="color:#707000;">Cargando…</span>';
+    try{
+        const r=await fetch('?action=read-file',{
+            method:'POST',
+            headers:{'Content-Type':'application/x-www-form-urlencoded'},
+            body:'path='+encodeURIComponent(NXDN_INI_PATHS[which])
+        });
+        const d=await r.json();
+        if(d.ok) el.innerHTML=colorizeIni(d.content);
+        else el.innerHTML=`<span style="color:var(--red);">✖ ${esc(d.msg)}</span>`;
+    }catch(e){
+        el.innerHTML=`<span style="color:var(--red);">✖ Error: ${esc(e.message)}</span>`;
+    }
+}
+
+function nxdnIniEdit(which){
+    feditOpen(NXDN_INI_PATHS[which]);
 }
 
 function updateNXDNClock(){if(!nxdnCurrentlyActive){const now=new Date();const clk=document.getElementById('nxdnNxClock');if(clk){clk.textContent=now.toLocaleTimeString('es-ES');document.getElementById('nxdnNxDate').textContent=now.toLocaleDateString('es-ES',{weekday:'short',day:'2-digit',month:'short',year:'numeric'}).toUpperCase();}}}
@@ -1232,6 +1309,7 @@ document.getElementById('xtInp').addEventListener('keydown',async function(e){
     await checkMMDVMYSFStatus();
     await checkDStarStatus();
     await checkNXDNStatus();
+    if(nxdnRunning){nxdnIniLoad('mmdvmnxdn');nxdnIniLoad('nxdngateway');}
 
     setInterval(checkStatus,10000);
     setInterval(checkYSFStatus,8000);
