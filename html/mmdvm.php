@@ -720,7 +720,7 @@ button.btn-header { font-family: var(--font-mono); }
 <div class="status-item"><div class="dot" id="dot-mmdvmysf"></div><span style="color:#26c6da">MMDVMHost YSF</span></div>
 <div class="status-item"><div class="dot" id="dot-ysf"></div><span style="color:var(--violet)">YSFGateway</span></div>
 <!-- <div class="section-divider"></div> -->
-<div class="status-item"><div class="dot" id="dot-dstarmmd"></div><span style="color:#00e5ff">MMDVMDStar</span></div>
+<div class="status-item"><div class="dot" id="dot-dstarmmd"></div><span style="color:#00e5ff">MMDVMhost DStar</span></div>
 <div class="status-item"><div class="dot" id="dot-dstargw"></div><span style="color:#00e5ff">DStarGateway</span></div>
 <!-- <div class="section-divider"></div> -->
 <div class="status-item"><div class="dot" id="dot-nxdnmmd"></div><span style="color:#ffd700">MMDVMHost NXDN</span></div>
