@@ -60,7 +60,7 @@ $SECTIONS = [
         ['key' => 'ModeHang',       'label' => 'Mode Hang (s)',         'type' => 'int'],
     ],
     'NXDN Network' => [
-        ['key' => 'Enabled',        'label' => 'Habilitado (0/1)',      'type' => 'int'],
+        ['key' => 'Enable',         'label' => 'Habilitado (0/1)',      'type' => 'int'],
         ['key' => 'LocalAddress',   'label' => 'Dirección local',       'type' => 'str'],
         ['key' => 'LocalPort',      'label' => 'Puerto local',          'type' => 'int'],
         ['key' => 'GatewayAddress', 'label' => 'Dirección gateway',     'type' => 'str'],
