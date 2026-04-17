@@ -761,7 +761,7 @@ button.btn-header { font-family: var(--font-mono); }
       <a href="ysfgateway_config.php" class="ini-btn edit ysf" style="flex:1;justify-content:center;">⚙ YSFGATEWAY CONFIG</a>
     </div>
     <div class="service-card-btns">
-      <a href="edit_ini.php?file=mmdvmysf" class="ini-btn view" style="flex:1;justify-content:center;color:#80deea;border-color:rgba(38,198,218,.2);">📄 editar fichero MMDVMYSF.ini</a>
+      <a href="edit_ini.php?file=mmdvmysf" class="ini-btn view" style="flex:1;justify-content:center;color:#00e5ff;border-color:rgba(38,198,218,.2);">📄 editar fichero MMDVMYSF.ini</a>
       <a href="edit_ini.php?file=ysfgateway" class="ini-btn view ysf" style="flex:1;justify-content:center;">📄 editar fichero YSFGateway.ini</a>
     </div>
   </div>
