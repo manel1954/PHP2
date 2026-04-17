@@ -800,8 +800,8 @@ button.btn-header { font-family: var(--font-mono); }
       <a href="nxdngateway_config.php" class="ini-btn edit" style="flex:1;justify-content:center;color:#ffc400;border-color:rgba(255,196,0,.3);">⚙ NXDNGATEWAY CONFIG</a>
     </div>
     <div class="service-card-btns" style="margin-top:.4rem;">
-      <a href="edit_ini.php?file=mmdvmnxdn" class="ini-btn view" style="flex:1;justify-content:center;color:#ffd700;border-color:rgba(255,215,0,.3);">📄 editar fichero MMDVMNXDN.ini</a>
-      <a href="edit_ini.php?file=nxdngateway" class="ini-btn view" style="flex:1;justify-content:center;color:#ffc400;border-color:rgba(255,196,0,.3);">📄 editar fichero NXDNGateway.ini</a>
+      <a href="edit_ini.php?file=mmdvmnxdn" class="ini-btn view" style="flex:1;justify-content:center;color:#00e5ff;border-color:rgba(255,215,0,.3);">📄 editar fichero MMDVMNXDN.ini</a>
+      <a href="edit_ini.php?file=nxdngateway" class="ini-btn view" style="flex:1;justify-content:center;color:#00e5ff;border-color:rgba(255,196,0,.3);">📄 editar fichero NXDNGateway.ini</a>
     </div>
   </div>
 </div>
