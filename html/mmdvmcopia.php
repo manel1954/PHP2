@@ -714,15 +714,15 @@ button.btn-header { font-family: var(--font-mono); }
 <!-- Status bar -->
 <div class="status-bar">
 <div class="status-item"><div class="dot" id="dot-mosquitto"></div><span>Mosquitto</span></div>
-<div class="status-item"><div class="dot" id="dot-mmdvm"></div><span>MMDVMHost</span></div>
+<div class="status-item"><div class="dot" id="dot-mmdvm"></div><span>MMDVMHost Dmr</span></div>
 <div class="status-item"><div class="dot" id="dot-gateway"></div><span>DMRGateway</span></div>
-<div class="section-divider"></div>
+<!-- <div class="section-divider"></div> -->
 <div class="status-item"><div class="dot" id="dot-mmdvmysf"></div><span style="color:#26c6da">MMDVMHost YSF</span></div>
 <div class="status-item"><div class="dot" id="dot-ysf"></div><span style="color:var(--violet)">YSFGateway</span></div>
-<div class="section-divider"></div>
-<div class="status-item"><div class="dot" id="dot-dstarmmd"></div><span style="color:#00e5ff">MMDVMDStar</span></div>
+<!-- <div class="section-divider"></div> -->
+<div class="status-item"><div class="dot" id="dot-dstarmmd"></div><span style="color:#00e5ff">MMDVMhost DStar</span></div>
 <div class="status-item"><div class="dot" id="dot-dstargw"></div><span style="color:#00e5ff">DStarGateway</span></div>
-<div class="section-divider"></div>
+<!-- <div class="section-divider"></div> -->
 <div class="status-item"><div class="dot" id="dot-nxdnmmd"></div><span style="color:#ffd700">MMDVMHost NXDN</span></div>
 <div class="status-item"><div class="dot" id="dot-nxdngw"></div><span style="color:#ffd700">NXDNGateway</span></div>
 </div>
@@ -737,7 +737,7 @@ button.btn-header { font-family: var(--font-mono); }
       <label class="sw dmr" id="swDMR"><input type="checkbox" id="chkDMR" onchange="toggleServices(this)"><span class="sw-track"></span><span class="sw-knob"></span><span class="sw-busy-dot"></span></label>
       <span class="toggle-status" id="dmrToggleStatus">OFF</span>
     </div>
-    <div class="auto-badge" id="autoRefreshBadge" style="display:none"><div class="dot-sm"></div> auto-refresh 3s</div>
+    <div class="auto-badge" id="autoRefreshBadge" style="display:none"><div class="dot-sm"></div> DMR activo</div>
     <div class="service-card-btns">
       <a href="mmdvm_config.php" class="ini-btn edit" style="flex:1;justify-content:center;color:var(--cyan);border-color:rgba(0,212,255,.3);">⚙ MMDVMHOST Config</a>
       <a href="dmrgateway_config.php" class="ini-btn edit" style="flex:1;justify-content:center;">⚙ DMRGateway Config</a>
@@ -767,13 +767,13 @@ button.btn-header { font-family: var(--font-mono); }
   </div>
   <!-- D-STAR -->
   <div class="service-card" style="border-color:rgba(0,229,255,.25);">
-    <div class="service-card-label" style="color:#00ff9f;">▸ D-STAR · MMDVMHost + DStarGateway</div>
+    <div class="service-card-label" style="color:#00ff9f;">▸ DSTAR · MMDVMHost + DStarGateway</div>
     <div class="toggle-row">
-      <span class="toggle-label" id="dstarToggleLabel">D-STAR</span>
+      <span class="toggle-label" id="dstarToggleLabel">DSTAR</span>
       <label class="sw dstar" id="swDSTAR"><input type="checkbox" id="chkDSTAR" onchange="toggleDStar(this)"><span class="sw-track"></span><span class="sw-knob"></span><span class="sw-busy-dot"></span></label>
       <span class="toggle-status" id="dstarToggleStatus">OFF</span>
     </div>
-    <div class="auto-badge" id="dstarRefreshBadge" style="display:none;color:#00e5ff;"><div class="dot-sm" style="background:#00e5ff;"></div> D-STAR activo</div>
+    <div class="auto-badge" id="dstarRefreshBadge" style="display:none;color:#00e5ff;"><div class="dot-sm" style="background:#00e5ff;"></div> DSTAR activo</div>
     <div class="service-card-btns" style="margin-top:.6rem;">
       <a href="mmdvmdstar_config.php" class="ini-btn edit" style="flex:1;justify-content:center;color:#00e5ff;border-color:rgba(0,229,255,.3);">⚙ MMDVMDSTAR CONFIG</a>
       <a href="dstargateway_config.php" class="ini-btn edit" style="flex:1;justify-content:center;color:#00ff9f;border-color:rgba(0,255,159,.3);">⚙ DSTARGATEWAY CONFIG</a>
@@ -824,14 +824,14 @@ button.btn-header { font-family: var(--font-mono); }
 <!-- ── Row 2: D-STAR Display (izq) + C4FM Display (dcha) ── -->
 <div class="display-row" style="margin-top:1.2rem;">
   <div id="dstarDisplayPanel" style="display:none;">
-    <div class="panel-label" style="color:#00e5ff;">▸ D-STAR Display</div>
+    <div class="panel-label" style="color:#00e5ff;">▸ DSTAR Display</div>
     <div class="nextion-dstar">
-      <div class="nx-topbar dstar-bar"><span class="nx-mode">D-STAR · DIGITAL</span><span style="color:#006070" id="dstarStationLabel">EA3EIZ · ADER</span><span style="color:#00b0c0;opacity:.85;min-width:5rem;text-align:right;font-size:.6rem;" id="dstarDest">CQCQCQ</span></div>
+      <div class="nx-topbar dstar-bar"><span class="nx-mode">DSTAR · DIGITAL</span><span style="color:#006070" id="dstarStationLabel">EA3EIZ · ADER</span><span style="color:#00b0c0;opacity:.85;min-width:5rem;text-align:right;font-size:.6rem;" id="dstarDest">CQCQCQ</span></div>
       <div class="nx-infobar nx-infobar-dstar"><span class="nx-info-item"><span class="nx-info-lbl">PORT</span><span class="nx-info-val" id="dstarNxPort">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">FRX</span><span class="nx-info-val" style="color:#00e5ff" id="dstarNxFrx">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">FTX</span><span class="nx-info-val" style="color:#00b0c0" id="dstarNxFtx">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">IP</span><span class="nx-info-val" style="color:#80f0ff" id="dstarNxIp">—</span></span></div>
       <div class="nx-vu" id="dstarVuLeft"></div><div class="nx-vu right" id="dstarVuRight"></div>
       <div class="nx-center" id="dstarNxCenter"><div class="nx-clock" id="dstarNxClock" style="color:#00e5ff;">00:00:00</div><div class="nx-date" id="dstarNxDate" style="color:#009090;">—</div></div>
       <div class="nx-txbar" id="dstarTxBar"></div>
-      <div class="nx-botbar dstar-bar"><span style="color:#006070;font-family:var(--font-mono);font-size:.65rem;">D-STAR · DIGITAL VOICE</span><span style="color:#006070;font-family:var(--font-mono);font-size:.65rem;">XRF266 B</span><span class="nx-source" id="dstarSource"></span></div>
+      <div class="nx-botbar dstar-bar"><span style="color:#006070;font-family:var(--font-mono);font-size:.65rem;">DSTAR · DIGITAL VOICE</span><span style="color:#006070;font-family:var(--font-mono);font-size:.65rem;">XRF266 B</span><span class="nx-source" id="dstarSource"></span></div>
     </div>
   </div>
   <div id="ysfDisplayPanel">
@@ -876,12 +876,12 @@ button.btn-header { font-family: var(--font-mono); }
 <!-- ── Últimos escuchados D-STAR (izq) + C4FM (dcha) ── -->
 <div class="display-row" style="margin-top:1rem;">
   <div id="dstarLastHeardPanel" style="display:none;">
-    <div class="panel-label" style="color:#00e5ff;">▸ Últimos escuchados D-STAR</div>
+    <div class="panel-label" style="color:#00e5ff;">▸ Últimos escuchados DSTAR</div>
     <div class="lh-panel" style="border-color:#004a4a;">
       <div class="lh-header" style="background:#0a1a1a;border-bottom-color:#004a4a;color:#006070;">
         <span>Indicativo</span><span>Nombre</span><span>Hora</span><span>Src</span>
       </div>
-      <div class="lh-body" id="dstarLhBody"><div class="lh-empty">Sin actividad D-STAR</div></div>
+      <div class="lh-body" id="dstarLhBody"><div class="lh-empty">Sin actividad DSTAR</div></div>
     </div>
   </div>
   <div id="ysfLastHeardPanel">

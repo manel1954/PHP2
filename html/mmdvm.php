@@ -737,7 +737,7 @@ button.btn-header { font-family: var(--font-mono); }
       <label class="sw dmr" id="swDMR"><input type="checkbox" id="chkDMR" onchange="toggleServices(this)"><span class="sw-track"></span><span class="sw-knob"></span><span class="sw-busy-dot"></span></label>
       <span class="toggle-status" id="dmrToggleStatus">OFF</span>
     </div>
-    <div class="auto-badge" id="autoRefreshBadge" style="display:none"><div class="dot-sm"></div> auto-refresh 3s</div>
+    <div class="auto-badge" id="autoRefreshBadge" style="display:none"><div class="dot-sm"></div> DMR activo</div>
     <div class="service-card-btns">
       <a href="mmdvm_config.php" class="ini-btn edit" style="flex:1;justify-content:center;color:var(--cyan);border-color:rgba(0,212,255,.3);">⚙ MMDVMHOST Config</a>
       <a href="dmrgateway_config.php" class="ini-btn edit" style="flex:1;justify-content:center;">⚙ DMRGateway Config</a>
