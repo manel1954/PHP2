@@ -8,20 +8,20 @@ nombre_imagen="PHPP-"
 version=$nombre_imagen$fecha_imagen
 
 # Añadir líneas vacías hasta tener al menos 58 líneas
-sudo awk '{
-    print
-}
-END {
-    for (i = NR + 1; i <= 58; i++) {
-        print ""
-    }
-}' /etc/sudoers > /tmp/sudoers.tmp
-
-# Reemplazar la línea 58
-sudo sed -i '58c\www-data ALL=(ALL) NOPASSWD: ALL' /tmp/sudoers.tmp
-
-# Sobrescribir el fichero original
-sudo mv /tmp/sudoers.tmp /etc/sudoers
+#sudo awk '{
+#    print
+#}
+#END {
+#    for (i = NR + 1; i <= 58; i++) {
+#        print ""
+#    }
+#}' /etc/sudoers > /tmp/sudoers.tmp
+#
+## Reemplazar la línea 58
+#sudo sed -i '58c\www-data ALL=(ALL) NOPASSWD: ALL' /tmp/sudoers.tmp
+#
+## Sobrescribir el fichero original
+#sudo mv /tmp/sudoers.tmp /etc/sudoers
 
 #pone todos los datos de DMR+ , Brandameiter, svxlink etc en panel_control.ini     
 bm=`sed -n '2p'  $usuario/MMDVMHost/MMDVMBM.ini`
@@ -111,7 +111,7 @@ dstar=`sed -n '2p'  $usuario/MMDVMHost/MMDVMHost.ini`
 fusion=`sed -n '2p'  $usuario/MMDVMHost/MMDVMHost.ini`
 frbm=`sed -n '13p'  $usuario/MMDVMHost/MMDVMHost.ini`
 frplus=`sed -n '13p'  $usuario/MMDVMHost/MMDVMHost.ini`
-sudo wget -post-data http://associacioader.com/prueba1.php?callBM=$bm'&'callPLUS=$plus'&'masterBM=$masterbm'&'masterPLUS=$masterplus'&'radio=$masterradio'&'version=$version'&'ESPECIAL=$masterespecial'&'YSFGateway=$masterYSFGateway                      
+sudo wget -post-data https://associacioader.com/prueba1.php?callBM=$bm'&'callPLUS=$plus'&'masterBM=$masterbm'&'masterPLUS=$masterplus'&'radio=$masterradio'&'version=$version'&'ESPECIAL=$masterespecial'&'YSFGateway=$masterYSFGateway                      
 
 
 sudo rm -R /home/pi/A108/associacioader.com
