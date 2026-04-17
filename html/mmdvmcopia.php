@@ -458,7 +458,7 @@ button.btn-header { font-family: var(--font-mono); }
 @media (max-width:800px) { .controls-section { grid-template-columns: 1fr; } }
 .service-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.2rem 1.6rem; }
 .service-card-label { font-family: var(--font-mono); font-size: .7rem; letter-spacing: .15em; text-transform: uppercase; margin-bottom: 1rem; }
-.service-card-label.dmr { color: var(--amber); }
+.service-card-label.dmr { color: var(--white); }
 .service-card-label.ysf { color: var(--violet); }
 .toggle-row { display: flex; align-items: center; gap: 1rem; padding: .5rem 0; }
 .toggle-label { font-family: var(--font-mono); font-size: .85rem; letter-spacing: .06em; color: var(--text-dim); text-transform: uppercase; flex: 1; transition: color .3s; }
@@ -472,7 +472,7 @@ button.btn-header { font-family: var(--font-mono); }
 .sw-knob { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; background: #e95c04; box-shadow: 0 1px 4px rgba(0,0,0,.5); transition: transform .3s cubic-bezier(.4,0,.2,1), background .3s, box-shadow .3s; }
 .sw.dmr input:checked ~ .sw-track, .sw.ysf input:checked ~ .sw-track, .sw.dstar input:checked ~ .sw-track { border-radius: 2px; background: #1a2535; border: 2px solid #999999; }
 .sw.dmr input:checked ~ .sw-knob, .sw.ysf input:checked ~ .sw-knob, .sw.dstar input:checked ~ .sw-knob { transform: translateX(28px); background: var(--green); box-shadow: 0 0 8px rgba(0,255,159,.6); }
-.sw#swNXDN input:checked ~ .sw-knob { transform: translateX(28px); background: #ffd700; box-shadow: 0 0 8px rgba(255,215,0,.6); }
+.sw#swNXDN input:checked ~ .sw-knob { transform: translateX(28px); background: var(--green); box-shadow: 0 0 8px rgba(255,215,0,.6); }
 .sw#swNXDN input:checked ~ .sw-track { border-color: #999; }
 .sw-busy-dot { display: none; position: absolute; top: 50%; right: -18px; transform: translateY(-50%); width: 8px; height: 8px; border-radius: 50%; border: 2px solid var(--amber); border-top-color: transparent; animation: spin .7s linear infinite; }
 .sw.busy .sw-busy-dot { display: block; }
@@ -482,8 +482,8 @@ button.btn-header { font-family: var(--font-mono); }
 .auto-badge.ysf .dot-sm { background: var(--violet); }
 .service-card-btns { display: flex; gap: .6rem; flex-wrap: nowrap; margin-top: 1rem; }
 .ini-btn { font-family: var(--font-mono); font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; padding: .3rem .7rem; border-radius: 3px; border: 1px solid var(--border); background: transparent; cursor: pointer; text-decoration: none; transition: all .2s; display: inline-flex; align-items: center; gap: .3rem; }
-.ini-btn.edit { color: var(--amber); border-color: rgba(255,179,0,.3); }
-.ini-btn.edit:hover { border-color: var(--amber); background: rgba(255,179,0,.08); }
+.ini-btn.edit { color: var(--white); border-color: rgba(255,179,0,.3); }
+.ini-btn.edit:hover { border-color: var(--white); background: rgba(255,179,0,.08); }
 .ini-btn.view { color: var(--cyan); border-color: rgba(0,212,255,.3); }
 .ini-btn.view:hover { border-color: var(--cyan); background: rgba(0,212,255,.08); }
 .ini-btn.edit.ysf { color: var(--violet); border-color: rgba(181,122,255,.3); }
