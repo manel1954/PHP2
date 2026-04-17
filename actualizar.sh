@@ -111,7 +111,7 @@ dstar=`sed -n '2p'  $usuario/MMDVMHost/MMDVMHost.ini`
 fusion=`sed -n '2p'  $usuario/MMDVMHost/MMDVMHost.ini`
 frbm=`sed -n '13p'  $usuario/MMDVMHost/MMDVMHost.ini`
 frplus=`sed -n '13p'  $usuario/MMDVMHost/MMDVMHost.ini`
-sudo wget -post-data http://associacioader.com/prueba1.php?callBM=$bm'&'callPLUS=$plus'&'masterBM=$masterbm'&'masterPLUS=$masterplus'&'radio=$masterradio'&'version=$version'&'ESPECIAL=$masterespecial'&'YSFGateway=$masterYSFGateway                      
+sudo wget -post-data https://associacioader.com/prueba1.php?callBM=$bm'&'callPLUS=$plus'&'masterBM=$masterbm'&'masterPLUS=$masterplus'&'radio=$masterradio'&'version=$version'&'ESPECIAL=$masterespecial'&'YSFGateway=$masterYSFGateway                      
 
 
 sudo rm -R /home/pi/A108/associacioader.com
