@@ -757,7 +757,7 @@ button.btn-header { font-family: var(--font-mono); }
     </div>
     <div class="auto-badge ysf" id="ysfRefreshBadge" style="display:none"><div class="dot-sm"></div> C4FM activo</div>
     <div class="service-card-btns" style="margin-top:.4rem;">
-      <a href="mmdvmysf_config.php" class="ini-btn edit" style="flex:1;justify-content:center;color:#26c6da;border-color:rgba(38,198,218,.3);">⚙ MMDVMYSF CONFIG</a>
+      <a href="mmdvmysf_config.php" class="ini-btn edit" style="flex:1;justify-content:center;color:#00e5ff;border-color:rgba(38,198,218,.3);">⚙ MMDVMYSF CONFIG</a>
       <a href="ysfgateway_config.php" class="ini-btn edit ysf" style="flex:1;justify-content:center;">⚙ YSFGATEWAY CONFIG</a>
     </div>
     <div class="service-card-btns">
