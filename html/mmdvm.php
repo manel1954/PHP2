@@ -215,7 +215,7 @@ if ($action === 'display-restart') { shell_exec('sudo systemctl daemon-reload 2>
 if ($action === 'install-display') { $output = shell_exec('sudo /home/pi/A108/instalar_displaydriver.sh 2>&1'); header('Content-Type: application/json'); echo json_encode(['ok'=>true,'output'=>htmlspecialchars($output??'')]); exit; }
 
 if ($action === 'backup-configs') {
-    $zipName = 'Copia_PHP2.zip'; $zipPath = '/tmp/'.$zipName;
+    $zipName = 'Copia_PHPPLUS.zip'; $zipPath = '/tmp/'.$zipName;
     $files = ['/home/pi/MMDVMHost/MMDVMHost.ini','/home/pi/MMDVMHost/MMDVMYSF.ini','/home/pi/MMDVMHost/MMDVMDSTAR.ini','/home/pi/MMDVMHost/MMDVMNXDN.ini','/home/pi/Display-Driver/DisplayDriver.ini','/home/pi/YSFClients/YSFGateway/YSFGateway.ini','/home/pi/DMRGateway/DMRGateway.ini','/home/pi/DStarGateway/DStarGateway.ini','/home/pi/NXDNClients/NXDNGateway/NXDNGateway.ini'];
     $fileList = implode(' ', array_map('escapeshellarg', $files));
     shell_exec("zip -j ".escapeshellarg($zipPath)." {$fileList} 2>/dev/null");
@@ -1003,7 +1003,7 @@ button.btn-header { font-family: var(--font-mono); }
 <div id="restoreModal" class="restore-modal">
 <div class="restore-box">
 <div class="restore-title">📂 Restaurar configuración</div>
-<label class="restore-label" for="restoreFile">Selecciona fichero Copia_PHP2.zip</label>
+<label class="restore-label" for="restoreFile">Selecciona fichero Copia_PHPPLUS.zip</label>
 <input type="file" id="restoreFile" accept=".zip" class="restore-file">
 <div class="restore-btns">
 <button class="restore-btn-ok" onclick="doRestore()">▶ Restaurar</button>
