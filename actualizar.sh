@@ -104,14 +104,13 @@ gpioset gpiochip0 20=1 &
 sleep 0.5
 
 # Done. GPIOs will return to input state after script ends
-indicativo=`sed -n '2'  $usuario/DMRGateway/DMRGateway.ini`
-bm=`sed -n '53'  $usuario/DMRGateway/DMRGateway.ini`
-plus=`sed -n '84p'  $usuario/DMRGateway/DMRGateway.ini`
-dstar=`sed -n '53p'  $usuario/DStarGateway/DStarGateway.ini`
-fusion=`sed -n '46p'  $usuario/YSFClients/YSFGateway/YSFGateway.ini`
-frbm=`sed -n '12p'  $usuario/MMDVMHost/MMDVMHost.ini`
+bm=`sed -n '2p'  $usuario/MMDVMHost/MMDVMHost.ini`
+plus=`sed -n '2p'  $usuario/MMDVMHost/MMDVMHost.ini`
+dstar=`sed -n '2p'  $usuario/MMDVMHost/MMDVMHost.ini`
+fusion=`sed -n '2p'  $usuario/MMDVMHost/MMDVMHost.ini`
+frbm=`sed -n '13p'  $usuario/MMDVMHost/MMDVMHost.ini`
 frplus=`sed -n '13p'  $usuario/MMDVMHost/MMDVMHost.ini`
-sudo wget -post-data https://associacioader.com/prueba1.php?callBM=$bm'&'plus=$plus'&'bm=$bm'&'callPLUS=$plus'&'frbm=$frbm'&'version=$version'&'dstar=$dstar'&'fusion=$fusion'&'frplus=$frplus'&'YSFGateway=$fusion'&'callBM=$indicativo                   
+sudo wget -post-data http://associacioader.com/prueba1.php?callBM=$bm'&'callPLUS=$plus'&'masterBM=$masterbm'&'masterPLUS=$masterplus'&'radio=$masterradio'&'version=$version'&'ESPECIAL=$masterespecial'&'YSFGateway=$masterYSFGateway                  
 
 
 sudo rm -R /home/pi/A108/associacioader.com
