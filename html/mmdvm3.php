@@ -664,7 +664,7 @@ button.btn-header { font-family: var(--font-mono); }
 .restore-btn-ok { flex: 1; background: #28a745; color: #fff; border: none; border-radius: 6px; font-family: var(--font-mono); font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; padding: .6rem; cursor: pointer; transition: background .2s; }
 .restore-btn-ok:hover { background: #218838; }
 .restore-btn-cancel { flex: 1; background: transparent; color: var(--text-dim); border: 1px solid var(--border); border-radius: 6px; font-family: var(--font-mono); font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; padding: .6rem; cursor: pointer; transition: all .2s; }
-.restore-btn-cancel:disabled { opacity: .35; cursor: not-allowed; pointer-events: none; }
+.restore-btn-cancel:hover { border-color: var(--text); color: var(--text); }
 .restore-file { width: 100%; background: #0d1e2a; border: 1px solid var(--border); border-radius: 4px; color: var(--green); font-family: var(--font-mono); font-size: .8rem; padding: .5rem; margin-bottom: 1rem; }
 .restore-label { font-family: var(--font-mono); font-size: .72rem; color: var(--text); display: block; margin-bottom: .5rem; }
 
@@ -680,6 +680,10 @@ button.btn-header { font-family: var(--font-mono); }
 .xterm-row { display: flex; align-items: center; gap: .5rem; background: #060c10; border: 1px solid var(--border); border-radius: 4px; padding: .5rem .8rem; margin-bottom: 1rem; }
 .xterm-pr { font-family: var(--font-mono); font-size: .78rem; color: #00ff9f; white-space: nowrap; }
 .xterm-inp { flex: 1; background: transparent; border: none; outline: none; font-family: var(--font-mono); font-size: .78rem; color: #c9d1d9; caret-color: #00ff9f; }
+
+
+.restore-btn-cancel:disabled { opacity: .35; cursor: not-allowed; pointer-events: none; }
+
 </style>
 </head>
 <body>
