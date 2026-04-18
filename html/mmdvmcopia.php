@@ -356,6 +356,7 @@ if ($action === 'nxdn-status') {
     exit;
 }
 if ($action === 'nxdn-start') {
+  saveState('nxdn','on');
     shell_exec('sudo systemctl start mmdvmnxdn 2>/dev/null');
     sleep(2);
     shell_exec('sudo systemctl start nxdngateway 2>/dev/null');
@@ -364,6 +365,7 @@ if ($action === 'nxdn-start') {
     exit;
 }
 if ($action === 'nxdn-stop') {
+  saveState('nxdn','off');
     shell_exec('sudo systemctl stop nxdngateway 2>/dev/null');
     sleep(1);
     shell_exec('sudo systemctl stop mmdvmnxdn 2>/dev/null');
