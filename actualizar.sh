@@ -34,7 +34,7 @@ frplus=`sed -n '13p'  $usuario/MMDVMHost/MMDVMPLUS.ini`
 indi=$(awk "NR==2" $usuario/MMDVMHost/MMDVMBM.ini)
 ide=$(awk "NR==3" $usuario/MMDVMHost/MMDVMBM.ini)
 frec=$(awk "NR==13" $usuario/MMDVMHost/MMDVMBM.ini)
-masterbm=$(awk "NR==232" $usuario/MMDVMHost/MMDVMBM.ini)
+masterbm=$(awk "NR==53" $usuario/DMRGateway/DMRGateway.ini)
 masterbm=`expr substr $masterbm 15 30`
 sed -i "1c $indi" $usuario/info_panel_control.ini
 sed -i "2c $ide" $usuario/info_panel_control.ini
@@ -44,7 +44,7 @@ sed -i "4c $masterbm" $usuario/info_panel_control.ini
 indi=$(awk "NR==2" $usuario/MMDVMHost/MMDVMPLUS.ini)
 ide=$(awk "NR==3" $usuario/MMDVMHost/MMDVMPLUS.ini)
 frec=$(awk "NR==13" $usuario/MMDVMHost/MMDVMPLUS.ini)
-masterplus=$(awk "NR==232" $usuario/MMDVMHost/MMDVMPLUS.ini)
+masterplus=$(awk "NR==84" $usuario/DMRGateway/DMRGateway.ini)
 masterplus=`expr substr $masterplus 15 30`
 sed -i "11c $indi" $usuario/info_panel_control.ini
 sed -i "12c $ide" $usuario/info_panel_control.ini
