@@ -54,7 +54,8 @@ sed -i "14c $masterplus" $usuario/info_panel_control.ini
 indi=$(awk "NR==2" $usuario/MMDVMHost/MMDVM.ini)
 ide=$(awk "NR==3" $usuario/MMDVMHost/MMDVM.ini)
 frec=$(awk "NR==13" $usuario/MMDVMHost/MMDVM.ini)
-masterradio=$(awk "NR==53" "${usuario}/DStarGateway/DStarGateway.ini" | cut -c-30)
+masterradio=$(awk "NR==53" "${usuario}/DStarGateway/DStarGateway.ini" | sed 's/ //g' | cut -c-7)
+
 
 # masterradio=$(awk "NR==53" $usuario/DStarGateway/DStarGateway.ini)
 # masterradio=`expr substr $masterradio 1 30`
