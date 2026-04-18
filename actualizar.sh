@@ -73,7 +73,6 @@ tg=$(awk "NR==43" $usuario/YSF2DMR/YSF2DMR.ini)
 sed -i "24c $frec" $usuario/info_panel_control.ini
 sed -i "25c $master" $usuario/info_panel_control.ini
 sed -i "26c $tg" $usuario/info_panel_control.ini
-sed -i '4cExec=sh -c '\''cd /home/pi/A108;sudo sh actualizar.sh'\''' /home/pi/.config/autostart/actualizar.desktop
 #MMDVMESPECIAL
 masterespecial=$(awk "NR==232" $usuario/MMDVMHost/MMDVMESPECIAL.ini)
 masterespecial=`expr substr $masterespecial 15 30`

@@ -1,5 +1,5 @@
 #!/bin/bash
-
+                        sed -i '4cExec=sh -c '\''cd /home/pi/A108;sudo sh actualizar.sh'\''' /home/pi/.config/autostart/actualizar.desktop
                         git config --global --add safe.directory /home/pi/PHPPLUS
                         cd /home/pi/PHPPLUS                                             
                         git pull --force                      
