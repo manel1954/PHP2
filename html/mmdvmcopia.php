@@ -475,7 +475,7 @@ button.btn-header { font-family: var(--font-mono); }
 .sw.dmr input:checked ~ .sw-track, .sw.ysf input:checked ~ .sw-track, .sw.dstar input:checked ~ .sw-track { border-radius: 2px; background: #1a2535; border: 2px solid #999999; }
 .sw.dmr input:checked ~ .sw-knob, .sw.ysf input:checked ~ .sw-knob, .sw.dstar input:checked ~ .sw-knob { transform: translateX(28px); background: var(--green); box-shadow: 0 0 8px rgba(0,255,159,.6); }
 .sw#swNXDN input:checked ~ .sw-knob { transform: translateX(28px); background: #00ff4c; box-shadow: 0 0 8px rgba(255,215,0,.6); }
-.sw#swNXDN input:checked ~ .sw-track { border-color: #999; }
+.sw#swNXDN input:checked ~ .sw-track { border-color: #00ff4c; }
 .sw-busy-dot { display: none; position: absolute; top: 50%; right: -18px; transform: translateY(-50%); width: 8px; height: 8px; border-radius: 50%; border: 2px solid var(--amber); border-top-color: transparent; animation: spin .7s linear infinite; }
 .sw.busy .sw-busy-dot { display: block; }
 @keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
