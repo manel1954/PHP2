@@ -604,9 +604,6 @@ button.btn-header { font-family: var(--font-mono); }
 .lh-row-nxdn.lh-active { background: rgba(255,215,0,.08); }
 .lh-tx-dot-nxdn { width: 6px; height: 6px; border-radius: 50%; background: #ffd700; box-shadow: 0 0 6px #ffd700; animation: pulse 1s infinite; flex-shrink: 0; }
 .lh-call-nxdn { font-family: var(--font-mono); font-size: .82rem; color: #ffd700; letter-spacing: .05em; font-weight: bold; }
-#ysfLastHeardPanel { grid-column: 2; }
-#ysfDisplayPanel { grid-column: 2; }
-@media (max-width:900px) { #ysfLastHeardPanel { grid-column: 1; } #ysfDisplayPanel { grid-column: 1; } }
 .log-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
 @media (max-width:900px) { .log-grid { grid-template-columns: 1fr; } }
 .log-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
@@ -828,6 +825,8 @@ button.btn-header { font-family: var(--font-mono); }
 </div>
 
 <!-- ── Row 1: DMR Display ── -->
+
+<!-- ── Fila 1: DMR Display (izq) + C4FM Display (dcha) ── -->
 <div class="display-row">
   <div id="dmrDisplayPanel">
     <div class="panel-label">▸ DMR Display</div>
@@ -838,21 +837,6 @@ button.btn-header { font-family: var(--font-mono); }
       <div class="nx-center" id="nxCenter"><div class="nx-clock" id="nxClock">00:00:00</div><div class="nx-date" id="nxDate">—</div></div>
       <div class="nx-txbar" id="nxTxBar"></div>
       <div class="nx-botbar"><span class="nx-dmrid" id="nxDmrid">—</span><span>SLOT <span id="nxSlot">—</span></span><span class="nx-source" id="nxSource"></span></div>
-    </div>
-  </div>
-</div>
-
-<!-- ── Row 2: D-STAR Display (izq) + C4FM Display (dcha) ── -->
-<div class="display-row" style="margin-top:1.2rem;">
-  <div id="dstarDisplayPanel" style="display:none;">
-    <div class="panel-label" style="color:#00e5ff;">▸ D-STAR Display</div>
-    <div class="nextion-dstar">
-      <div class="nx-topbar dstar-bar"><span class="nx-mode">D-STAR · DIGITAL</span><span style="color:#006070" id="dstarStationLabel">EA3EIZ · ADER</span><span style="color:#00b0c0;opacity:.85;min-width:5rem;text-align:right;font-size:.6rem;" id="dstarDest">CQCQCQ</span></div>
-      <div class="nx-infobar nx-infobar-dstar"><span class="nx-info-item"><span class="nx-info-lbl">PORT</span><span class="nx-info-val" id="dstarNxPort">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">FRX</span><span class="nx-info-val" style="color:#00e5ff" id="dstarNxFrx">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">FTX</span><span class="nx-info-val" style="color:#00b0c0" id="dstarNxFtx">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">IP</span><span class="nx-info-val" style="color:#80f0ff" id="dstarNxIp">—</span></span></div>
-      <div class="nx-vu" id="dstarVuLeft"></div><div class="nx-vu right" id="dstarVuRight"></div>
-      <div class="nx-center" id="dstarNxCenter"><div class="nx-clock" id="dstarNxClock" style="color:#00e5ff;">00:00:00</div><div class="nx-date" id="dstarNxDate" style="color:#009090;">—</div></div>
-      <div class="nx-txbar" id="dstarTxBar"></div>
-      <div class="nx-botbar dstar-bar"><span style="color:#006070;font-family:var(--font-mono);font-size:.65rem;">D-STAR · DIGITAL VOICE</span><span style="color:#006070;font-family:var(--font-mono);font-size:.65rem;">XRF266 B</span><span class="nx-source" id="dstarSource"></span></div>
     </div>
   </div>
   <div id="ysfDisplayPanel">
@@ -868,9 +852,20 @@ button.btn-header { font-family: var(--font-mono); }
   </div>
 </div>
 
-<!-- ── Row 3: NXDN Display ── -->
-<div class="display-row" style="margin-top:1.2rem;" id="nxdnDisplayRow" style="display:none;">
-  <div id="nxdnDisplayPanel" style="display:none;">
+<!-- ── Fila 2: D-STAR Display (izq) + NXDN Display (dcha) ── -->
+<div class="display-row" style="margin-top:1.2rem;">
+  <div id="dstarDisplayPanel">
+    <div class="panel-label" style="color:#00e5ff;">▸ D-STAR Display</div>
+    <div class="nextion-dstar">
+      <div class="nx-topbar dstar-bar"><span class="nx-mode">D-STAR · DIGITAL</span><span style="color:#006070" id="dstarStationLabel">EA3EIZ · ADER</span><span style="color:#00b0c0;opacity:.85;min-width:5rem;text-align:right;font-size:.6rem;" id="dstarDest">CQCQCQ</span></div>
+      <div class="nx-infobar nx-infobar-dstar"><span class="nx-info-item"><span class="nx-info-lbl">PORT</span><span class="nx-info-val" id="dstarNxPort">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">FRX</span><span class="nx-info-val" style="color:#00e5ff" id="dstarNxFrx">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">FTX</span><span class="nx-info-val" style="color:#00b0c0" id="dstarNxFtx">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">IP</span><span class="nx-info-val" style="color:#80f0ff" id="dstarNxIp">—</span></span></div>
+      <div class="nx-vu" id="dstarVuLeft"></div><div class="nx-vu right" id="dstarVuRight"></div>
+      <div class="nx-center" id="dstarNxCenter"><div class="nx-clock" id="dstarNxClock" style="color:#00e5ff;">00:00:00</div><div class="nx-date" id="dstarNxDate" style="color:#009090;">—</div></div>
+      <div class="nx-txbar" id="dstarTxBar"></div>
+      <div class="nx-botbar dstar-bar"><span style="color:#006070;font-family:var(--font-mono);font-size:.65rem;">D-STAR · DIGITAL VOICE</span><span style="color:#006070;font-family:var(--font-mono);font-size:.65rem;">XRF266 B</span><span class="nx-source" id="dstarSource"></span></div>
+    </div>
+  </div>
+  <div id="nxdnDisplayPanel">
     <div class="panel-label" style="color:#ffd700;">▸ NXDN Display</div>
     <div class="nextion-nxdn">
       <div class="nx-topbar nxdn-bar"><span class="nx-mode">NXDN · DIGITAL</span><span style="color:#707000" id="nxdnStationLabel">EA3EIZ · ADER</span><span style="color:#ffd700;opacity:.85;min-width:5rem;text-align:right;font-size:.6rem;" id="nxdnTGLabel">—</span></div>
@@ -883,9 +878,7 @@ button.btn-header { font-family: var(--font-mono); }
   </div>
 </div>
 
-<!-- ── Últimos escuchados DMR ── -->
-<div class="display-row" style="margin-top:1rem;">
-  <div id="dmrLastHeardPanel">
+<div id="dmrLastHeardPanel">
     <div class="panel-label">▸ Últimos escuchados DMR</div>
     <div class="lh-panel">
       <div class="lh-header"><span>Indicativo</span><span>Nombre</span><span>TG</span><span>Hora</span><span>Src</span></div>
