@@ -678,11 +678,14 @@ button.btn-header { font-family: var(--font-mono); }
 .fedit-msg.ok{color:var(--green);border-color:var(--green);background:rgba(0,255,159,.06);}
 .fedit-msg.err{color:var(--red);border-color:var(--red);background:rgba(255,69,96,.06);}
 .flag-emoji {
-    font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;
-    font-size: 1.1em;
     display: inline-block;
     vertical-align: middle;
-    margin-right: 3px;
+    margin-right: 4px;
+    width: 22px;
+    height: 15px;
+    border-radius: 2px;
+    object-fit: cover;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
 }
 </style>
 
@@ -1022,8 +1025,39 @@ const DMR_IDLE_TIMEOUT=12000,YSF_IDLE_TIMEOUT=12000;
 
 async function fetchStationInfo(){try{const r=await fetch('?action=station-info');const d=await r.json();document.getElementById('scCallsign').textContent='📡 '+d.callsign;const nxPort=document.getElementById('nxPort');if(nxPort)nxPort.textContent=d.port||'—';const nxFrx=document.getElementById('nxFrx');if(nxFrx)nxFrx.textContent=d.freqRX||'—';const nxFtx=document.getElementById('nxFtx');if(nxFtx)nxFtx.textContent=d.freq||'—';const nxIp=document.getElementById('nxIp');if(nxIp)nxIp.textContent=d.ip||'—';const yNxPort=document.getElementById('ysfNxPort');if(yNxPort)yNxPort.textContent=d.ysfPort||'—';const yNxFrx=document.getElementById('ysfNxFrx');if(yNxFrx)yNxFrx.textContent=d.ysfFreqRX||'—';const yNxFtx=document.getElementById('ysfNxFtx');if(yNxFtx)yNxFtx.textContent=d.ysfFreqTX||'—';const yNxIp=document.getElementById('ysfNxIp');if(yNxIp)yNxIp.textContent=d.ysfIp||'—';const label=d.callsign+' · ADER';const nx=document.getElementById('nxStationLabel');if(nx)nx.textContent=label;const yx=document.getElementById('ysfStationLabel');if(yx)yx.textContent=label;const dx=document.getElementById('dstarStationLabel');if(dx)dx.textContent=label;const nxdnLbl=document.getElementById('nxdnStationLabel');if(nxdnLbl)nxdnLbl.textContent=label;const dNxPort=document.getElementById('dstarNxPort');if(dNxPort)dNxPort.textContent=d.dstarPort||'—';const dNxFrx=document.getElementById('dstarNxFrx');if(dNxFrx)dNxFrx.textContent=d.dstarFreqRX||'—';const dNxFtx=document.getElementById('dstarNxFtx');if(dNxFtx)dNxFtx.textContent=d.dstarFreqTX||'—';const dNxIp=document.getElementById('dstarNxIp');if(dNxIp)dNxIp.textContent=d.dstarIp||'—';const nNxPort=document.getElementById('nxdnNxPort');if(nNxPort)nNxPort.textContent=d.nxdnPort||'—';const nNxFrx=document.getElementById('nxdnNxFrx');if(nNxFrx)nNxFrx.textContent=d.nxdnFreqRX||'—';const nNxFtx=document.getElementById('nxdnNxFtx');if(nNxFtx)nNxFtx.textContent=d.nxdnFreqTX||'—';const nNxIp=document.getElementById('nxdnNxIp');if(nNxIp)nNxIp.textContent=d.nxdnIp||'—';}catch(e){console.warn('station-info error:',e);}}
 
-function getFlagByCall(callsign){if(!callsign)return'';const cs=callsign.toUpperCase().trim();const prefixes=[{re:/^E[ABCDEFGH][1-9]/,flag:'🇪🇸'},{re:/^C[TUQ]/,flag:'🇵🇹'},{re:/^F[A-Z]/,flag:'🇫🇷'},{re:/^I[0-9]/,flag:'🇮🇹'},{re:/^IK|^IW|^IZ/,flag:'🇮🇹'},{re:/^(G[0-9]|M[0-9]|2E[0-9]|2[0-9]|GB|MJ|MU)/,flag:'🇬🇧'},{re:/^D[ALM]|^DA|^DB|^DC|^DD|^DE|^DF|^DG|^DH|^DI|^DJ|^DK|^DL|^DM|^DN|^DO|^DP|^DQ|^DR/,flag:'🇩🇪'},{re:/^K[0-9]|^W[0-9]|^N[0-9]|^AA|^AB|^AC|^AD|^AE|^AF/,flag:'🇺🇸'},{re:/^VE[0-9]|^VA[0-9]|^VO[0-9]|^VY[0-9]/,flag:'🇨🇦'},{re:/^PY[0-9]|^PU|^PV|^PW|^PX/,flag:'🇧🇷'},{re:/^LU[0-9]|^LV|^LW|^LX/,flag:'🇦🇷'},{re:/^JA[0-9]|^JE|^JF|^JG|^JH|^JI|^JJ|^JK|^JL|^JR/,flag:'🇯🇵'},{re:/^VK[0-9]/,flag:'🇦🇺'},{re:/^ZS[0-9]|^ZT|^ZU/,flag:'🇿🇦'},{re:/^OH[0-9]|^OG/,flag:'🇫🇮'},{re:/^PA[0-9]|^PB|^PC|^PD|^PE|^PF|^PG|^PH/,flag:'🇳🇱'},{re:/^HB[0-9]|^HB9/,flag:'🇨🇭'},{re:/^OE[0-9]/,flag:'🇦🇹'},{re:/^SP[0-9]|^SQ|^SR|^HF/,flag:'🇵🇱'},{re:/^UA[0-9]|^UB|^UC|^UD|^UE|^UF|^UG|^UH|^RA|^RB|^RC/,flag:'🇷🇺'},{re:/^SV[0-9]|^SW|^SX|^SY|^SZ/,flag:'🇬🇷'},{re:/^LY[0-9]/,flag:'🇱🇹'},{re:/^9A[0-9]/,flag:'🇭🇷'}];for(const p of prefixes){if(p.re.test(cs))return'<span class="flag-emoji">'+p.flag+'</span>';}return'<span class="flag-emoji">🌐</span>';}
-
+function getFlagByCall(callsign){
+    if(!callsign)return'';
+    const cs=callsign.toUpperCase().trim();
+    const prefixes=[
+        {re:/^E[ABCDEFGH][1-9]/,code:'es'},
+        {re:/^C[TUQ]/,code:'pt'},
+        {re:/^F[A-Z]/,code:'fr'},
+        {re:/^I[0-9]|^IK|^IW|^IZ/,code:'it'},
+        {re:/^G[0-9]|^M[0-9]|^2E|^GB|^MJ|^MU/,code:'gb'},
+        {re:/^D[A-R]|^Y[2-9]/,code:'de'},
+        {re:/^[KWN][0-9]|^AA|^AB|^AC|^AD|^AE|^AF/,code:'us'},
+        {re:/^VE|^VA|^VO|^VY/,code:'ca'},
+        {re:/^PY|^PU|^PV|^PW|^PX/,code:'br'},
+        {re:/^LU|^LV|^LW|^LX/,code:'ar'},
+        {re:/^JA|^JE|^JF|^JG|^JH|^JI|^JJ|^JK|^JL|^JR/,code:'jp'},
+        {re:/^VK/,code:'au'},
+        {re:/^ZS|^ZT|^ZU/,code:'za'},
+        {re:/^OH|^OG/,code:'fi'},
+        {re:/^PA|^PB|^PC|^PD|^PE|^PF|^PG|^PH/,code:'nl'},
+        {re:/^HB/,code:'ch'},
+        {re:/^OE/,code:'at'},
+        {re:/^SP|^SQ|^SR|^HF/,code:'pl'},
+        {re:/^UA|^UB|^UC|^UD|^UE|^UF|^RA|^RB|^RC/,code:'ru'},
+        {re:/^SV|^SW|^SX|^SY|^SZ/,code:'gr'},
+        {re:/^LY/,code:'lt'},
+        {re:/^9A/,code:'hr'},
+    ];
+    for(const p of prefixes){
+        if(p.re.test(cs))
+            return`<img class="flag-emoji" src="https://flagcdn.com/20x15/${p.code}.png" alt="${p.code.toUpperCase()}">`;
+    }
+    return'';
+}
 function buildVU(id){const el=document.getElementById(id);for(let i=0;i<18;i++){const d=document.createElement('div');d.className='nx-vu-bar';d.id=`${id}-${i}`;el.appendChild(d);}}
 buildVU('vuLeft');buildVU('vuRight');buildVU('ysfVuLeft');buildVU('ysfVuRight');buildVU('nxdnVuLeft');buildVU('nxdnVuRight');
 
