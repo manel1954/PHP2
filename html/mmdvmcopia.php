@@ -677,16 +677,8 @@ button.btn-header { font-family: var(--font-mono); }
 .fedit-msg{font-family:var(--font-mono);font-size:.75rem;display:none;padding:.4rem .8rem;border-radius:4px;border:1px solid;}
 .fedit-msg.ok{color:var(--green);border-color:var(--green);background:rgba(0,255,159,.06);}
 .fedit-msg.err{color:var(--red);border-color:var(--red);background:rgba(255,69,96,.06);}
-.flag-emoji {
-    display: inline-block;
-    vertical-align: middle;
-    margin-right: 5px;
-}
-.flag-emoji img {
-    width: 26px;
-    height: 26px;
-    vertical-align: middle;
-}
+.flag-emoji { display:inline-block; vertical-align:middle; margin-right:5px; }
+.flag-emoji img { width:26px; height:26px; vertical-align:middle; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/twemoji@14.0.2/dist/twemoji.min.js" crossorigin="anonymous"></script>
 </head>
@@ -1059,6 +1051,73 @@ function getFlagByCall(callsign){
     return'';
 }
 
+function buildVU(id){const el=document.getElementById(id);for(let i=0;i<18;i++){const d=document.createElement('div');d.className='nx-vu-bar';d.id=`${id}-${i}`;el.appendChild(d);}}
+buildVU('vuLeft');buildVU('vuRight');buildVU('ysfVuLeft');buildVU('ysfVuRight');buildVU('nxdnVuLeft');buildVU('nxdnVuRight');
+
+function animateVU(on,prefix){clearInterval(prefix==='ysf'?ysfVuTimer:vuTimer);const ids=prefix==='ysf'?['ysfVuLeft','ysfVuRight']:['vuLeft','vuRight'];ids.forEach(id=>{for(let i=0;i<18;i++)document.getElementById(`${id}-${i}`).className='nx-vu-bar';});if(!on)return;const timer=setInterval(()=>{ids.forEach(id=>{const lvl=Math.floor(Math.random()*16)+1;for(let i=0;i<18;i++){let cls='nx-vu-bar';if(i<lvl)cls+=prefix==='ysf'?(i<10?' lit-v':i<14?' lit-vd':' lit-r'):(i<10?' lit-g':i<14?' lit-a':' lit-r');document.getElementById(`${id}-${i}`).className=cls;}});},80);if(prefix==='ysf')ysfVuTimer=timer;else vuTimer=timer;}
+
+let nxdnVuTimerAnim=null;
+function animateNXDNVU(on){clearInterval(nxdnVuTimerAnim);['nxdnVuLeft','nxdnVuRight'].forEach(id=>{for(let i=0;i<18;i++)document.getElementById(`${id}-${i}`).className='nx-vu-bar';});if(!on)return;nxdnVuTimerAnim=setInterval(()=>{['nxdnVuLeft','nxdnVuRight'].forEach(id=>{const lvl=Math.floor(Math.random()*16)+1;for(let i=0;i<18;i++){let cls='nx-vu-bar';if(i<lvl)cls+=i<10?' lit-y':i<14?' lit-ya':' lit-r';document.getElementById(`${id}-${i}`).className=cls;}});},80);}
+
+function updateClock(){const now=new Date();const hms=now.toLocaleTimeString('es-ES');const date=now.toLocaleDateString('es-ES',{weekday:'short',day:'2-digit',month:'short',year:'numeric'}).toUpperCase();if(!currentlyActive){const clk=document.getElementById('nxClock');if(clk){clk.textContent=hms;document.getElementById('nxDate').textContent=date;}}if(!ysfCurrentlyActive){const yClk=document.getElementById('ysfNxClock');if(yClk){yClk.textContent=hms;document.getElementById('ysfNxDate').textContent=date;}}}
+setInterval(updateClock,1000);updateClock();
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function setDMRToggle(on){const chk=document.getElementById('chkDMR'),lbl=document.getElementById('dmrToggleLabel'),sta=document.getElementById('dmrToggleStatus');chk.checked=on;lbl.className='toggle-label'+(on?' on-dmr':'');sta.className='toggle-status'+(on?' on':'');sta.textContent=on?'ON':'OFF';document.getElementById('autoRefreshBadge').style.display=on?'flex':'none';document.getElementById('dmrLogPanels').style.display=on?'contents':'none';document.getElementById('dmrLastHeardPanel').style.display=on?'':'none';document.getElementById('dmrDisplayPanel').style.display=on?'':'none';}
+function setYSFToggle(on){const chk=document.getElementById('chkYSF'),lbl=document.getElementById('ysfToggleLabel'),sta=document.getElementById('ysfToggleStatus');chk.checked=on;lbl.className='toggle-label'+(on?' on-ysf':'');sta.className='toggle-status'+(on?' on':'');sta.textContent=on?'ON':'OFF';document.getElementById('ysfRefreshBadge').style.display=on?'flex':'none';document.getElementById('ysfLogPanels').style.display=on?'contents':'none';document.getElementById('ysfLastHeardPanel').style.display=on?'':'none';document.getElementById('ysfDisplayPanel').style.display=on?'':'none';}
+
+function showIdle(){currentlyActive=false;animateVU(false,'dmr');document.getElementById('nxTxBar').classList.remove('active');document.getElementById('nxTG').textContent='—';document.getElementById('nxSlot').textContent='—';document.getElementById('nxDmrid').textContent='—';const src=document.getElementById('nxSource');src.textContent='';src.className='nx-source';document.getElementById('nxCenter').innerHTML='<div class="nx-clock" id="nxClock">00:00:00</div><div class="nx-date" id="nxDate">—</div>';updateClock();}
+function showActive(d){currentlyActive=true;animateVU(true,'dmr');document.getElementById('nxTxBar').classList.add('active');document.getElementById('nxTG').textContent=d.tg?'TG '+d.tg:'—';document.getElementById('nxSlot').textContent=d.slot||'—';document.getElementById('nxDmrid').textContent=d.dmrid||'—';const src=document.getElementById('nxSource');if(d.source==='RF'){src.textContent='RF';src.className='nx-source rf';}else if(d.source==='NETWORK'){src.textContent='NET';src.className='nx-source net';}else{src.textContent='';src.className='nx-source';}const flag=getFlagByCall(d.callsign);document.getElementById('nxCenter').innerHTML=`<div class="nx-callsign">${flag} ${esc(d.callsign)}</div>`+(d.name?`<div class="nx-name">${esc(d.name)}</div>`:'');}
+function showYSFIdle(){ysfCurrentlyActive=false;animateVU(false,'ysf');document.getElementById('ysfTxBar').className='nx-txbar';document.getElementById('ysfDest').textContent='—';document.getElementById('ysfProto').textContent='YSF';const src=document.getElementById('ysfSource');src.textContent='';src.className='nx-source';document.getElementById('ysfNxCenter').innerHTML='<div class="nx-clock" id="ysfNxClock" style="color:#c084ff;">00:00:00</div><div class="nx-date" id="ysfNxDate" style="color:#9b59d4;">—</div>';updateClock();}
+function showYSFActive(d){ysfCurrentlyActive=true;animateVU(true,'ysf');document.getElementById('ysfTxBar').className='nx-txbar active-ysf';document.getElementById('ysfDest').textContent=d.dest?d.dest:'ALL';const src=document.getElementById('ysfSource');if(d.source==='RF'){src.textContent='RF';src.className='nx-source rf';}else if(d.source==='NETWORK'){src.textContent='NET';src.className='nx-source net';}else{src.textContent='';src.className='nx-source';}const flag=getFlagByCall(d.callsign);document.getElementById('ysfNxCenter').innerHTML=`<div class="nx-callsign ysf">${flag} ${esc(d.callsign)}</div>`+(d.name?`<div class="nx-name ysf">${esc(d.name)}</div>`:'');}
+
+function renderLastHeard(list,activeCall){const body=document.getElementById('lhBody');if(!list||list.length===0){body.innerHTML='<div class="lh-empty">Sin actividad reciente</div>';return;}body.innerHTML=list.map(r=>{const isActive=activeCall&&r.callsign===activeCall;const srcCls=r.source==='RF'?'rf':'net',srcLbl=r.source==='RF'?'RF':'NET';const dot=isActive?'<span class="lh-tx-dot"></span>':'';const flag=getFlagByCall(r.callsign);return`<div class="lh-row${isActive?' lh-active':''}"><div class="lh-call-wrap">${dot}<span class="lh-call">${flag} ${esc(r.callsign)}</span></div><span class="lh-name">${esc(r.name||'—')}</span><span class="lh-tg">${esc(r.tg||'—')}</span><span class="lh-time">${esc(r.time||'—')}</span><span class="lh-src ${srcCls}">${srcLbl}</span></div>`;}).join('');}
+function renderYSFLastHeard(list,activeCall){const body=document.getElementById('ysfLhBody');if(!list||list.length===0){body.innerHTML='<div class="lh-empty">Sin actividad C4FM</div>';return;}body.innerHTML=list.map(r=>{const isActive=activeCall&&r.callsign===activeCall;const srcCls=r.source==='RF'?'rf':'net',srcLbl=r.source==='RF'?'RF':'NET';const dot=isActive?'<span class="lh-tx-dot-ysf"></span>':'';const flag=getFlagByCall(r.callsign);return`<div class="lh-row-ysf${isActive?' lh-active':''}"><div class="lh-call-wrap">${dot}<span class="lh-call-ysf">${flag} ${esc(r.callsign)}</span></div><span class="lh-name">${esc(r.name||'—')}</span><span class="lh-time">${esc(r.time||'—')}</span><span class="lh-src-ysf ${srcCls}">${srcLbl}</span></div>`;}).join('');}
+
+async function fetchTransmission(){try{const r=await fetch('?action=transmission');const d=await r.json();if(d.active){dmrLastActiveTs=Date.now();showActive(d);}else{if(currentlyActive&&(Date.now()-dmrLastActiveTs)>DMR_IDLE_TIMEOUT)showIdle();}renderLastHeard(d.lastHeard||[],d.active?d.callsign:null);}catch(e){if(currentlyActive&&(Date.now()-dmrLastActiveTs)>DMR_IDLE_TIMEOUT)showIdle();}}
+async function fetchYSFTransmission(){try{const r=await fetch('?action=ysf-transmission');const d=await r.json();if(d.active){ysfLastActiveTs=Date.now();showYSFActive(d);}else{if(ysfCurrentlyActive)showYSFIdle();}renderYSFLastHeard(d.lastHeard||[],d.active?d.callsign:null);}catch(e){if(ysfCurrentlyActive&&(Date.now()-ysfLastActiveTs)>YSF_IDLE_TIMEOUT)showYSFIdle();}}
+
+async function checkStatus(){try{const r=await fetch('?action=status');const d=await r.json();const gw=d.gateway==='active',mmd=d.mmdvm==='active';setDot('dot-gateway',gw?'active':'off');setDot('dot-mmdvm',mmd?'active':'off');setDot('dot-mosquitto',gw?'active':'off');running=gw||mmd;setDMRToggle(running);if(running)startRefresh();}catch(e){}}
+async function checkYSFStatus(){try{const r=await fetch('?action=ysf-status');const d=await r.json();ysfRunning=d.ysf==='active';setDot('dot-ysf',ysfRunning?'active':'off');setYSFToggle(ysfRunning||mmdvmYsfRunning);}catch(e){}}
+async function checkMMDVMYSFStatus(){try{const r=await fetch('?action=mmdvmysf-status');const d=await r.json();mmdvmYsfRunning=d.mmdvmysf==='active';setDot('dot-mmdvmysf',mmdvmYsfRunning?'active':'off');setYSFToggle(ysfRunning||mmdvmYsfRunning);}catch(e){}}
+function setDot(id,state){document.getElementById(id).className='dot'+(state==='active'?' active':state==='error'?' error':'');}
+
+function setDSTARToggle(on){const chk=document.getElementById('chkDSTAR'),lbl=document.getElementById('dstarToggleLabel'),sta=document.getElementById('dstarToggleStatus');chk.checked=on;lbl.style.color=on?'#00e5ff':'';sta.className='toggle-status'+(on?' on':'');sta.textContent=on?'ON':'OFF';document.getElementById('dstarRefreshBadge').style.display=on?'flex':'none';document.getElementById('dstarPanelMmd').style.display=on?'':'none';document.getElementById('dstarPanelGw').style.display=on?'':'none';document.getElementById('dstarDisplayPanel').style.display=on?'':'none';document.getElementById('dstarLastHeardPanel').style.display=on?'':'none';}
+
+let dstarVuTimer=null,dstarCurrentlyActive=false,dstarTxTimer2=null;
+function buildDStarVU(){['dstarVuLeft','dstarVuRight'].forEach(id=>{const el=document.getElementById(id);for(let i=0;i<18;i++){const d=document.createElement('div');d.className='nx-vu-bar';d.id=`${id}-${i}`;el.appendChild(d);}});}
+buildDStarVU();
+function animateDStarVU(on){clearInterval(dstarVuTimer);['dstarVuLeft','dstarVuRight'].forEach(id=>{for(let i=0;i<18;i++)document.getElementById(`${id}-${i}`).className='nx-vu-bar';});if(!on)return;dstarVuTimer=setInterval(()=>{['dstarVuLeft','dstarVuRight'].forEach(id=>{const lvl=Math.floor(Math.random()*16)+1;for(let i=0;i<18;i++){let cls='nx-vu-bar';if(i<lvl)cls+=i<10?' lit-g':i<14?' lit-a':' lit-r';document.getElementById(`${id}-${i}`).className=cls;}});},80);}
+function updateDStarClock(){if(!dstarCurrentlyActive){const now=new Date();const clk=document.getElementById('dstarNxClock');if(clk){clk.textContent=now.toLocaleTimeString('es-ES');document.getElementById('dstarNxDate').textContent=now.toLocaleDateString('es-ES',{weekday:'short',day:'2-digit',month:'short',year:'numeric'}).toUpperCase();}}}
+setInterval(updateDStarClock,1000);updateDStarClock();
+function showDStarIdle(){dstarCurrentlyActive=false;animateDStarVU(false);document.getElementById('dstarTxBar').className='nx-txbar';const src=document.getElementById('dstarSource');src.textContent='';src.className='nx-source';document.getElementById('dstarNxCenter').innerHTML='<div class="nx-clock" id="dstarNxClock" style="color:#00e5ff;">00:00:00</div><div class="nx-date" id="dstarNxDate" style="color:#009090;">—</div>';updateDStarClock();}
+function showDStarActive(d){dstarCurrentlyActive=true;animateDStarVU(true);document.getElementById('dstarTxBar').className='nx-txbar active';document.getElementById('dstarTxBar').style.background='linear-gradient(90deg,transparent,#00e5ff,transparent)';const src=document.getElementById('dstarSource');if(d.source==='RF'){src.textContent='RF';src.className='nx-source rf';}else{src.textContent='NET';src.className='nx-source net';}const flag=getFlagByCall(d.callsign.replace(/\/.*$/,''));document.getElementById('dstarNxCenter').innerHTML=`<div class="nx-callsign dstar">${flag} ${esc(d.callsign)}</div>`+(d.name?`<div class="nx-name dstar">${esc(d.name)}</div>`:'');}
+function renderDStarLastHeard(list,activeCall){const body=document.getElementById('dstarLhBody');if(!list||list.length===0){body.innerHTML='<div class="lh-empty">Sin actividad D-STAR</div>';return;}body.innerHTML=list.map(r=>{const isActive=activeCall&&r.callsign===activeCall;const srcCls=r.source==='RF'?'rf':'net',srcLbl=r.source==='RF'?'RF':'NET';const dot=isActive?'<span class="lh-tx-dot" style="background:#00e5ff;box-shadow:0 0 6px #00e5ff;"></span>':'';const flag=getFlagByCall(r.callsign.replace(/\/.*$/,''));return`<div class="lh-row${isActive?' lh-active':''}"><div class="lh-call-wrap">${dot}<span class="lh-call" style="color:#00e5ff;">${flag} ${esc(r.callsign)}</span></div><span class="lh-name">${esc(r.name||'—')}</span><span class="lh-time">${esc(r.time||'—')}</span><span class="lh-src ${srcCls}">${srcLbl}</span></div>`;}).join('');}
+async function fetchDStarTransmission(){try{const r=await fetch('?action=dstar-transmission');const d=await r.json();if(d.active)showDStarActive(d);else showDStarIdle();renderDStarLastHeard(d.lastHeard||[],d.active?d.callsign:null);}catch(e){}}
+function startDStarTransmissionPoll(){fetchDStarTransmission();dstarTxTimer2=setInterval(fetchDStarTransmission,4000);}
+function stopDStarTransmissionPoll(){clearInterval(dstarTxTimer2);dstarTxTimer2=null;}
+async function checkDStarStatus(){try{const r=await fetch('?action=dstar-status');const d=await r.json();const gw=d.gateway==='active',mmd=d.mmdvm==='active';setDot('dot-dstargw',gw?'active':'off');setDot('dot-dstarmmd',mmd?'active':'off');dstarRunning=(gw||mmd)&&!d.stopped;setDSTARToggle(dstarRunning);if(dstarRunning){startDStarLogs();startDStarTransmissionPoll();}}catch(e){}}
+async function toggleDStar(chk){const wasOn=!chk.checked;const sw=document.getElementById('swDSTAR');chk.checked=wasOn;sw.classList.add('busy');try{await fetch(wasOn?'?action=dstar-stop':'?action=dstar-start');let ok=false;for(let i=0;i<15;i++){await new Promise(r=>setTimeout(r,1000));const r=await fetch('?action=dstar-status');const d=await r.json();const gw=d.gateway==='active',mmd=d.mmdvm==='active';const isOn=(gw||mmd)&&!d.stopped;if(wasOn&&!isOn){ok=true;setDot('dot-dstargw','off');setDot('dot-dstarmmd','off');dstarRunning=false;setDSTARToggle(false);stopDStarLogs();stopDStarTransmissionPoll();showDStarIdle();clearLog('logDstarGw');clearLog('logDstarMmd');break;}if(!wasOn&&isOn){ok=true;setDot('dot-dstargw',gw?'active':'off');setDot('dot-dstarmmd',mmd?'active':'off');dstarRunning=true;setDSTARToggle(true);startDStarLogs();startDStarTransmissionPoll();break;}}if(!ok){const r=await fetch('?action=dstar-status');const d=await r.json();const gw=d.gateway==='active',mmd=d.mmdvm==='active';dstarRunning=(gw||mmd)&&!d.stopped;setDot('dot-dstargw',gw?'active':'off');setDot('dot-dstarmmd',mmd?'active':'off');setDSTARToggle(dstarRunning);}}catch(e){console.warn('toggleDStar error:',e);}finally{sw.classList.remove('busy');}}
+async function fetchDStarLogs(){try{const r=await fetch('?action=dstar-logs&lines=15');const d=await r.json();['logDstarGw:gateway','logDstarMmd:mmdvm'].forEach(pair=>{const[id,key]=pair.split(':');const el=document.getElementById(id);const atBot=el.scrollHeight-el.clientHeight<=el.scrollTop+10;el.innerHTML=colorize(d[key]);if(atBot)el.scrollTop=el.scrollHeight;});}catch(e){}}
+function startDStarLogs(){fetchDStarLogs();dstarTimer=setInterval(fetchDStarLogs,5000);}
+function stopDStarLogs(){clearInterval(dstarTimer);dstarTimer=null;}
+
+// ── NXDN ──────────────────────────────────────────────────────────────────────
+let nxdnRunning=false,nxdnTimer=null,nxdnTxTimer=null,nxdnCurrentlyActive=false,nxdnLastActiveTs=0;
+const NXDN_IDLE_TIMEOUT=12000;
+
+function setNXDNToggle(on){
+    const chk=document.getElementById('chkNXDN'),lbl=document.getElementById('nxdnToggleLabel'),sta=document.getElementById('nxdnToggleStatus');
+    chk.checked=on;lbl.style.color=on?'#ffd700':'';
+    sta.className='toggle-status'+(on?' on':'');sta.textContent=on?'ON':'OFF';
+    document.getElementById('nxdnRefreshBadge').style.display=on?'flex':'none';
+    document.getElementById('nxdnPanelMmd').style.display=on?'':'none';
+    document.getElementById('nxdnPanelGw').style.display=on?'':'none';
+    document.getElementById('nxdnDisplayPanel').style.display=on?'':'none';
+    document.getElementById('nxdnLastHeardPanel').style.display=on?'':'none';
+}
+
 // ── Fin NXDN ──
 
 function updateNXDNClock(){if(!nxdnCurrentlyActive){const now=new Date();const clk=document.getElementById('nxdnNxClock');if(clk){clk.textContent=now.toLocaleTimeString('es-ES');document.getElementById('nxdnNxDate').textContent=now.toLocaleDateString('es-ES',{weekday:'short',day:'2-digit',month:'short',year:'numeric'}).toUpperCase();}}}
@@ -1232,26 +1291,6 @@ document.getElementById('xtInp').addEventListener('keydown',async function(e){
     startMMDVMYSFLogs();
     startYSFTransmissionPoll();
 })();
-
-// ✅ TWEMOJI — solo en .flag-emoji, no toca botones ni otros emojis
-function _applyFlagTwemoji(root){
-    (root||document).querySelectorAll('.flag-emoji').forEach(function(el){
-        twemoji.parse(el,{folder:'svg',ext:'.svg',base:'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/'});
-    });
-}
-new MutationObserver(function(ms){
-    ms.forEach(function(m){
-        m.addedNodes.forEach(function(n){
-            if(n.nodeType!==1)return;
-            if(n.classList&&n.classList.contains('flag-emoji'))
-                twemoji.parse(n,{folder:'svg',ext:'.svg',base:'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/'});
-            else if(n.querySelectorAll)
-                n.querySelectorAll('.flag-emoji').forEach(function(el){
-                    twemoji.parse(el,{folder:'svg',ext:'.svg',base:'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/'});
-                });
-        });
-    });
-}).observe(document.body,{childList:true,subtree:true});
-document.addEventListener('DOMContentLoaded',function(){_applyFlagTwemoji();});
 </script>
 </body>
+</html>
