@@ -534,7 +534,7 @@ button.btn-header { font-family: var(--font-mono); }
 .nx-center { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .15rem; z-index: 1; }
 .nx-clock { font-family: var(--font-orb); font-size: 4rem; font-weight: 700; color: #f5bd06; letter-spacing: .06em; line-height: 1; }
 .nx-date { font-family: var(--font-mono); font-size: .7rem; color: #ff0; letter-spacing: .12em; text-transform: uppercase; margin-top: .2rem; }
-.nx-callsign { font-family: var(--font-orb); font-size: 50px; font-weight: 900; letter-spacing: .04em; line-height: 1; color: var(--green); text-shadow: 0 0 20px rgba(255,255,159,.55); }
+.nx-callsign { font-family: var(--font-orb); font-size: 3.4rem; font-weight: 900; letter-spacing: .04em; line-height: 1; color: var(--green); text-shadow: 0 0 20px rgba(255,255,159,.55); }
 .nx-callsign.ysf { color: var(--violet); text-shadow: 0 0 20px rgba(181,122,255,.6); }
 .nx-callsign.nxdn { color: #ffd700; text-shadow: 0 0 20px rgba(255,215,0,.6); }
 .nx-name { font-family: var(--font-ui); font-weight: 500; font-size: 1.2rem; color: var(--cyan); letter-spacing: .18em; text-transform: uppercase; opacity: .9; margin-top: .15rem; }
@@ -636,6 +636,7 @@ button.btn-header { font-family: var(--font-mono); }
 .restore-btn-ok:hover { background: #218838; }
 .restore-btn-cancel { flex: 1; background: transparent; color: var(--text-dim); border: 1px solid var(--border); border-radius: 6px; font-family: var(--font-mono); font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; padding: .6rem; cursor: pointer; transition: all .2s; }
 .restore-btn-cancel:hover { border-color: var(--text); color: var(--text); }
+.restore-btn-cancel:disabled { opacity: .3; cursor: not-allowed; pointer-events: none; }
 .restore-msg { margin-top: .8rem; font-family: var(--font-mono); font-size: .75rem; display: none; padding: .5rem .8rem; border-radius: 4px; border: 1px solid; }
 .restore-msg.ok { color: var(--green); border-color: var(--green); background: rgba(0,255,159,.06); }
 .restore-msg.err { color: var(--red); border-color: var(--red); background: rgba(255,69,96,.06); }
