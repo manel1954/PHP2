@@ -215,7 +215,7 @@ if ($action === 'display-restart') { shell_exec('sudo systemctl daemon-reload 2>
 if ($action === 'install-display') { $output = shell_exec('sudo /home/pi/A108/instalar_displaydriver.sh 2>&1'); header('Content-Type: application/json'); echo json_encode(['ok'=>true,'output'=>htmlspecialchars($output??'')]); exit; }
 
 if ($action === 'backup-configs') {
-    $zipName = 'Copia_PHPPLUS.zip'; $zipPath = '/tmp/'.$zipName;
+    $zipName = 'Copia_PHP2.zip'; $zipPath = '/tmp/'.$zipName;
     $files = ['/home/pi/MMDVMHost/MMDVMHost.ini','/home/pi/MMDVMHost/MMDVMYSF.ini','/home/pi/MMDVMHost/MMDVMDSTAR.ini','/home/pi/MMDVMHost/MMDVMNXDN.ini','/home/pi/Display-Driver/DisplayDriver.ini','/home/pi/YSFClients/YSFGateway/YSFGateway.ini','/home/pi/DMRGateway/DMRGateway.ini','/home/pi/DStarGateway/DStarGateway.ini','/home/pi/NXDNClients/NXDNGateway/NXDNGateway.ini'];
     $fileList = implode(' ', array_map('escapeshellarg', $files));
     shell_exec("zip -j ".escapeshellarg($zipPath)." {$fileList} 2>/dev/null");
@@ -356,7 +356,7 @@ if ($action === 'nxdn-status') {
     exit;
 }
 if ($action === 'nxdn-start') {
-  saveState('nxdn','on');
+    saveState('nxdn','on');
     shell_exec('sudo systemctl start mmdvmnxdn 2>/dev/null');
     sleep(2);
     shell_exec('sudo systemctl start nxdngateway 2>/dev/null');
@@ -365,7 +365,7 @@ if ($action === 'nxdn-start') {
     exit;
 }
 if ($action === 'nxdn-stop') {
-  saveState('nxdn','off');
+    saveState('nxdn','off');
     shell_exec('sudo systemctl stop nxdngateway 2>/dev/null');
     sleep(1);
     shell_exec('sudo systemctl stop mmdvmnxdn 2>/dev/null');
@@ -460,11 +460,11 @@ button.btn-header { font-family: var(--font-mono); }
 @media (max-width:800px) { .controls-section { grid-template-columns: 1fr; } }
 .service-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.2rem 1.6rem; }
 .service-card-label { font-family: var(--font-mono); font-size: .7rem; letter-spacing: .15em; text-transform: uppercase; margin-bottom: 1rem; }
-.service-card-label.dmr { color: var(--white); }
+.service-card-label.dmr { color: var(--amber); }
 .service-card-label.ysf { color: var(--violet); }
 .toggle-row { display: flex; align-items: center; gap: 1rem; padding: .5rem 0; }
 .toggle-label { font-family: var(--font-mono); font-size: .85rem; letter-spacing: .06em; color: var(--text-dim); text-transform: uppercase; flex: 1; transition: color .3s; }
-.toggle-label.on-dmr { color: var(--white); }
+.toggle-label.on-dmr { color: var(--amber); }
 .toggle-label.on-ysf { color: var(--violet); }
 .toggle-status { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .1em; color: var(--text-dim); min-width: 3rem; text-align: right; transition: color .3s; }
 .toggle-status.on { color: var(--green); }
@@ -474,7 +474,7 @@ button.btn-header { font-family: var(--font-mono); }
 .sw-knob { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; background: #e95c04; box-shadow: 0 1px 4px rgba(0,0,0,.5); transition: transform .3s cubic-bezier(.4,0,.2,1), background .3s, box-shadow .3s; }
 .sw.dmr input:checked ~ .sw-track, .sw.ysf input:checked ~ .sw-track, .sw.dstar input:checked ~ .sw-track { border-radius: 2px; background: #1a2535; border: 2px solid #999999; }
 .sw.dmr input:checked ~ .sw-knob, .sw.ysf input:checked ~ .sw-knob, .sw.dstar input:checked ~ .sw-knob { transform: translateX(28px); background: var(--green); box-shadow: 0 0 8px rgba(0,255,159,.6); }
-.sw#swNXDN input:checked ~ .sw-knob { transform: translateX(28px); background: var(--green); box-shadow: 0 0 8px rgba(255,215,0,.6); }
+.sw#swNXDN input:checked ~ .sw-knob { transform: translateX(28px); background: #ffd700; box-shadow: 0 0 8px rgba(255,215,0,.6); }
 .sw#swNXDN input:checked ~ .sw-track { border-color: #999; }
 .sw-busy-dot { display: none; position: absolute; top: 50%; right: -18px; transform: translateY(-50%); width: 8px; height: 8px; border-radius: 50%; border: 2px solid var(--amber); border-top-color: transparent; animation: spin .7s linear infinite; }
 .sw.busy .sw-busy-dot { display: block; }
@@ -484,8 +484,8 @@ button.btn-header { font-family: var(--font-mono); }
 .auto-badge.ysf .dot-sm { background: var(--violet); }
 .service-card-btns { display: flex; gap: .6rem; flex-wrap: nowrap; margin-top: 1rem; }
 .ini-btn { font-family: var(--font-mono); font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; padding: .3rem .7rem; border-radius: 3px; border: 1px solid var(--border); background: transparent; cursor: pointer; text-decoration: none; transition: all .2s; display: inline-flex; align-items: center; gap: .3rem; }
-.ini-btn.edit { color: var(--white); border-color: rgba(255,179,0,.3); }
-.ini-btn.edit:hover { border-color: var(--white); background: rgba(255,179,0,.08); }
+.ini-btn.edit { color: var(--amber); border-color: rgba(255,179,0,.3); }
+.ini-btn.edit:hover { border-color: var(--amber); background: rgba(255,179,0,.08); }
 .ini-btn.view { color: var(--cyan); border-color: rgba(0,212,255,.3); }
 .ini-btn.view:hover { border-color: var(--cyan); background: rgba(0,212,255,.08); }
 .ini-btn.edit.ysf { color: var(--violet); border-color: rgba(181,122,255,.3); }
@@ -532,7 +532,7 @@ button.btn-header { font-family: var(--font-mono); }
 .nx-txbar.active-nxdn { background: linear-gradient(90deg,transparent,#ffd700,transparent); background-size: 200% 100%; animation: scan 1.4s linear infinite; }
 @keyframes scan { from{background-position:200% 0} to{background-position:-200% 0} }
 .nx-center { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .15rem; z-index: 1; }
-.nx-clock { font-family: var(--font-orb); font-size: 4rem; font-weight: 700; color: #fff; letter-spacing: .06em; line-height: 1; }
+.nx-clock { font-family: var(--font-orb); font-size: 4rem; font-weight: 700; color: #f5bd06; letter-spacing: .06em; line-height: 1; }
 .nx-date { font-family: var(--font-mono); font-size: .7rem; color: #ff0; letter-spacing: .12em; text-transform: uppercase; margin-top: .2rem; }
 .nx-callsign { font-family: var(--font-orb); font-size: 3.4rem; font-weight: 900; letter-spacing: .04em; line-height: 1; color: var(--green); text-shadow: 0 0 20px rgba(255,255,159,.55); }
 .nx-callsign.ysf { color: var(--violet); text-shadow: 0 0 20px rgba(181,122,255,.6); }
@@ -634,7 +634,8 @@ button.btn-header { font-family: var(--font-mono); }
 .restore-btns { display: flex; gap: .8rem; }
 .restore-btn-ok { flex: 1; background: #28a745; color: #fff; border: none; border-radius: 6px; font-family: var(--font-mono); font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; padding: .6rem; cursor: pointer; transition: background .2s; }
 .restore-btn-ok:hover { background: #218838; }
-.restore-btn-cancel:disabled { opacity: .35; cursor: not-allowed; pointer-events: none; }
+.restore-btn-cancel { flex: 1; background: transparent; color: var(--text-dim); border: 1px solid var(--border); border-radius: 6px; font-family: var(--font-mono); font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; padding: .6rem; cursor: pointer; transition: all .2s; }
+.restore-btn-cancel:hover { border-color: var(--text); color: var(--text); }
 .restore-msg { margin-top: .8rem; font-family: var(--font-mono); font-size: .75rem; display: none; padding: .5rem .8rem; border-radius: 4px; border: 1px solid; }
 .restore-msg.ok { color: var(--green); border-color: var(--green); background: rgba(0,255,159,.06); }
 .restore-msg.err { color: var(--red); border-color: var(--red); background: rgba(255,69,96,.06); }
@@ -676,7 +677,22 @@ button.btn-header { font-family: var(--font-mono); }
 .fedit-msg{font-family:var(--font-mono);font-size:.75rem;display:none;padding:.4rem .8rem;border-radius:4px;border:1px solid;}
 .fedit-msg.ok{color:var(--green);border-color:var(--green);background:rgba(0,255,159,.06);}
 .fedit-msg.err{color:var(--red);border-color:var(--red);background:rgba(255,69,96,.06);}
+.flag-emoji {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 4px;
+    width: 22px;
+    height: 15px;
+    border-radius: 2px;
+    object-fit: cover;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
 </style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/twemoji@14.0.2/dist/twemoji.min.js" crossorigin="anonymous"></script>
+
+
 </head>
 <body>
 <header class="ctrl-header">
@@ -715,15 +731,15 @@ button.btn-header { font-family: var(--font-mono); }
 <!-- Status bar -->
 <div class="status-bar">
 <div class="status-item"><div class="dot" id="dot-mosquitto"></div><span>Mosquitto</span></div>
-<div class="status-item"><div class="dot" id="dot-mmdvm"></div><span>MMDVMHost Dmr</span></div>
+<div class="status-item"><div class="dot" id="dot-mmdvm"></div><span>MMDVMHost</span></div>
 <div class="status-item"><div class="dot" id="dot-gateway"></div><span>DMRGateway</span></div>
-<!-- <div class="section-divider"></div> -->
+<div class="section-divider"></div>
 <div class="status-item"><div class="dot" id="dot-mmdvmysf"></div><span style="color:#26c6da">MMDVMHost YSF</span></div>
 <div class="status-item"><div class="dot" id="dot-ysf"></div><span style="color:var(--violet)">YSFGateway</span></div>
-<!-- <div class="section-divider"></div> -->
-<div class="status-item"><div class="dot" id="dot-dstarmmd"></div><span style="color:#00e5ff">MMDVMhost DStar</span></div>
+<div class="section-divider"></div>
+<div class="status-item"><div class="dot" id="dot-dstarmmd"></div><span style="color:#00e5ff">MMDVMDStar</span></div>
 <div class="status-item"><div class="dot" id="dot-dstargw"></div><span style="color:#00e5ff">DStarGateway</span></div>
-<!-- <div class="section-divider"></div> -->
+<div class="section-divider"></div>
 <div class="status-item"><div class="dot" id="dot-nxdnmmd"></div><span style="color:#ffd700">MMDVMHost NXDN</span></div>
 <div class="status-item"><div class="dot" id="dot-nxdngw"></div><span style="color:#ffd700">NXDNGateway</span></div>
 </div>
@@ -738,14 +754,14 @@ button.btn-header { font-family: var(--font-mono); }
       <label class="sw dmr" id="swDMR"><input type="checkbox" id="chkDMR" onchange="toggleServices(this)"><span class="sw-track"></span><span class="sw-knob"></span><span class="sw-busy-dot"></span></label>
       <span class="toggle-status" id="dmrToggleStatus">OFF</span>
     </div>
-    <div class="auto-badge" id="autoRefreshBadge" style="display:none"><div class="dot-sm"></div> DMR activo</div>
+    <div class="auto-badge" id="autoRefreshBadge" style="display:none"><div class="dot-sm"></div> auto-refresh 3s</div>
     <div class="service-card-btns">
       <a href="mmdvm_config.php" class="ini-btn edit" style="flex:1;justify-content:center;color:var(--cyan);border-color:rgba(0,212,255,.3);">⚙ MMDVMHOST Config</a>
       <a href="dmrgateway_config.php" class="ini-btn edit" style="flex:1;justify-content:center;">⚙ DMRGateway Config</a>
     </div>
     <div class="service-card-btns" style="margin-top:.4rem;">
       <a href="edit_ini.php?file=mmdvm" class="ini-btn view" style="flex:1;justify-content:center;">📄 EDITAR FICHERO MMDVMHOST.ini</a>
-      <a href="edit_ini.php?file=dmrgateway" class="ini-btn view" style="flex:1;justify-content:center;color:var(--white);border-color:rgba(255,179,0,.3);">📄 EDITAR FICHERO DMRGateway.ini</a>
+      <a href="edit_ini.php?file=dmrgateway" class="ini-btn view" style="flex:1;justify-content:center;color:var(--amber);border-color:rgba(255,179,0,.3);">📄 EDITAR FICHERO DMRGateway.ini</a>
     </div>
   </div>
   <!-- C4FM -->
@@ -758,23 +774,23 @@ button.btn-header { font-family: var(--font-mono); }
     </div>
     <div class="auto-badge ysf" id="ysfRefreshBadge" style="display:none"><div class="dot-sm"></div> C4FM activo</div>
     <div class="service-card-btns" style="margin-top:.4rem;">
-      <a href="mmdvmysf_config.php" class="ini-btn edit" style="flex:1;justify-content:center;color:#00e5ff;border-color:rgba(38,198,218,.3);">⚙ MMDVMYSF CONFIG</a>
+      <a href="mmdvmysf_config.php" class="ini-btn edit" style="flex:1;justify-content:center;color:#26c6da;border-color:rgba(38,198,218,.3);">⚙ MMDVMYSF CONFIG</a>
       <a href="ysfgateway_config.php" class="ini-btn edit ysf" style="flex:1;justify-content:center;">⚙ YSFGATEWAY CONFIG</a>
     </div>
     <div class="service-card-btns">
-      <a href="edit_ini.php?file=mmdvmysf" class="ini-btn view" style="flex:1;justify-content:center;color:#00e5ff;border-color:rgba(38,198,218,.2);">📄 editar fichero MMDVMYSF.ini</a>
+      <a href="edit_ini.php?file=mmdvmysf" class="ini-btn view" style="flex:1;justify-content:center;color:#80deea;border-color:rgba(38,198,218,.2);">📄 editar fichero MMDVMYSF.ini</a>
       <a href="edit_ini.php?file=ysfgateway" class="ini-btn view ysf" style="flex:1;justify-content:center;">📄 editar fichero YSFGateway.ini</a>
     </div>
   </div>
   <!-- D-STAR -->
   <div class="service-card" style="border-color:rgba(0,229,255,.25);">
-    <div class="service-card-label" style="color:#00ff9f;">▸ DSTAR · MMDVMHost + DStarGateway</div>
+    <div class="service-card-label" style="color:#00ff9f;">▸ D-STAR · MMDVMHost + DStarGateway</div>
     <div class="toggle-row">
-      <span class="toggle-label" id="dstarToggleLabel">DSTAR</span>
+      <span class="toggle-label" id="dstarToggleLabel">D-STAR</span>
       <label class="sw dstar" id="swDSTAR"><input type="checkbox" id="chkDSTAR" onchange="toggleDStar(this)"><span class="sw-track"></span><span class="sw-knob"></span><span class="sw-busy-dot"></span></label>
       <span class="toggle-status" id="dstarToggleStatus">OFF</span>
     </div>
-    <div class="auto-badge" id="dstarRefreshBadge" style="display:none;color:#00e5ff;"><div class="dot-sm" style="background:#00e5ff;"></div> DSTAR activo</div>
+    <div class="auto-badge" id="dstarRefreshBadge" style="display:none;color:#00e5ff;"><div class="dot-sm" style="background:#00e5ff;"></div> D-STAR activo</div>
     <div class="service-card-btns" style="margin-top:.6rem;">
       <a href="mmdvmdstar_config.php" class="ini-btn edit" style="flex:1;justify-content:center;color:#00e5ff;border-color:rgba(0,229,255,.3);">⚙ MMDVMDSTAR CONFIG</a>
       <a href="dstargateway_config.php" class="ini-btn edit" style="flex:1;justify-content:center;color:#00ff9f;border-color:rgba(0,255,159,.3);">⚙ DSTARGATEWAY CONFIG</a>
@@ -801,16 +817,14 @@ button.btn-header { font-family: var(--font-mono); }
       <a href="nxdngateway_config.php" class="ini-btn edit" style="flex:1;justify-content:center;color:#ffc400;border-color:rgba(255,196,0,.3);">⚙ NXDNGATEWAY CONFIG</a>
     </div>
     <div class="service-card-btns" style="margin-top:.4rem;">
-      <a href="edit_ini.php?file=mmdvmnxdn" class="ini-btn view" style="flex:1;justify-content:center;color:#00e5ff;border-color:rgba(255,215,0,.3);">📄 editar fichero MMDVMNXDN.ini</a>
+      <a href="edit_ini.php?file=mmdvmnxdn" class="ini-btn view" style="flex:1;justify-content:center;color:#ffd700;border-color:rgba(255,215,0,.3);">📄 editar fichero MMDVMNXDN.ini</a>
       <a href="edit_ini.php?file=nxdngateway" class="ini-btn view" style="flex:1;justify-content:center;color:#ffc400;border-color:rgba(255,196,0,.3);">📄 editar fichero NXDNGateway.ini</a>
     </div>
   </div>
 </div>
 
-<!-- ── Row 1: DMR (izq) + YSF (dcha) ── -->
+<!-- ── Row 1: DMR Display ── -->
 <div class="display-row">
-
-  <!-- DMR (igual) -->
   <div id="dmrDisplayPanel">
     <div class="panel-label">▸ DMR Display</div>
     <div class="nextion">
@@ -822,8 +836,21 @@ button.btn-header { font-family: var(--font-mono); }
       <div class="nx-botbar"><span class="nx-dmrid" id="nxDmrid">—</span><span>SLOT <span id="nxSlot">—</span></span><span class="nx-source" id="nxSource"></span></div>
     </div>
   </div>
+</div>
 
-  <!-- YSF (movido aquí) -->
+<!-- ── Row 2: D-STAR Display (izq) + C4FM Display (dcha) ── -->
+<div class="display-row" style="margin-top:1.2rem;">
+  <div id="dstarDisplayPanel" style="display:none;">
+    <div class="panel-label" style="color:#00e5ff;">▸ D-STAR Display</div>
+    <div class="nextion-dstar">
+      <div class="nx-topbar dstar-bar"><span class="nx-mode">D-STAR · DIGITAL</span><span style="color:#006070" id="dstarStationLabel">EA3EIZ · ADER</span><span style="color:#00b0c0;opacity:.85;min-width:5rem;text-align:right;font-size:.6rem;" id="dstarDest">CQCQCQ</span></div>
+      <div class="nx-infobar nx-infobar-dstar"><span class="nx-info-item"><span class="nx-info-lbl">PORT</span><span class="nx-info-val" id="dstarNxPort">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">FRX</span><span class="nx-info-val" style="color:#00e5ff" id="dstarNxFrx">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">FTX</span><span class="nx-info-val" style="color:#00b0c0" id="dstarNxFtx">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">IP</span><span class="nx-info-val" style="color:#80f0ff" id="dstarNxIp">—</span></span></div>
+      <div class="nx-vu" id="dstarVuLeft"></div><div class="nx-vu right" id="dstarVuRight"></div>
+      <div class="nx-center" id="dstarNxCenter"><div class="nx-clock" id="dstarNxClock" style="color:#00e5ff;">00:00:00</div><div class="nx-date" id="dstarNxDate" style="color:#009090;">—</div></div>
+      <div class="nx-txbar" id="dstarTxBar"></div>
+      <div class="nx-botbar dstar-bar"><span style="color:#006070;font-family:var(--font-mono);font-size:.65rem;">D-STAR · DIGITAL VOICE</span><span style="color:#006070;font-family:var(--font-mono);font-size:.65rem;">XRF266 B</span><span class="nx-source" id="dstarSource"></span></div>
+    </div>
+  </div>
   <div id="ysfDisplayPanel">
     <div class="panel-label ysf-label">▸ C4FM Display</div>
     <div class="nextion-ysf">
@@ -835,26 +862,10 @@ button.btn-header { font-family: var(--font-mono); }
       <div class="nx-botbar ysf-bar"><span style="color:#5a3a8a;font-family:var(--font-mono);font-size:.65rem;" id="ysfProto">YSF</span><span style="color:#5a3a8a;font-family:var(--font-mono);font-size:.65rem;">C4FM · DIGITAL VOICE</span><span class="nx-source" id="ysfSource"></span></div>
     </div>
   </div>
-
 </div>
 
-<!-- ── Row 2: D-STAR (izq) + NXDN (dcha) ── -->
-<div class="display-row" style="margin-top:1.2rem;">
-
-  <!-- D-STAR (igual) -->
-  <div id="dstarDisplayPanel" style="display:none;">
-    <div class="panel-label" style="color:#00e5ff;">▸ DSTAR Display</div>
-    <div class="nextion-dstar">
-      <div class="nx-topbar dstar-bar"><span class="nx-mode">DSTAR · DIGITAL</span><span style="color:#006070" id="dstarStationLabel">EA3EIZ · ADER</span><span style="color:#00b0c0;opacity:.85;min-width:5rem;text-align:right;font-size:.6rem;" id="dstarDest">CQCQCQ</span></div>
-      <div class="nx-infobar nx-infobar-dstar"><span class="nx-info-item"><span class="nx-info-lbl">PORT</span><span class="nx-info-val" id="dstarNxPort">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">FRX</span><span class="nx-info-val" style="color:#00e5ff" id="dstarNxFrx">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">FTX</span><span class="nx-info-val" style="color:#00b0c0" id="dstarNxFtx">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">IP</span><span class="nx-info-val" style="color:#80f0ff" id="dstarNxIp">—</span></span></div>
-      <div class="nx-vu" id="dstarVuLeft"></div><div class="nx-vu right" id="dstarVuRight"></div>
-      <div class="nx-center" id="dstarNxCenter"><div class="nx-clock" id="dstarNxClock" style="color:#00e5ff;">00:00:00</div><div class="nx-date" id="dstarNxDate" style="color:#009090;">—</div></div>
-      <div class="nx-txbar" id="dstarTxBar"></div>
-      <div class="nx-botbar dstar-bar"><span style="color:#006070;font-family:var(--font-mono);font-size:.65rem;">D-STAR · DIGITAL VOICE</span><span style="color:#006070;font-family:var(--font-mono);font-size:.65rem;">XRF266 B</span><span class="nx-source" id="dstarSource"></span></div>
-    </div>
-  </div>
-
-  <!-- NXDN (movido aquí) -->
+<!-- ── Row 3: NXDN Display ── -->
+<div class="display-row" style="margin-top:1.2rem;" id="nxdnDisplayRow" style="display:none;">
   <div id="nxdnDisplayPanel" style="display:none;">
     <div class="panel-label" style="color:#ffd700;">▸ NXDN Display</div>
     <div class="nextion-nxdn">
@@ -866,70 +877,50 @@ button.btn-header { font-family: var(--font-mono); }
       <div class="nx-botbar nxdn-bar"><span style="color:#707000;font-family:var(--font-mono);font-size:.65rem;">NXDN · DIGITAL VOICE</span><span style="color:#707000;font-family:var(--font-mono);font-size:.65rem;">NXDN REF 21465</span><span class="nx-source" id="nxdnSource"></span></div>
     </div>
   </div>
-
 </div>
 
-<!-- ── Últimos escuchados DMR + C4FM ── -->
+<!-- ── Últimos escuchados DMR ── -->
 <div class="display-row" style="margin-top:1rem;">
-
-  <!-- ── Últimos escuchados DMR ── -->
   <div id="dmrLastHeardPanel">
     <div class="panel-label">▸ Últimos escuchados DMR</div>
     <div class="lh-panel">
-      <div class="lh-header">
-        <span>Indicativo</span><span>Nombre</span><span>TG</span><span>Hora</span><span>Src</span>
-      </div>
-      <div class="lh-body" id="lhBody">
-        <div class="lh-empty">Sin actividad reciente</div>
-      </div>
+      <div class="lh-header"><span>Indicativo</span><span>Nombre</span><span>TG</span><span>Hora</span><span>Src</span></div>
+      <div class="lh-body" id="lhBody"><div class="lh-empty">Sin actividad reciente</div></div>
     </div>
   </div>
-
-  <!-- ── Últimos escuchados C4FM ── -->
-  <div id="ysfLastHeardPanel">
-    <div class="panel-label ysf-label">▸ Últimos escuchados C4FM</div>
-    <div class="lh-panel-ysf">
-      <div class="lh-header-ysf">
-        <span>Indicativo</span><span>Nombre</span><span>Hora</span><span>Src</span>
-      </div>
-      <div class="lh-body" id="ysfLhBody">
-        <div class="lh-empty">Sin actividad C4FM</div>
-      </div>
-    </div>
-  </div>
-
 </div>
 
-<!-- ── Últimos escuchados D-STAR + NXDN ── -->
+<!-- ── Últimos escuchados D-STAR (izq) + C4FM (dcha) ── -->
 <div class="display-row" style="margin-top:1rem;">
-
-  <!-- ── Últimos escuchados D-STAR ── -->
   <div id="dstarLastHeardPanel" style="display:none;">
-    <div class="panel-label" style="color:#00e5ff;">▸ Últimos escuchados DSTAR</div>
+    <div class="panel-label" style="color:#00e5ff;">▸ Últimos escuchados D-STAR</div>
     <div class="lh-panel" style="border-color:#004a4a;">
       <div class="lh-header" style="background:#0a1a1a;border-bottom-color:#004a4a;color:#006070;">
         <span>Indicativo</span><span>Nombre</span><span>Hora</span><span>Src</span>
       </div>
-      <div class="lh-body" id="dstarLhBody">
-        <div class="lh-empty">Sin actividad DSTAR</div>
-      </div>
+      <div class="lh-body" id="dstarLhBody"><div class="lh-empty">Sin actividad D-STAR</div></div>
     </div>
   </div>
+  <div id="ysfLastHeardPanel">
+    <div class="panel-label ysf-label">▸ Últimos escuchados C4FM</div>
+    <div class="lh-panel-ysf">
+      <div class="lh-header-ysf"><span>Indicativo</span><span>Nombre</span><span>Hora</span><span>Src</span></div>
+      <div class="lh-body" id="ysfLhBody"><div class="lh-empty">Sin actividad C4FM</div></div>
+    </div>
+  </div>
+</div>
 
-  <!-- ── Últimos escuchados NXDN ── -->
+<!-- ── Últimos escuchados NXDN ── -->
+<div class="display-row" style="margin-top:1rem;" id="nxdnLastHeardRow" style="display:none;">
   <div id="nxdnLastHeardPanel" style="display:none;">
     <div class="panel-label" style="color:#ffd700;">▸ Últimos escuchados NXDN</div>
     <div class="lh-panel-nxdn">
-      <div class="lh-header-nxdn">
-        <span>Indicativo</span><span>Nombre</span><span>TG</span><span>Hora</span><span>Src</span>
-      </div>
-      <div class="lh-body" id="nxdnLhBody">
-        <div class="lh-empty">Sin actividad NXDN</div>
-      </div>
+      <div class="lh-header-nxdn"><span>Indicativo</span><span>Nombre</span><span>TG</span><span>Hora</span><span>Src</span></div>
+      <div class="lh-body" id="nxdnLhBody"><div class="lh-empty">Sin actividad NXDN</div></div>
     </div>
   </div>
-
 </div>
+
 
 
 <!-- ── Logs ── -->
@@ -1003,7 +994,7 @@ button.btn-header { font-family: var(--font-mono); }
 <div id="restoreModal" class="restore-modal">
 <div class="restore-box">
 <div class="restore-title">📂 Restaurar configuración</div>
-<label class="restore-label" for="restoreFile">Selecciona fichero Copia_PHPPLUS.zip</label>
+<label class="restore-label" for="restoreFile">Selecciona fichero Copia_PHP2.zip</label>
 <input type="file" id="restoreFile" accept=".zip" class="restore-file">
 <div class="restore-btns">
 <button class="restore-btn-ok" onclick="doRestore()">▶ Restaurar</button>
@@ -1034,8 +1025,39 @@ const DMR_IDLE_TIMEOUT=12000,YSF_IDLE_TIMEOUT=12000;
 
 async function fetchStationInfo(){try{const r=await fetch('?action=station-info');const d=await r.json();document.getElementById('scCallsign').textContent='📡 '+d.callsign;const nxPort=document.getElementById('nxPort');if(nxPort)nxPort.textContent=d.port||'—';const nxFrx=document.getElementById('nxFrx');if(nxFrx)nxFrx.textContent=d.freqRX||'—';const nxFtx=document.getElementById('nxFtx');if(nxFtx)nxFtx.textContent=d.freq||'—';const nxIp=document.getElementById('nxIp');if(nxIp)nxIp.textContent=d.ip||'—';const yNxPort=document.getElementById('ysfNxPort');if(yNxPort)yNxPort.textContent=d.ysfPort||'—';const yNxFrx=document.getElementById('ysfNxFrx');if(yNxFrx)yNxFrx.textContent=d.ysfFreqRX||'—';const yNxFtx=document.getElementById('ysfNxFtx');if(yNxFtx)yNxFtx.textContent=d.ysfFreqTX||'—';const yNxIp=document.getElementById('ysfNxIp');if(yNxIp)yNxIp.textContent=d.ysfIp||'—';const label=d.callsign+' · ADER';const nx=document.getElementById('nxStationLabel');if(nx)nx.textContent=label;const yx=document.getElementById('ysfStationLabel');if(yx)yx.textContent=label;const dx=document.getElementById('dstarStationLabel');if(dx)dx.textContent=label;const nxdnLbl=document.getElementById('nxdnStationLabel');if(nxdnLbl)nxdnLbl.textContent=label;const dNxPort=document.getElementById('dstarNxPort');if(dNxPort)dNxPort.textContent=d.dstarPort||'—';const dNxFrx=document.getElementById('dstarNxFrx');if(dNxFrx)dNxFrx.textContent=d.dstarFreqRX||'—';const dNxFtx=document.getElementById('dstarNxFtx');if(dNxFtx)dNxFtx.textContent=d.dstarFreqTX||'—';const dNxIp=document.getElementById('dstarNxIp');if(dNxIp)dNxIp.textContent=d.dstarIp||'—';const nNxPort=document.getElementById('nxdnNxPort');if(nNxPort)nNxPort.textContent=d.nxdnPort||'—';const nNxFrx=document.getElementById('nxdnNxFrx');if(nNxFrx)nNxFrx.textContent=d.nxdnFreqRX||'—';const nNxFtx=document.getElementById('nxdnNxFtx');if(nNxFtx)nNxFtx.textContent=d.nxdnFreqTX||'—';const nNxIp=document.getElementById('nxdnNxIp');if(nNxIp)nNxIp.textContent=d.nxdnIp||'—';}catch(e){console.warn('station-info error:',e);}}
 
-function getFlagByCall(callsign){if(!callsign)return'';const cs=callsign.toUpperCase().trim();const prefixes=[{re:/^EA[0-9]|EB|EC|ED|EE|EF|EG|EH/,flag:'🇪🇸'},{re:/^CT|CU|CV|CQ/,flag:'🇵🇹'},{re:/^F[A-Z]|FT[0-9A-Z]|FM|FO|FH|FJ|FK|FL|FP|FR|FS/,flag:'🇫🇷'},{re:/^I[0-9]|IK|IW|IZ/,flag:'🇮🇹'},{re:/^G[0-9]|M[0-9]|2E[0-9]|2[0-9]|GB|MJ|MU/,flag:'🇬🇧'},{re:/^D[ALM]|DA|DB|DC|DD|DE|DF|DG|DH|DI|DJ|DK|DL|DM|DN|DO|DP|DQ|DR/,flag:'🇩🇪'},{re:/^K[0-9]|W[0-9]|N[0-9]|AA|AB|AC|AD|AE|AF/,flag:'🇺🇸'},{re:/^VE[0-9]|VA[0-9]|VO[0-9]|VY[0-9]/,flag:'🇨🇦'},{re:/^PY[0-9]|PU|PV|PW|PX/,flag:'🇧🇷'},{re:/^LU[0-9]|LV|LW|LX/,flag:'🇦🇷'},{re:/^JA[0-9]|JB|JC|JD|JE|JF|JG|JH|JI|JJ|JK|JL|JM|JN|JO|JP|JQ|JR|JS|JT|JU|JV|JW|JX|JY|JZ/,flag:'🇯🇵'},{re:/^VK[0-9]|VL|VM|VN|VO|VP|VQ|VR|VS|VT|VU|VV|VW|VX|VY|VZ/,flag:'🇦🇺'},{re:/^ZS[0-9]|ZT|ZU|ZV|ZW|ZX|ZY|ZZ/,flag:'🇿🇦'},{re:/^OH[0-9]|OG|OI|OJ|OK|OL|OM|ON|OO|OP|OQ|OR|OS|OT|OU|OV|OW|OX|OY|OZ/,flag:'🇫🇮'},{re:/^PA[0-9]|PB|PC|PD|PE|PF|PG|PH|PI|PJ|PK|PL|PM|PN|PO|PP|PQ|PR|PS|PT|PU|PV|PW|PX|PY|PZ/,flag:'🇳🇱'},{re:/^HB[0-9]|HB9/,flag:'🇨🇭'},{re:/^OE[0-9]/,flag:'🇦🇹'},{re:/^SP[0-9]|SQ|SR/,flag:'🇵🇱'},{re:/^UA[0-9]|UB|UC|UD|UE|UF|UG|UH|UI|UJ|UK|UL|UM|UN|UO|UP|UQ|UR|US|UT|UU|UV|UW|UX|UY|UZ/,flag:'🇷🇺'},{re:/^SV[0-9]|SW|SX|SY|SZ/,flag:'🇬🇷'},{re:/^LY[0-9]|LZ/,flag:'🇱🇹'},{re:/^9A[0-9]/,flag:'🇭🇷'}];for(const p of prefixes){if(p.re.test(cs))return p.flag;}return'🌐';}
-
+function getFlagByCall(callsign){
+    if(!callsign)return'';
+    const cs=callsign.toUpperCase().trim();
+    const prefixes=[
+        {re:/^E[ABCDEFGH][1-9]/,code:'es'},
+        {re:/^C[TUQ]/,code:'pt'},
+        {re:/^F[A-Z]/,code:'fr'},
+        {re:/^I[0-9]|^IK|^IW|^IZ/,code:'it'},
+        {re:/^G[0-9]|^M[0-9]|^2E|^GB|^MJ|^MU/,code:'gb'},
+        {re:/^D[A-R]|^Y[2-9]/,code:'de'},
+        {re:/^[KWN][0-9]|^AA|^AB|^AC|^AD|^AE|^AF/,code:'us'},
+        {re:/^VE|^VA|^VO|^VY/,code:'ca'},
+        {re:/^PY|^PU|^PV|^PW|^PX/,code:'br'},
+        {re:/^LU|^LV|^LW|^LX/,code:'ar'},
+        {re:/^JA|^JE|^JF|^JG|^JH|^JI|^JJ|^JK|^JL|^JR/,code:'jp'},
+        {re:/^VK/,code:'au'},
+        {re:/^ZS|^ZT|^ZU/,code:'za'},
+        {re:/^OH|^OG/,code:'fi'},
+        {re:/^PA|^PB|^PC|^PD|^PE|^PF|^PG|^PH/,code:'nl'},
+        {re:/^HB/,code:'ch'},
+        {re:/^OE/,code:'at'},
+        {re:/^SP|^SQ|^SR|^HF/,code:'pl'},
+        {re:/^UA|^UB|^UC|^UD|^UE|^UF|^RA|^RB|^RC/,code:'ru'},
+        {re:/^SV|^SW|^SX|^SY|^SZ/,code:'gr'},
+        {re:/^LY/,code:'lt'},
+        {re:/^9A/,code:'hr'},
+    ];
+    for(const p of prefixes){
+        if(p.re.test(cs))
+            return`<img class="flag-emoji" src="https://flagcdn.com/20x15/${p.code}.png" alt="${p.code.toUpperCase()}">`;
+    }
+    return'';
+}
 function buildVU(id){const el=document.getElementById(id);for(let i=0;i<18;i++){const d=document.createElement('div');d.className='nx-vu-bar';d.id=`${id}-${i}`;el.appendChild(d);}}
 buildVU('vuLeft');buildVU('vuRight');buildVU('ysfVuLeft');buildVU('ysfVuRight');buildVU('nxdnVuLeft');buildVU('nxdnVuRight');
 
@@ -1076,7 +1098,7 @@ buildDStarVU();
 function animateDStarVU(on){clearInterval(dstarVuTimer);['dstarVuLeft','dstarVuRight'].forEach(id=>{for(let i=0;i<18;i++)document.getElementById(`${id}-${i}`).className='nx-vu-bar';});if(!on)return;dstarVuTimer=setInterval(()=>{['dstarVuLeft','dstarVuRight'].forEach(id=>{const lvl=Math.floor(Math.random()*16)+1;for(let i=0;i<18;i++){let cls='nx-vu-bar';if(i<lvl)cls+=i<10?' lit-g':i<14?' lit-a':' lit-r';document.getElementById(`${id}-${i}`).className=cls;}});},80);}
 function updateDStarClock(){if(!dstarCurrentlyActive){const now=new Date();const clk=document.getElementById('dstarNxClock');if(clk){clk.textContent=now.toLocaleTimeString('es-ES');document.getElementById('dstarNxDate').textContent=now.toLocaleDateString('es-ES',{weekday:'short',day:'2-digit',month:'short',year:'numeric'}).toUpperCase();}}}
 setInterval(updateDStarClock,1000);updateDStarClock();
-function showDStarIdle(){dstarCurrentlyActive=false;animateDStarVU(false);document.getElementById('dstarTxBar').className='nx-txbar';const src=document.getElementById('dstarSource');src.textContent='';src.className='nx-source';document.getElementById('dstarNxCenter').innerHTML='<div class="nx-clock" id="dstarNxClock" style="color:#00ff9f;">00:00:00</div><div class="nx-date" id="dstarNxDate" style="color:#009090;">—</div>';updateDStarClock();}
+function showDStarIdle(){dstarCurrentlyActive=false;animateDStarVU(false);document.getElementById('dstarTxBar').className='nx-txbar';const src=document.getElementById('dstarSource');src.textContent='';src.className='nx-source';document.getElementById('dstarNxCenter').innerHTML='<div class="nx-clock" id="dstarNxClock" style="color:#00e5ff;">00:00:00</div><div class="nx-date" id="dstarNxDate" style="color:#009090;">—</div>';updateDStarClock();}
 function showDStarActive(d){dstarCurrentlyActive=true;animateDStarVU(true);document.getElementById('dstarTxBar').className='nx-txbar active';document.getElementById('dstarTxBar').style.background='linear-gradient(90deg,transparent,#00e5ff,transparent)';const src=document.getElementById('dstarSource');if(d.source==='RF'){src.textContent='RF';src.className='nx-source rf';}else{src.textContent='NET';src.className='nx-source net';}const flag=getFlagByCall(d.callsign.replace(/\/.*$/,''));document.getElementById('dstarNxCenter').innerHTML=`<div class="nx-callsign dstar">${flag} ${esc(d.callsign)}</div>`+(d.name?`<div class="nx-name dstar">${esc(d.name)}</div>`:'');}
 function renderDStarLastHeard(list,activeCall){const body=document.getElementById('dstarLhBody');if(!list||list.length===0){body.innerHTML='<div class="lh-empty">Sin actividad D-STAR</div>';return;}body.innerHTML=list.map(r=>{const isActive=activeCall&&r.callsign===activeCall;const srcCls=r.source==='RF'?'rf':'net',srcLbl=r.source==='RF'?'RF':'NET';const dot=isActive?'<span class="lh-tx-dot" style="background:#00e5ff;box-shadow:0 0 6px #00e5ff;"></span>':'';const flag=getFlagByCall(r.callsign.replace(/\/.*$/,''));return`<div class="lh-row${isActive?' lh-active':''}"><div class="lh-call-wrap">${dot}<span class="lh-call" style="color:#00e5ff;">${flag} ${esc(r.callsign)}</span></div><span class="lh-name">${esc(r.name||'—')}</span><span class="lh-time">${esc(r.time||'—')}</span><span class="lh-src ${srcCls}">${srcLbl}</span></div>`;}).join('');}
 async function fetchDStarTransmission(){try{const r=await fetch('?action=dstar-transmission');const d=await r.json();if(d.active)showDStarActive(d);else showDStarIdle();renderDStarLastHeard(d.lastHeard||[],d.active?d.callsign:null);}catch(e){}}
@@ -1276,6 +1298,23 @@ document.getElementById('xtInp').addEventListener('keydown',async function(e){
     startMMDVMYSFLogs();
     startYSFTransmissionPoll();
 })();
+// Twemoji solo en banderas, no en botones
+function applyFlagTwemoji(root){
+    const spans=(root||document).querySelectorAll('.flag-emoji');
+    spans.forEach(s=>twemoji.parse(s,{folder:'svg',ext:'.svg',base:'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/'}));
+}
+const _flagObs=new MutationObserver(m=>{
+    m.forEach(mu=>{
+        mu.addedNodes.forEach(n=>{
+            if(n.nodeType===1){
+                if(n.classList&&n.classList.contains('flag-emoji'))twemoji.parse(n,{folder:'svg',ext:'.svg',base:'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/'});
+                else n.querySelectorAll&&n.querySelectorAll('.flag-emoji').forEach(s=>twemoji.parse(s,{folder:'svg',ext:'.svg',base:'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/'}));
+            }
+        });
+    });
+});
+_flagObs.observe(document.body,{childList:true,subtree:true});
+document.addEventListener('DOMContentLoaded',()=>applyFlagTwemoji());
 </script>
 </body>
 </html>
