@@ -678,9 +678,8 @@ button.btn-header { font-family: var(--font-mono); }
 .fedit-msg.ok{color:var(--green);border-color:var(--green);background:rgba(0,255,159,.06);}
 .fedit-msg.err{color:var(--red);border-color:var(--red);background:rgba(255,69,96,.06);}
 .flag-emoji { display:inline-block; vertical-align:middle; margin-right:5px; }
-.flag-emoji img { width:26px; height:26px; vertical-align:middle; }
+.flag-emoji img { width:28px; height:28px; vertical-align:middle; }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/twemoji@14.0.2/dist/twemoji.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
 <header class="ctrl-header">
@@ -1016,37 +1015,34 @@ async function fetchStationInfo(){try{const r=await fetch('?action=station-info'
 function getFlagByCall(callsign){
     if(!callsign)return'';
     const cs=callsign.toUpperCase().trim();
+    // URL base Twemoji SVG (no requiere librería JS)
+    const B='https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/';
     const prefixes=[
-        {re:/^E[ABCDEFGH][1-9]/,flag:'🇪🇸'},
-        {re:/^C[TUQ]/,flag:'🇵🇹'},
-        {re:/^F[A-Z]/,flag:'🇫🇷'},
-        {re:/^I[0-9]|^IK|^IW|^IZ/,flag:'🇮🇹'},
-        {re:/^G[0-9]|^M[0-9]|^2E|^GB|^MJ|^MU/,flag:'🇬🇧'},
-        {re:/^D[A-R]|^Y[2-9]/,flag:'🇩🇪'},
-        {re:/^[KWN][0-9]|^AA|^AB|^AC|^AD|^AE|^AF/,flag:'🇺🇸'},
-        {re:/^VE|^VA|^VO|^VY/,flag:'🇨🇦'},
-        {re:/^PY|^PU|^PV|^PW|^PX/,flag:'🇧🇷'},
-        {re:/^LU|^LV|^LW|^LX/,flag:'🇦🇷'},
-        {re:/^JA|^JE|^JF|^JG|^JH|^JI|^JJ|^JK|^JL|^JR/,flag:'🇯🇵'},
-        {re:/^VK/,flag:'🇦🇺'},
-        {re:/^ZS|^ZT|^ZU/,flag:'🇿🇦'},
-        {re:/^OH|^OG/,flag:'🇫🇮'},
-        {re:/^PA|^PB|^PC|^PD|^PE|^PF|^PG|^PH/,flag:'🇳🇱'},
-        {re:/^HB/,flag:'🇨🇭'},
-        {re:/^OE/,flag:'🇦🇹'},
-        {re:/^SP|^SQ|^SR|^HF/,flag:'🇵🇱'},
-        {re:/^UA|^UB|^UC|^UD|^UE|^UF|^RA|^RB|^RC/,flag:'🇷🇺'},
-        {re:/^SV|^SW|^SX|^SY|^SZ/,flag:'🇬🇷'},
-        {re:/^LY/,flag:'🇱🇹'},
-        {re:/^9A/,flag:'🇭🇷'},
+        {re:/^E[ABCDEFGH][1-9]/,u:'1f1ea-1f1f8'},  // ES
+        {re:/^C[TUQ]/,u:'1f1f5-1f1f9'},             // PT
+        {re:/^F[A-Z]/,u:'1f1eb-1f1f7'},             // FR
+        {re:/^I[0-9]|^IK|^IW|^IZ/,u:'1f1ee-1f1f9'},// IT
+        {re:/^G[0-9]|^M[0-9]|^2E|^GB|^MJ|^MU/,u:'1f1ec-1f1e7'}, // GB
+        {re:/^D[A-R]|^Y[2-9]/,u:'1f1e9-1f1ea'},     // DE
+        {re:/^[KWN][0-9]|^AA|^AB|^AC|^AD|^AE|^AF/,u:'1f1fa-1f1f8'}, // US
+        {re:/^VE|^VA|^VO|^VY/,u:'1f1e8-1f1e6'},     // CA
+        {re:/^PY|^PU|^PV|^PW|^PX/,u:'1f1e7-1f1f7'},// BR
+        {re:/^LU|^LV|^LW|^LX/,u:'1f1e6-1f1f7'},    // AR
+        {re:/^JA|^JE|^JF|^JG|^JH|^JI|^JJ|^JK|^JL|^JR/,u:'1f1ef-1f1f5'}, // JP
+        {re:/^VK/,u:'1f1e6-1f1fa'},                 // AU
+        {re:/^ZS|^ZT|^ZU/,u:'1f1ff-1f1e6'},         // ZA
+        {re:/^OH|^OG/,u:'1f1eb-1f1ee'},             // FI
+        {re:/^PA|^PB|^PC|^PD|^PE|^PF|^PG|^PH/,u:'1f1f3-1f1f1'}, // NL
+        {re:/^HB/,u:'1f1e8-1f1ed'},                 // CH
+        {re:/^OE/,u:'1f1e6-1f1f9'},                 // AT
+        {re:/^SP|^SQ|^SR|^HF/,u:'1f1f5-1f1f1'},     // PL
+        {re:/^UA|^UB|^UC|^UD|^UE|^UF|^RA|^RB|^RC/,u:'1f1f7-1f1fa'}, // RU
+        {re:/^SV|^SW|^SX|^SY|^SZ/,u:'1f1ec-1f1f7'},// GR
+        {re:/^LY/,u:'1f1f1-1f1f9'},                 // LT
+        {re:/^9A/,u:'1f1ed-1f1f7'},                 // HR
     ];
-    const TWO={folder:'svg',ext:'.svg',base:'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/'};
     for(const p of prefixes){
-        if(p.re.test(cs)){
-            if(typeof twemoji!=='undefined')
-                return twemoji.parse('<span class="flag-emoji">'+p.flag+'</span>',TWO);
-            return'<span class="flag-emoji">'+p.flag+'</span>';
-        }
+        if(p.re.test(cs))return'<img class="flag-emoji" src="'+B+p.u+'.svg" alt="">';
     }
     return'';
 }
