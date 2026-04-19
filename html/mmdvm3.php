@@ -155,8 +155,10 @@ if ($action === 'sysinfo') {
     $ramTotal = round($mem['MemTotal'] / 1048576, 2);
     $ramFree  = round(($mem['MemAvailable'] ?? $mem['MemFree']) / 1048576, 2);
     $ramUsed  = round($ramTotal - $ramFree, 2);
-    $diskTotal = round(disk_total_space('/') / 1073741824, 1);
-    $diskFree  = round(disk_free_space('/') / 1073741824, 1);
+  $dfOut = shell_exec("df / --output=size,avail --block-size=1G 2>/dev/null | tail -1");
+$dfParts = preg_split('/\s+/', trim($dfOut));
+$diskTotal = round(floatval($dfParts[0] ?? 0), 1);
+$diskFree  = round(floatval($dfParts[1] ?? 0), 1);
     $diskUsed  = round($diskTotal - $diskFree, 1);
     $temp = '';
     if (file_exists('/sys/class/thermal/thermal_zone0/temp'))
