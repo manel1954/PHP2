@@ -3,7 +3,7 @@
 # path usuario
 usuario="/home/pi"
 usuario="$usuario"
-fecha_imagen="18-04-26"
+fecha_imagen="19-04-26"
 nombre_imagen="PHPP-"
 version=$nombre_imagen$fecha_imagen
 
