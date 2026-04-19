@@ -1284,6 +1284,18 @@ document.getElementById('xtInp').addEventListener('keydown',async function(e){
     if(!running){showIdle();fetchTransmission();}
     showYSFIdle();showNXDNIdle();startYSFLogs();startMMDVMYSFLogs();startYSFTransmissionPoll();
 })();
+
+
+// Aplicar Twemoji a contenido dinámico
+function applyTwemoji(el){
+    twemoji.parse(el||document.body,{folder:'svg',ext:'.svg',base:'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/'});
+}
+const _twObs=new MutationObserver(m=>{m.forEach(mu=>{mu.addedNodes.forEach(n=>{if(n.nodeType===1)applyTwemoji(n);});});});
+_twObs.observe(document.body,{childList:true,subtree:true});
+document.addEventListener('DOMContentLoaded',()=>applyTwemoji());
+
+
+
 </script>
 </body>
 </html>
