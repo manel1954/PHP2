@@ -685,6 +685,13 @@ button.btn-header { font-family: var(--font-mono); }
     margin-right: 4px;
     line-height: 1;
 }
+.flag-emoji-img {
+    height: 20px;
+    width: auto;
+    vertical-align: middle;
+    margin-right: 4px;
+    border-radius: 2px;
+}
 </style>
 </head>
 <body>
@@ -1018,35 +1025,43 @@ const DMR_IDLE_TIMEOUT=12000,YSF_IDLE_TIMEOUT=12000;
 
 async function fetchStationInfo(){try{const r=await fetch('?action=station-info');const d=await r.json();document.getElementById('scCallsign').textContent='📡 '+d.callsign;const nxPort=document.getElementById('nxPort');if(nxPort)nxPort.textContent=d.port||'—';const nxFrx=document.getElementById('nxFrx');if(nxFrx)nxFrx.textContent=d.freqRX||'—';const nxFtx=document.getElementById('nxFtx');if(nxFtx)nxFtx.textContent=d.freq||'—';const nxIp=document.getElementById('nxIp');if(nxIp)nxIp.textContent=d.ip||'—';const yNxPort=document.getElementById('ysfNxPort');if(yNxPort)yNxPort.textContent=d.ysfPort||'—';const yNxFrx=document.getElementById('ysfNxFrx');if(yNxFrx)yNxFrx.textContent=d.ysfFreqRX||'—';const yNxFtx=document.getElementById('ysfNxFtx');if(yNxFtx)yNxFtx.textContent=d.ysfFreqTX||'—';const yNxIp=document.getElementById('ysfNxIp');if(yNxIp)yNxIp.textContent=d.ysfIp||'—';const label=d.callsign+' · ADER';const nx=document.getElementById('nxStationLabel');if(nx)nx.textContent=label;const yx=document.getElementById('ysfStationLabel');if(yx)yx.textContent=label;const dx=document.getElementById('dstarStationLabel');if(dx)dx.textContent=label;const nxdnLbl=document.getElementById('nxdnStationLabel');if(nxdnLbl)nxdnLbl.textContent=label;const dNxPort=document.getElementById('dstarNxPort');if(dNxPort)dNxPort.textContent=d.dstarPort||'—';const dNxFrx=document.getElementById('dstarNxFrx');if(dNxFrx)dNxFrx.textContent=d.dstarFreqRX||'—';const dNxFtx=document.getElementById('dstarNxFtx');if(dNxFtx)dNxFtx.textContent=d.dstarFreqTX||'—';const dNxIp=document.getElementById('dstarNxIp');if(dNxIp)dNxIp.textContent=d.dstarIp||'—';const nNxPort=document.getElementById('nxdnNxPort');if(nNxPort)nNxPort.textContent=d.nxdnPort||'—';const nNxFrx=document.getElementById('nxdnNxFrx');if(nNxFrx)nNxFrx.textContent=d.nxdnFreqRX||'—';const nNxFtx=document.getElementById('nxdnNxFtx');if(nNxFtx)nNxFtx.textContent=d.nxdnFreqTX||'—';const nNxIp=document.getElementById('nxdnNxIp');if(nNxIp)nNxIp.textContent=d.nxdnIp||'—';}catch(e){console.warn('station-info error:',e);}}
 
+// Detección única al cargar: Windows no soporta emoji de bandera regional
+const _winOS = /Windows/i.test(navigator.userAgent);
+// URL base Twemoji PNG para fallback Windows
+const _TBASE = 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/';
+const _FLAGS = [
+    {re:/^E[ABCDEFGH][1-9]/,  e:'🇪🇸', t:'1f1ea-1f1f8'},
+    {re:/^C[TUQ]/,            e:'🇵🇹', t:'1f1f5-1f1f9'},
+    {re:/^F[A-Z]/,            e:'🇫🇷', t:'1f1eb-1f1f7'},
+    {re:/^I[0-9]|^IK|^IW|^IZ/,e:'🇮🇹',t:'1f1ee-1f1f9'},
+    {re:/^G[0-9]|^M[0-9]|^2E|^GB|^MJ|^MU/,e:'🇬🇧',t:'1f1ec-1f1e7'},
+    {re:/^D[A-R]|^Y[2-9]/,   e:'🇩🇪', t:'1f1e9-1f1ea'},
+    {re:/^[KWN][0-9]|^AA|^AB|^AC|^AD|^AE|^AF/,e:'🇺🇸',t:'1f1fa-1f1f8'},
+    {re:/^VE|^VA|^VO|^VY/,   e:'🇨🇦', t:'1f1e8-1f1e6'},
+    {re:/^PY|^PU|^PV|^PW|^PX/,e:'🇧🇷',t:'1f1e7-1f1f7'},
+    {re:/^LU|^LV|^LW|^LX/,   e:'🇦🇷', t:'1f1e6-1f1f7'},
+    {re:/^JA|^JE|^JF|^JG|^JH|^JI|^JJ|^JK|^JL|^JR/,e:'🇯🇵',t:'1f1ef-1f1f5'},
+    {re:/^VK/,                e:'🇦🇺', t:'1f1e6-1f1fa'},
+    {re:/^ZS|^ZT|^ZU/,       e:'🇿🇦', t:'1f1ff-1f1e6'},
+    {re:/^OH|^OG/,            e:'🇫🇮', t:'1f1eb-1f1ee'},
+    {re:/^PA|^PB|^PC|^PD|^PE|^PF|^PG|^PH/,e:'🇳🇱',t:'1f1f3-1f1f1'},
+    {re:/^HB/,                e:'🇨🇭', t:'1f1e8-1f1ed'},
+    {re:/^OE/,                e:'🇦🇹', t:'1f1e6-1f1f9'},
+    {re:/^SP|^SQ|^SR|^HF/,   e:'🇵🇱', t:'1f1f5-1f1f1'},
+    {re:/^UA|^UB|^UC|^UD|^UE|^UF|^RA|^RB|^RC/,e:'🇷🇺',t:'1f1f7-1f1fa'},
+    {re:/^SV|^SW|^SX|^SY|^SZ/,e:'🇬🇷',t:'1f1ec-1f1f7'},
+    {re:/^LY/,                e:'🇱🇹', t:'1f1f1-1f1f9'},
+    {re:/^9A/,                e:'🇭🇷', t:'1f1ed-1f1f7'},
+];
 function getFlagByCall(callsign){
     if(!callsign)return'';
     const cs=callsign.toUpperCase().trim();
-    const prefixes=[
-        {re:/^E[ABCDEFGH][1-9]/,f:'🇪🇸'},
-        {re:/^C[TUQ]/,f:'🇵🇹'},
-        {re:/^F[A-Z]/,f:'🇫🇷'},
-        {re:/^I[0-9]|^IK|^IW|^IZ/,f:'🇮🇹'},
-        {re:/^G[0-9]|^M[0-9]|^2E|^GB|^MJ|^MU/,f:'🇬🇧'},
-        {re:/^D[A-R]|^Y[2-9]/,f:'🇩🇪'},
-        {re:/^[KWN][0-9]|^AA|^AB|^AC|^AD|^AE|^AF/,f:'🇺🇸'},
-        {re:/^VE|^VA|^VO|^VY/,f:'🇨🇦'},
-        {re:/^PY|^PU|^PV|^PW|^PX/,f:'🇧🇷'},
-        {re:/^LU|^LV|^LW|^LX/,f:'🇦🇷'},
-        {re:/^JA|^JE|^JF|^JG|^JH|^JI|^JJ|^JK|^JL|^JR/,f:'🇯🇵'},
-        {re:/^VK/,f:'🇦🇺'},
-        {re:/^ZS|^ZT|^ZU/,f:'🇿🇦'},
-        {re:/^OH|^OG/,f:'🇫🇮'},
-        {re:/^PA|^PB|^PC|^PD|^PE|^PF|^PG|^PH/,f:'🇳🇱'},
-        {re:/^HB/,f:'🇨🇭'},
-        {re:/^OE/,f:'🇦🇹'},
-        {re:/^SP|^SQ|^SR|^HF/,f:'🇵🇱'},
-        {re:/^UA|^UB|^UC|^UD|^UE|^UF|^RA|^RB|^RC/,f:'🇷🇺'},
-        {re:/^SV|^SW|^SX|^SY|^SZ/,f:'🇬🇷'},
-        {re:/^LY/,f:'🇱🇹'},
-        {re:/^9A/,f:'🇭🇷'},
-    ];
-    for(const p of prefixes){
-        if(p.re.test(cs))return'<span class="flag-emoji">'+p.f+'</span>';
+    for(const p of _FLAGS){
+        if(p.re.test(cs)){
+            if(_winOS)
+                return'<img class="flag-emoji-img" src="'+_TBASE+p.t+'.png" alt="">';
+            return'<span class="flag-emoji">'+p.e+'</span>';
+        }
     }
     return'';
 }
