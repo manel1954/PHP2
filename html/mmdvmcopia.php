@@ -677,8 +677,14 @@ button.btn-header { font-family: var(--font-mono); }
 .fedit-msg{font-family:var(--font-mono);font-size:.75rem;display:none;padding:.4rem .8rem;border-radius:4px;border:1px solid;}
 .fedit-msg.ok{color:var(--green);border-color:var(--green);background:rgba(0,255,159,.06);}
 .fedit-msg.err{color:var(--red);border-color:var(--red);background:rgba(255,69,96,.06);}
-.flag-emoji { display:inline-block; vertical-align:middle; margin-right:4px; }
-.flag-emoji img { height:22px; width:auto; vertical-align:middle; }
+.flag-emoji {
+    font-family: 'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;
+    font-size: 1.6rem;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 4px;
+    line-height: 1;
+}
 </style>
 </head>
 <body>
@@ -1015,33 +1021,32 @@ async function fetchStationInfo(){try{const r=await fetch('?action=station-info'
 function getFlagByCall(callsign){
     if(!callsign)return'';
     const cs=callsign.toUpperCase().trim();
-    const B='https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/';
     const prefixes=[
-        {re:/^E[ABCDEFGH][1-9]/,u:'1f1ea-1f1f8'},
-        {re:/^C[TUQ]/,u:'1f1f5-1f1f9'},
-        {re:/^F[A-Z]/,u:'1f1eb-1f1f7'},
-        {re:/^I[0-9]|^IK|^IW|^IZ/,u:'1f1ee-1f1f9'},
-        {re:/^G[0-9]|^M[0-9]|^2E|^GB|^MJ|^MU/,u:'1f1ec-1f1e7'},
-        {re:/^D[A-R]|^Y[2-9]/,u:'1f1e9-1f1ea'},
-        {re:/^[KWN][0-9]|^AA|^AB|^AC|^AD|^AE|^AF/,u:'1f1fa-1f1f8'},
-        {re:/^VE|^VA|^VO|^VY/,u:'1f1e8-1f1e6'},
-        {re:/^PY|^PU|^PV|^PW|^PX/,u:'1f1e7-1f1f7'},
-        {re:/^LU|^LV|^LW|^LX/,u:'1f1e6-1f1f7'},
-        {re:/^JA|^JE|^JF|^JG|^JH|^JI|^JJ|^JK|^JL|^JR/,u:'1f1ef-1f1f5'},
-        {re:/^VK/,u:'1f1e6-1f1fa'},
-        {re:/^ZS|^ZT|^ZU/,u:'1f1ff-1f1e6'},
-        {re:/^OH|^OG/,u:'1f1eb-1f1ee'},
-        {re:/^PA|^PB|^PC|^PD|^PE|^PF|^PG|^PH/,u:'1f1f3-1f1f1'},
-        {re:/^HB/,u:'1f1e8-1f1ed'},
-        {re:/^OE/,u:'1f1e6-1f1f9'},
-        {re:/^SP|^SQ|^SR|^HF/,u:'1f1f5-1f1f1'},
-        {re:/^UA|^UB|^UC|^UD|^UE|^UF|^RA|^RB|^RC/,u:'1f1f7-1f1fa'},
-        {re:/^SV|^SW|^SX|^SY|^SZ/,u:'1f1ec-1f1f7'},
-        {re:/^LY/,u:'1f1f1-1f1f9'},
-        {re:/^9A/,u:'1f1ed-1f1f7'},
+        {re:/^E[ABCDEFGH][1-9]/,f:'🇪🇸'},
+        {re:/^C[TUQ]/,f:'🇵🇹'},
+        {re:/^F[A-Z]/,f:'🇫🇷'},
+        {re:/^I[0-9]|^IK|^IW|^IZ/,f:'🇮🇹'},
+        {re:/^G[0-9]|^M[0-9]|^2E|^GB|^MJ|^MU/,f:'🇬🇧'},
+        {re:/^D[A-R]|^Y[2-9]/,f:'🇩🇪'},
+        {re:/^[KWN][0-9]|^AA|^AB|^AC|^AD|^AE|^AF/,f:'🇺🇸'},
+        {re:/^VE|^VA|^VO|^VY/,f:'🇨🇦'},
+        {re:/^PY|^PU|^PV|^PW|^PX/,f:'🇧🇷'},
+        {re:/^LU|^LV|^LW|^LX/,f:'🇦🇷'},
+        {re:/^JA|^JE|^JF|^JG|^JH|^JI|^JJ|^JK|^JL|^JR/,f:'🇯🇵'},
+        {re:/^VK/,f:'🇦🇺'},
+        {re:/^ZS|^ZT|^ZU/,f:'🇿🇦'},
+        {re:/^OH|^OG/,f:'🇫🇮'},
+        {re:/^PA|^PB|^PC|^PD|^PE|^PF|^PG|^PH/,f:'🇳🇱'},
+        {re:/^HB/,f:'🇨🇭'},
+        {re:/^OE/,f:'🇦🇹'},
+        {re:/^SP|^SQ|^SR|^HF/,f:'🇵🇱'},
+        {re:/^UA|^UB|^UC|^UD|^UE|^UF|^RA|^RB|^RC/,f:'🇷🇺'},
+        {re:/^SV|^SW|^SX|^SY|^SZ/,f:'🇬🇷'},
+        {re:/^LY/,f:'🇱🇹'},
+        {re:/^9A/,f:'🇭🇷'},
     ];
     for(const p of prefixes){
-        if(p.re.test(cs))return'<img class="flag-emoji" src="'+B+p.u+'.png" alt="">';
+        if(p.re.test(cs))return'<span class="flag-emoji">'+p.f+'</span>';
     }
     return'';
 }
