@@ -545,8 +545,8 @@ button.btn-header { font-family: var(--font-mono); }
 
 .nx-infobar { position: absolute; top: 30px; left: 0; right: 0; height: 26px; background: rgba(0,0,0,.35); border-bottom: 1px solid #0d2030; display: flex; align-items: center; justify-content: space-around; padding: 0 8rem; gap: 1rem; z-index: 2; }
 .nx-info-item { display: flex; align-items: center; gap: .4rem; }
-.nx-info-lbl { font-family: var(--font-mono); font-size: 7px; color:#ff0; text-transform: uppercase; font-weight: bold; }
-.nx-info-val { font-family: var(--font-mono); font-size: 7px; color:#ff0; }
+.nx-info-lbl { font-family: var(--font-mono); font-size: 8px; color:#ff0; text-transform: uppercase; font-weight: bold; }
+.nx-info-val { font-family: var(--font-mono); font-size: 8px; color:#ff0; }
 
 
 
