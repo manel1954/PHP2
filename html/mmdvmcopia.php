@@ -472,7 +472,7 @@ button.btn-header { font-family: var(--font-mono); }
 .sw input { opacity: 0; width: 0; height: 0; position: absolute; }
 .sw-track { position: absolute; inset: 0; border-radius: 2px; background: #1a2535; border: 2px solid #f00; transition: background .3s, border-color .3s, box-shadow .3s; }
 .sw-knob { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; background: #f00; box-shadow: 0 1px 4px rgba(0,0,0,.5); transition: transform .3s cubic-bezier(.4,0,.2,1), background .3s, box-shadow .3s; }
-.sw.dmr input:checked ~ .sw-track, .sw.ysf input:checked ~ .sw-track, .sw.dstar input:checked ~ .sw-track { border-radius: 2px; background: #1a2535; border: 2px solid #999999; }
+.sw.dmr input:checked ~ .sw-track, .sw.ysf input:checked ~ .sw-track, .sw.dstar input:checked ~ .sw-track { border-radius: 2px; background: #1a2535; border: 2px solid #00ff4c }
 .sw.dmr input:checked ~ .sw-knob, .sw.ysf input:checked ~ .sw-knob, .sw.dstar input:checked ~ .sw-knob { transform: translateX(28px); background:#00ff4c; box-shadow: 0 0 8px rgba(0,255,159,.6); }
 .sw#swNXDN input:checked ~ .sw-knob { transform: translateX(28px); background: #00ff4c; box-shadow: 0 0 8px rgba(255,215,0,.6); }
 .sw#swNXDN input:checked ~ .sw-track { border-color: #00ff4c; }
