@@ -5,12 +5,17 @@ $action = $_GET['action'] ?? '';
 
 if ($action === 'dump1090-start') {
     shell_exec('sudo systemctl start dump1090 2>/dev/null');
-    sleep(2);
-    $st = trim(shell_exec('systemctl is-active dump1090 2>/dev/null'));
+    // Espera hasta 10s a que salga del estado "activating"
+    $st = 'activating';
+    for ($i = 0; $i < 10; $i++) {
+        sleep(1);
+        $st = trim(shell_exec('systemctl is-active dump1090 2>/dev/null'));
+        if ($st !== 'activating') break;
+    }
     header('Content-Type: application/json');
     echo json_encode($st === 'active'
         ? ['ok'=>true,  'output'=>'dump1090.service iniciado correctamente']
-        : ['ok'=>false, 'error'=>'El servicio no arrancó (estado: '.$st.')']);
+        : ['ok'=>false, 'error'=>'El servicio no arrancó (estado final: '.$st.')']);
     exit;
 }
 
