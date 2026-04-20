@@ -5,17 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hola</title>
     <style>
+        body{
+            background: #222;
+        }
         .btn-header { background: cyan; padding: 10px; border: none; cursor: pointer; }
     </style>
 </head>
 <body>
     <h1><?php echo "Hola José Luis"; ?></h1>
-    
-    <button class="btn-header" onclick="extraOpen()">⌨ MENU EXTRA</button>
-    
+
+    <?php
+    // Si se recibe la petición de ejecutar el script
+    if (isset($_GET['action']) && $_GET['action'] === 'ejecutar_dump') {
+        $script = '/home/pi/A108/ejecutar_dump1090.sh';
+        $output = shell_exec("bash $script 2>&1");
+        echo json_encode(['ok' => true, 'output' => $output]);
+        exit;
+    }
+    ?>
+
+    <button class="btn-header" onclick="ejecutarDump()">⌨ MENU EXTRA</button>
+
     <script>
-    function extraOpen() {
-        window.open('/extra.php', '_blank');
+    function ejecutarDump() {
+        fetch('?action=ejecutar_dump')
+            .then(r => r.json())
+            .then(data => {
+                console.log('Script ejecutado:', data.output);
+                alert('Script ejecutado correctamente');
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                alert('Error al ejecutar el script');
+            });
     }
     </script>
 </body>
