@@ -11,10 +11,10 @@
 
 <div class="container py-4">
 
-    <h1 class="mb-4">
-        <i class="bi bi-grid-3x3-gap-fill me-2" style="color: #ff6600;"></i>
-        <?php echo "MENU EXTRA"; ?>
-    </h1>
+<h1 class="mb-4 text-center">
+    <i class="bi bi-grid-3x3-gap-fill me-2" style="color: #ff6600;"></i>
+    <?php echo "MENU EXTRA"; ?>
+</h1>
 
     <div class="row g-3">
 
