@@ -212,6 +212,32 @@ if ($action === 'mmdvmysf-stop')   { saveState('ysf','off'); shell_exec('sudo sy
 if ($action === 'mmdvmysf-logs')   { $lines = intval($_GET['lines']??15); $log = shell_exec("sudo journalctl -u mmdvmysf -n {$lines} --no-pager --output=short 2>/dev/null"); header('Content-Type: application/json'); echo json_encode(['mmdvmysf'=>htmlspecialchars($log??'')]); exit; }
 if ($action === 'reboot')          { shell_exec('sudo /usr/bin/systemctl reboot 2>/dev/null'); header('Content-Type: application/json'); echo json_encode(['ok'=>true]); exit; }
 if ($action === 'display-restart') { shell_exec('sudo systemctl daemon-reload 2>/dev/null'); shell_exec('sudo systemctl enable displaydriver 2>/dev/null'); shell_exec('sudo systemctl restart displaydriver 2>/dev/null'); header('Content-Type: application/json'); echo json_encode(['ok'=>true]); exit; }
+
+
+if ($action === 'dump1090-start') {
+    $script = '/home/pi/A108/ejecutar_dump1090.sh';
+    if (!file_exists($script)) { header('Content-Type: application/json'); echo json_encode(['ok'=>false,'error'=>'Script no encontrado']); exit; }
+    $output = shell_exec("sudo bash $script 2>&1");
+    header('Content-Type: application/json');
+    echo json_encode($output !== null ? ['ok'=>true,'output'=>trim($output)] : ['ok'=>false,'error'=>'shell_exec devolvió null (sudoers?)']);
+    exit;
+}
+if ($action === 'dump1090-log') {
+    header('Content-Type: text/plain');
+    $log = '/tmp/dump1090.log';
+    if (file_exists($log)) {
+        $lines = file($log);
+        echo implode('', array_slice($lines, -80));
+    } else {
+        echo '(log vacío — dump1090 aún no iniciado)';
+    }
+    exit;
+}
+
+
+
+
+
 if ($action === 'install-display') { $output = shell_exec('sudo /home/pi/A108/instalar_displaydriver.sh 2>&1'); header('Content-Type: application/json'); echo json_encode(['ok'=>true,'output'=>htmlspecialchars($output??'')]); exit; }
 
 if ($action === 'backup-configs') {
