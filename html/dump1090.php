@@ -4,34 +4,34 @@ header('X-Content-Type-Options: nosniff');
 $action = $_GET['action'] ?? '';
 
 if ($action === 'dump1090-start') {
-    shell_exec('sudo systemctl start dump1090 2>/dev/null');
+    shell_exec('sudo systemctl start dump1090-fa 2>/dev/null');
     $st = 'activating';
-    for ($i = 0; $i < 10; $i++) {
+    for ($i = 0; $i < 15; $i++) {
         sleep(1);
-        $st = trim(shell_exec('systemctl is-active dump1090 2>/dev/null'));
+        $st = trim(shell_exec('systemctl is-active dump1090-fa 2>/dev/null'));
         if ($st !== 'activating') break;
     }
     header('Content-Type: application/json');
     echo json_encode($st === 'active'
-        ? ['ok'=>true,  'output'=>'dump1090.service iniciado correctamente']
+        ? ['ok'=>true,  'output'=>'dump1090-fa iniciado correctamente']
         : ['ok'=>false, 'error'=>'El servicio no arrancó (estado final: '.$st.')']);
     exit;
 }
 
 if ($action === 'dump1090-stop') {
-    shell_exec('sudo systemctl stop dump1090 2>/dev/null');
+    shell_exec('sudo systemctl stop dump1090-fa 2>/dev/null');
     sleep(1);
-    $st = trim(shell_exec('systemctl is-active dump1090 2>/dev/null'));
+    $st = trim(shell_exec('systemctl is-active dump1090-fa 2>/dev/null'));
     header('Content-Type: application/json');
     echo json_encode($st !== 'active'
-        ? ['ok'=>true,  'msg'=>'dump1090.service detenido correctamente']
-        : ['ok'=>false, 'msg'=>'No se pudo detener el servicio (estado: '.$st.')']);
+        ? ['ok'=>true,  'msg'=>'dump1090-fa detenido correctamente']
+        : ['ok'=>false, 'msg'=>'No se pudo detener (estado: '.$st.')']);
     exit;
 }
 
 if ($action === 'dump1090-status') {
-    $st  = trim(shell_exec('systemctl is-active dump1090 2>/dev/null'));
-    $pid = trim(shell_exec('systemctl show dump1090 --property=MainPID --value 2>/dev/null'));
+    $st  = trim(shell_exec('systemctl is-active dump1090-fa 2>/dev/null'));
+    $pid = trim(shell_exec('systemctl show dump1090-fa --property=MainPID --value 2>/dev/null'));
     header('Content-Type: application/json');
     echo json_encode(['active' => $st === 'active', 'status' => $st, 'pid' => $pid]);
     exit;
@@ -39,24 +39,26 @@ if ($action === 'dump1090-status') {
 
 if ($action === 'dump1090-log') {
     header('Content-Type: text/plain');
-    $log = shell_exec('sudo journalctl -u dump1090 -n 80 --no-pager --output=short 2>/dev/null');
-    if (empty(trim($log))) {
-        $logFile = '/tmp/dump1090.log';
-        $log = file_exists($logFile)
-            ? implode('', array_slice(file($logFile), -80))
-            : '(sin log disponible — servicio no iniciado)';
-    }
-    echo $log;
+    $log = shell_exec('sudo journalctl -u dump1090-fa -n 80 --no-pager --output=short 2>/dev/null');
+    echo !empty(trim($log)) ? $log : '(sin log disponible)';
     exit;
 }
 
 if ($action === 'aircraft-json') {
-    $url  = 'http://127.0.0.1:8080/data/aircraft.json';
-    $json = @file_get_contents($url);
     header('Content-Type: application/json');
-    echo $json !== false
-        ? $json
-        : json_encode(['aircraft'=>[], 'error'=>'No se puede conectar a dump1090 en puerto 8080']);
+    $paths = [
+        '/run/dump1090-fa/aircraft.json',
+        '/run/dump1090/aircraft.json',
+    ];
+    foreach ($paths as $path) {
+        if (file_exists($path)) {
+            echo file_get_contents($path);
+            exit;
+        }
+    }
+    $json = @file_get_contents('http://127.0.0.1:8080/data/aircraft.json');
+    if ($json !== false) { echo $json; exit; }
+    echo json_encode(['aircraft'=>[], 'error'=>'No se encuentra aircraft.json en /run/dump1090-fa/']);
     exit;
 }
 
@@ -85,7 +87,7 @@ if ($action === 'terminal') {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>✈ dump1090 · ADS-B</title>
+<title>✈ dump1090-fa · ADS-B</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@500;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -106,12 +108,12 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-ui); h
 
 .btn-ex { font-family: var(--font-mono); font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; border-radius: 4px; padding: .28rem .85rem; cursor: pointer; transition: background .2s, opacity .2s; border: 1px solid; background: transparent; }
 .btn-ex:disabled { opacity: .4; cursor: not-allowed; }
-.btn-cyan  { color: var(--cyan);  border-color: var(--cyan);  }
 .btn-cyan:hover:not(:disabled)  { background: rgba(0,212,255,.1); }
-.btn-green { color: var(--green); border-color: var(--green); }
 .btn-green:hover:not(:disabled) { background: rgba(0,255,159,.1); }
-.btn-red   { color: var(--red);   border-color: var(--red);   }
 .btn-red:hover:not(:disabled)   { background: rgba(255,69,96,.15); }
+.btn-cyan  { color: var(--cyan);  border-color: var(--cyan);  }
+.btn-green { color: var(--green); border-color: var(--green); }
+.btn-red   { color: var(--red);   border-color: var(--red);   }
 .btn-dim   { color: var(--text-dim); border-color: #1e2d3d; }
 .btn-active { background: rgba(0,212,255,.15) !important; border-color: var(--cyan) !important; color: var(--cyan) !important; }
 
@@ -158,7 +160,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-ui); h
 #dump1090MapFrame { width: 100%; height: 100%; border: none; background: #000; flex: 1; }
 
 /* Tabla aviones */
-.ac-toolbar { display: flex; align-items: center; gap: 1rem; padding: .5rem 1.4rem; background: rgba(0,0,0,.3); border-bottom: 1px solid var(--border); flex-shrink: 0; font-family: var(--font-mono); font-size: .72rem; }
+.ac-toolbar { display: flex; align-items: center; gap: 1rem; padding: .5rem 1.4rem; background: rgba(0,0,0,.3); border-bottom: 1px solid var(--border); flex-shrink: 0; font-family: var(--font-mono); font-size: .72rem; flex-wrap: wrap; }
 .ac-counter { color: var(--amber); }
 .ac-updated { color: var(--text-dim); margin-left: auto; }
 .ac-wrap { flex: 1; overflow-y: auto; }
@@ -206,11 +208,11 @@ table.ac-table td.r { text-align: right; }
 <!-- Header -->
 <header class="ex-header">
     <div>
-        <div class="ex-title">✈ dump1090 · ADS-B Receiver</div>
-        <div class="ex-subtitle">SDR · Decodificador de tráfico aéreo · dump1090.service</div>
+        <div class="ex-title">✈ dump1090-fa · ADS-B Receiver</div>
+        <div class="ex-subtitle">SDR · FlightAware · dump1090-fa.service</div>
     </div>
     <div class="ex-btns">
-        <label class="sw" id="swDump" title="Iniciar / Parar dump1090.service">
+        <label class="sw" id="swDump" title="Iniciar / Parar dump1090-fa.service">
             <input type="checkbox" id="chkDump" onchange="toggleDump1090(this)">
             <span class="sw-track"></span>
             <span class="sw-knob"></span>
@@ -230,7 +232,7 @@ table.ac-table td.r { text-align: right; }
     <span class="sep">|</span>
     <span style="color:var(--text-dim)">PID: <span id="svcPid" style="color:var(--cyan)">—</span></span>
     <span class="sep">|</span>
-    <span style="color:var(--text-dim)">Mapa: <span id="mapUrlTxt" style="color:var(--cyan)">—</span></span>
+    <span style="color:var(--text-dim)">JSON: <span style="color:var(--green)">/run/dump1090-fa/aircraft.json</span></span>
 </div>
 
 <!-- Tabs -->
@@ -247,11 +249,12 @@ table.ac-table td.r { text-align: right; }
     <div id="paneLog" class="tab-pane active">
         <div id="launchCard" class="launch-card">
             <div class="launch-icon">✈</div>
-            <div class="launch-title">dump1090 · ADS-B</div>
-            <div class="launch-desc">Activa el toggle del header para arrancar <strong>dump1090.service</strong> y recibir tráfico aéreo en tiempo real.</div>
+            <div class="launch-title">dump1090-fa · ADS-B</div>
+            <div class="launch-desc">Activa el toggle para arrancar <strong>dump1090-fa.service</strong> y recibir tráfico aéreo en tiempo real.</div>
             <div class="launch-params">
-                ⚙ Servicio: dump1090.service<br>
-                📝 Log:     journalctl -u dump1090<br>
+                ⚙ Servicio: dump1090-fa.service<br>
+                📝 Log:     journalctl -u dump1090-fa<br>
+                📄 JSON:    /run/dump1090-fa/aircraft.json<br>
                 🌐 Mapa:    http://[IP]:8080
             </div>
         </div>
@@ -272,11 +275,11 @@ table.ac-table td.r { text-align: right; }
             <span class="sep">|</span>
             <span style="color:var(--text-dim)">Con posición: <span style="color:var(--green)" id="acWithPos">—</span></span>
             <span class="sep">|</span>
-            <span style="color:var(--text-dim)">Máx dist: <span style="color:var(--amber)" id="acMaxDist">—</span></span>
+            <span style="color:var(--text-dim)">En tierra: <span style="color:var(--amber)" id="acOnGround">—</span></span>
             <span class="ac-updated" id="acUpdated">—</span>
         </div>
-        <div class="ac-wrap" id="acWrap">
-            <div class="ac-empty" id="acEmpty">Esperando datos de dump1090…</div>
+        <div class="ac-wrap">
+            <div class="ac-empty" id="acEmpty">Esperando datos de dump1090-fa…</div>
             <table class="ac-table" id="acTable" style="display:none;">
                 <thead>
                     <tr>
@@ -306,14 +309,8 @@ table.ac-table td.r { text-align: right; }
 </div>
 
 <script>
-const mapHost = window.location.hostname;
-const mapPort = 8080;
-const mapUrl  = 'http://' + mapHost + ':' + mapPort;
-document.getElementById('mapUrlTxt').textContent = mapUrl;
-
-// El JSON de aviones lo pedimos vía proxy PHP para evitar CORS
+const mapUrl = 'http://' + window.location.hostname + ':8080';
 const jsonUrl = '?action=aircraft-json';
-
 let logPollInterval = null;
 let acPollInterval  = null;
 
@@ -354,15 +351,14 @@ function switchTab(tab) {
     });
     document.getElementById('pane' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
     document.getElementById('tabBtn' + tab.charAt(0).toUpperCase() + tab.slice(1)).className = 'btn-ex btn-active';
-
-    if (tab === 'ac')  startAcPoll();
+    if (tab === 'ac') startAcPoll();
     if (tab === 'map') {
         const frame = document.getElementById('dump1090MapFrame');
         if (!frame.src || frame.src === 'about:blank') frame.src = mapUrl;
     }
 }
 
-// ── Toggle dump1090.service ───────────────────────────────────────────────────
+// ── Toggle dump1090-fa.service ────────────────────────────────────────────────
 async function toggleDump1090(chk) {
     const wasOn = !chk.checked;
     chk.checked = wasOn;
@@ -370,19 +366,19 @@ async function toggleDump1090(chk) {
     sw.classList.add('busy');
     document.getElementById('launchCard').style.display = 'none';
     document.getElementById('terminalWrap').style.display = 'flex';
-    xtApp('<span class="xt-out">⏳ ' + (wasOn ? 'Parando' : 'Iniciando') + ' dump1090.service…</span>');
+    xtApp('<span class="xt-out">⏳ ' + (wasOn ? 'Parando' : 'Iniciando') + ' dump1090-fa.service…</span>');
     try {
         const r = await fetch('?action=' + (wasOn ? 'dump1090-stop' : 'dump1090-start'));
         const d = await r.json();
         if (d.ok) {
             const isNowOn = !wasOn;
             setSwitch(isNowOn);
-            setStatus(isNowOn ? 'on' : '', isNowOn ? 'dump1090.service activo' : 'dump1090.service detenido');
+            setStatus(isNowOn ? 'on' : '', isNowOn ? 'dump1090-fa.service activo' : 'dump1090-fa.service detenido');
             xtApp('<span class="xt-ok">✅ ' + esc(d.output || d.msg) + '</span>');
             if (isNowOn) startLogPoll(); else { stopLogPoll(); stopAcPoll(); }
         } else {
             xtApp('<span class="xt-err">❌ ' + esc(d.error || d.msg) + '</span>');
-            setStatus('err', 'Error al cambiar estado del servicio');
+            setStatus('err', 'Error al cambiar estado');
         }
     } catch(e) {
         xtApp('<span class="xt-err">❌ Error de red: ' + esc(e.message) + '</span>');
@@ -401,12 +397,12 @@ async function checkServiceStatus() {
         setSwitch(d.active);
         updateStatusBar(d);
         if (d.active) {
-            setStatus('on', 'dump1090.service activo');
+            setStatus('on', 'dump1090-fa.service activo');
             document.getElementById('launchCard').style.display = 'none';
             document.getElementById('terminalWrap').style.display = 'flex';
             if (!logPollInterval) startLogPoll();
         } else {
-            setStatus('', 'dump1090.service inactivo');
+            setStatus('', 'dump1090-fa.service inactivo');
             stopLogPoll(); stopAcPoll();
         }
     } catch(e) { setStatus('err', 'Error al comprobar el servicio'); }
@@ -460,11 +456,12 @@ function renderAircraft(data) {
     const aircraft = (data.aircraft || []).sort((a,b) => (b.messages||0) - (a.messages||0));
     const total    = aircraft.length;
     const withPos  = aircraft.filter(a => a.lat !== undefined).length;
+    const onGround = aircraft.filter(a => a.alt_baro === 'ground' || a.altitude === 'ground').length;
 
-    document.getElementById('acCount').textContent  = total;
-    document.getElementById('acWithPos').textContent = withPos;
-    document.getElementById('acMaxDist').textContent = '—';
-    document.getElementById('acUpdated').textContent = 'Actualizado: ' + new Date().toLocaleTimeString('es-ES');
+    document.getElementById('acCount').textContent    = total;
+    document.getElementById('acWithPos').textContent  = withPos;
+    document.getElementById('acOnGround').textContent = onGround;
+    document.getElementById('acUpdated').textContent  = 'Actualizado: ' + new Date().toLocaleTimeString('es-ES');
 
     if (total === 0) {
         document.getElementById('acEmpty').textContent = 'Sin aeronaves detectadas…';
@@ -482,11 +479,18 @@ function renderAircraft(data) {
         const dot      = isActive ? '<span class="ac-dot"></span>' : '';
         const rowCls   = isActive ? 'ac-active' : isStale ? 'ac-stale' : '';
 
-        const altHtml = a.altitude !== undefined
-            ? (a.altitude === 'ground'
+        // dump1090-fa usa alt_baro en lugar de altitude
+        const altVal  = a.alt_baro ?? a.altitude;
+        const altHtml = altVal !== undefined
+            ? (altVal === 'ground'
                 ? '<span style="color:var(--green);font-size:.7rem;">TIERRA</span>'
-                : '<span class="col-alt">' + Number(a.altitude).toLocaleString() + '</span>')
+                : '<span class="col-alt">' + Number(altVal).toLocaleString() + '</span>')
             : '<span style="color:var(--text-dim)">—</span>';
+
+        // dump1090-fa usa gs (ground speed) en lugar de speed
+        const spd = a.gs ?? a.speed;
+        // dump1090-fa usa track
+        const trk = a.track;
 
         return `<tr class="${rowCls}">
             <td style="padding-left:1rem;">${dot}</td>
@@ -494,8 +498,8 @@ function renderAircraft(data) {
             <td class="col-flight">${a.flight ? esc(a.flight.trim()) : '<span style="color:var(--text-dim)">—</span>'}</td>
             <td class="col-squawk">${a.squawk || '—'}</td>
             <td class="r">${altHtml}</td>
-            <td class="r col-spd">${a.speed !== undefined ? Math.round(a.speed) : '—'}</td>
-            <td class="r">${hdgArrow(a.track)}</td>
+            <td class="r col-spd">${spd !== undefined ? Math.round(spd) : '—'}</td>
+            <td class="r">${hdgArrow(trk)}</td>
             <td class="r col-coord">${a.lat !== undefined ? a.lat.toFixed(4) : '—'}</td>
             <td class="r col-coord">${a.lon !== undefined ? a.lon.toFixed(4) : '—'}</td>
             <td>${rssiBar(a.rssi)}</td>
