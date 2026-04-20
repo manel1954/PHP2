@@ -37,7 +37,7 @@
 <nav class="navbar navbar-expand-md navbar-granate">
     <div class="container">
         <a class="navbar-brand" href="#">
-            <img src="Logo_ea3eiz.png" width="100" height="100" alt="Logo">
+           <img src="Logo_ea3eiz.png" width="30" height="30" alt="Logo" class="rounded-circle">
         </a>
         <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
             <span class="navbar-toggler-icon" style="filter: invert(1);"></span>
