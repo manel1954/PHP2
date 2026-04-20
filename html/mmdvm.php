@@ -980,6 +980,23 @@ button.btn-header { font-family: var(--font-mono); }
 </div>
 </div>
 
+
+<!-- Modal dump1090 -->
+<div id="dump1090Modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9800;align-items:center;justify-content:center;">
+  <div style="background:#0a0e14;border:1px solid #1e2d3d;border-radius:8px;width:860px;max-width:96vw;display:flex;flex-direction:column;overflow:hidden;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:.7rem 1.2rem;background:#111720;border-bottom:1px solid #1e2d3d;flex-shrink:0;">
+      <span style="font-family:'Share Tech Mono',monospace;font-size:.8rem;color:var(--cyan);letter-spacing:.12em;text-transform:uppercase;">✈ dump1090 · ADS-B Log</span>
+      <div style="display:flex;gap:.6rem;">
+        <button onclick="fetchDump1090Log()" style="background:transparent;border:1px solid var(--green);color:var(--green);font-family:'Share Tech Mono',monospace;font-size:.7rem;border-radius:4px;padding:.25rem .8rem;cursor:pointer;" onmouseover="this.style.background='rgba(0,255,159,.1)'" onmouseout="this.style.background='transparent'">⟳ Refrescar</button>
+        <button onclick="closeDump1090Modal()" style="background:transparent;border:1px solid var(--red);color:var(--red);font-family:'Share Tech Mono',monospace;font-size:.7rem;border-radius:4px;padding:.25rem .8rem;cursor:pointer;" onmouseover="this.style.background='rgba(255,69,96,.15)'" onmouseout="this.style.background='transparent'">✖ Cerrar</button>
+      </div>
+    </div>
+    <pre id="dump1090Out" style="flex:1;margin:0;padding:1rem;font-family:'Share Tech Mono',monospace;font-size:.75rem;color:#00ff9f;background:#060c10;height:420px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;"></pre>
+  </div>
+</div>
+
+
+
 <!-- Modal Terminal ttyd -->
 <div id="xtTtydModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9800;align-items:center;justify-content:center;">
   <div style="background:#0a0e14;border:1px solid #1e2d3d;border-radius:8px;width:960px;max-width:96vw;height:620px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;">
@@ -1269,8 +1286,45 @@ function xtTtydClose(){
 }
 
 function extraOpen() {
-    window.open('/extra.php', '_blank');
+    const modal = document.getElementById('dump1090Modal');
+    const term  = document.getElementById('dump1090Out');
+    term.textContent = '⏳ Lanzando dump1090…';
+    modal.style.display = 'flex';
 
+    fetch('?action=dump1090-start')
+        .then(r => r.json())
+        .then(d => {
+            if (d.ok) {
+                term.textContent = '✅ ' + (d.output || 'dump1090 iniciado') + '\n\n';
+                startDump1090Log();
+            } else {
+                term.textContent = '❌ Error: ' + d.error;
+            }
+        })
+        .catch(err => { term.textContent = '❌ Error de red: ' + err; });
+}
+
+let dump1090PollInterval = null;
+function startDump1090Log() {
+    stopDump1090Log();
+    dump1090PollInterval = setInterval(fetchDump1090Log, 1500);
+}
+function stopDump1090Log() {
+    clearInterval(dump1090PollInterval);
+    dump1090PollInterval = null;
+}
+function fetchDump1090Log() {
+    fetch('?action=dump1090-log&t=' + Date.now())
+        .then(r => r.text())
+        .then(text => {
+            const term = document.getElementById('dump1090Out');
+            term.textContent = text;
+            term.scrollTop = term.scrollHeight;
+        });
+}
+function closeDump1090Modal() {
+    stopDump1090Log();
+    document.getElementById('dump1090Modal').style.display = 'none';
 }
 
 
