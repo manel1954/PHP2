@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hola</title>
     <style>
+        body{
+            background: #222;
+        }
         .btn-header { background: cyan; padding: 10px; border: none; cursor: pointer; }
     </style>
 </head>
