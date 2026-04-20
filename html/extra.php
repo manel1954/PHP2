@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title style="color:#fff">MENU EXTRA</title>
+    <title style="color:#fff;">MENU EXTRA</title>
     <style>
     body { background-color: #120f0f;
     }
