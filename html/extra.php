@@ -12,7 +12,7 @@
     </style>
 </head>
 <body>
-    <h1><?php echo "Hola José Luis"; ?></h1>
+    <h1></h1>
 
     <?php
     // Si se recibe la petición de ejecutar el script
@@ -24,7 +24,7 @@
     }
     ?>
 
-    <button class="btn-header" onclick="ejecutarDump()">⌨ MENU EXTRA</button>
+    <button class="btn-header" onclick="ejecutarDump()">⌨ EJECUTAR DUMP1090</button>
 
     <script>
     function ejecutarDump() {
