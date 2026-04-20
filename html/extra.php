@@ -41,21 +41,21 @@
 
     <script>
     function ejecutarDump() {
-        fetch('?action=ejecutar_dump')
-            .then(r => r.text())           // primero text para ver qué llega
-            .then(raw => {
-                console.log('Respuesta raw:', raw);
-                const data = JSON.parse(raw);
-                if (data.ok) {
-                    alert('✅ Script ejecutado:\n' + (data.output || '(sin salida)'));
-                } else {
-                    alert('❌ Error: ' + data.error);
-                }
-            })
-            .catch(err => {
-                alert('❌ Error de red o JSON inválido:\n' + err);
-            });
-    }
+    fetch('/ejecutar_dump.php')   // <-- ruta absoluta al nuevo fichero
+        .then(r => r.text())
+        .then(raw => {
+            console.log('Respuesta raw:', raw);
+            const data = JSON.parse(raw);
+            if (data.ok) {
+                alert('✅ Script ejecutado:\n' + (data.output || '(sin salida)'));
+            } else {
+                alert('❌ Error: ' + data.error);
+            }
+        })
+        .catch(err => {
+            alert('❌ Error: ' + err);
+        });
+}
     </script>
 </body>
 </html>
