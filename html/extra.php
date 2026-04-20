@@ -26,6 +26,35 @@ if ($action === 'dump1090-log') {
         : '(log vacío — dump1090 aún no iniciado)';
     exit;
 }
+
+
+
+
+
+if ($action === 'terminal') {
+    $cmd = trim($_POST['cmd'] ?? '');
+    if (preg_match('/^\s*(vim|vi|less|more|top|htop|su)\s*/i', $cmd)) {
+        header('Content-Type: application/json');
+        echo json_encode(['output' => 'Comando interactivo no soportado.']);
+        exit;
+    }
+    if (preg_match('/(rm\s+-rf|shutdown|mkfs|dd\s+if=)/i', $cmd)) {
+        header('Content-Type: application/json');
+        echo json_encode(['output' => '❌ Comando bloqueado por seguridad']);
+        exit;
+    }
+    $out = $cmd !== ''
+        ? (shell_exec('/usr/bin/sudo -n -u pi -H bash -c ' . escapeshellarg($cmd) . ' 2>&1') ?? '')
+        : '';
+    header('Content-Type: application/json');
+    echo json_encode(['output' => htmlspecialchars($out)]);
+    exit;
+}
+
+
+
+
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -35,6 +64,41 @@ if ($action === 'dump1090-log') {
 <title>✈ dump1090 · ADS-B</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@500;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 <style>
+
+
+
+
+
+/* ── Terminal ── */
+.xterm-out {
+    font-family: var(--font-mono); font-size: .75rem; color: #7a9ab5;
+    background: #060c10; border: none;
+    padding: 1rem 1.4rem; flex: 1;
+    overflow-y: auto; white-space: pre-wrap; word-break: break-all; line-height: 1.55;
+}
+.xterm-out::-webkit-scrollbar { width: 4px; }
+.xterm-out::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.xterm-row {
+    display: flex; align-items: center; gap: .5rem;
+    background: #060c10; border-top: 1px solid var(--border);
+    padding: .5rem 1.4rem; flex-shrink: 0;
+}
+.xterm-pr  { font-family: var(--font-mono); font-size: .78rem; color: #00ff9f; white-space: nowrap; }
+.xterm-inp {
+    flex: 1; background: transparent; border: none; outline: none;
+    font-family: var(--font-mono); font-size: .78rem;
+    color: #c9d1d9; caret-color: #00ff9f;
+}
+.xt-cmd { color: #c9d1d9; }
+.xt-out { color: #7a9ab5; }
+.xt-err { color: #f85149; }
+
+
+
+
+
+
+
 :root {
     --bg: #0a0e14; --surface: #111720; --border: #1e2d3d;
     --green: #00ff9f; --red: #ff4560; --cyan: #00d4ff;
@@ -160,22 +224,28 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-ui); h
 <!-- Contenido -->
 <div class="ex-content">
 
-    <!-- Tab Log -->
-    <div id="paneLog" class="tab-pane active">
-        <!-- Card inicial -->
-        <div id="launchCard" class="launch-card">
-            <div class="launch-icon">✈</div>
-            <div class="launch-title">dump1090 · ADS-B</div>
-            <div class="launch-desc">Pulsa el botón para lanzar dump1090 y empezar a recibir tráfico aéreo en tiempo real.</div>
-            <div class="launch-params">
-                📄 Config: /home/pi/status.ini<br>
-                📝 Log:    /tmp/dump1090.log<br>
-                🌐 Mapa:   puerto HTTP (status.ini línea 46)
-            </div>
-            <button class="btn-ex btn-cyan" style="width:100%;padding:.5rem;font-size:.85rem;" onclick="lanzarDump1090()">▶ Lanzar dump1090</button>
+<!-- Tab Log / Terminal -->
+<div id="paneLog" class="tab-pane active">
+    <div id="launchCard" class="launch-card">
+        <div class="launch-icon">✈</div>
+        <div class="launch-title">dump1090 · ADS-B</div>
+        <div class="launch-desc">Pulsa el botón para lanzar dump1090 y empezar a recibir tráfico aéreo en tiempo real.</div>
+        <div class="launch-params">
+            📄 Config: /home/pi/status.ini<br>
+            📝 Log:    /tmp/dump1090.log<br>
+            🌐 Mapa:   puerto HTTP (status.ini línea 46)
         </div>
-        <pre id="dump1090Out" style="display:none;"></pre>
+        <button class="btn-ex btn-cyan" style="width:100%;padding:.5rem;font-size:.85rem;" onclick="lanzarDump1090()">▶ Lanzar dump1090</button>
     </div>
+    <div id="terminalWrap" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
+        <div class="xterm-out" id="xtOut">pi@raspberry:~$ Terminal lista
+</div>
+        <div class="xterm-row">
+            <span class="xterm-pr" id="xtPr">pi@raspberry:~$</span>
+            <input id="xtInp" class="xterm-inp" autocomplete="off" spellcheck="false" placeholder="escribe un comando…">
+        </div>
+    </div>
+</div>
 
     <!-- Tab Mapa -->
     <div id="paneMap" class="tab-pane">
@@ -188,32 +258,32 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-ui); h
 let pollInterval = null;
 let dumpsStarted = false;
 
-// Detecta hostname y puerto http desde status.ini (lo leemos via log action al inicio)
 const mapHost = window.location.hostname;
-const mapPort = 8080; // puerto por defecto; dump1090 usa el de status.ini línea 46
+const mapPort = 8080;
 const mapUrl  = 'http://' + mapHost + ':' + mapPort;
 document.getElementById('mapUrl').textContent = mapUrl;
 
+// ── Estado ──────────────────────────────────────────────────────────────────
 function setStatus(state, txt) {
     const dot = document.getElementById('dotStatus');
     dot.className = 'dot-status ' + (state === 'on' ? 'on' : state === 'err' ? 'err' : '');
     document.getElementById('statusTxt').textContent = txt;
 }
 
+// ── Pestañas ─────────────────────────────────────────────────────────────────
 function switchTab(tab) {
     const isLog = tab === 'log';
     document.getElementById('paneLog').classList.toggle('active', isLog);
     document.getElementById('paneMap').classList.toggle('active', !isLog);
     document.getElementById('tabBtnLog').className = 'btn-ex ' + (isLog  ? 'btn-active' : 'btn-dim');
     document.getElementById('tabBtnMap').className = 'btn-ex ' + (!isLog ? 'btn-active' : 'btn-dim');
-
-    // Carga el iframe solo cuando se abre la pestaña mapa
     if (!isLog) {
         const frame = document.getElementById('dump1090MapFrame');
         if (!frame.src || frame.src === 'about:blank') frame.src = mapUrl;
     }
 }
 
+// ── Lanzar dump1090 ──────────────────────────────────────────────────────────
 async function lanzarDump1090() {
     const btn = document.getElementById('btnLanzar');
     btn.textContent = '⏳ Iniciando…';
@@ -221,59 +291,121 @@ async function lanzarDump1090() {
     setStatus('', 'Lanzando dump1090…');
 
     document.getElementById('launchCard').style.display = 'none';
-    const out = document.getElementById('dump1090Out');
-    out.style.display = 'block';
-    out.textContent = '⏳ Ejecutando script…\n';
+    const wrap = document.getElementById('terminalWrap');
+    wrap.style.display = 'flex';
+
+    xtApp('<span class="xt-out">⏳ Ejecutando script…</span>');
 
     try {
         const r = await fetch('?action=dump1090-start');
         const d = await r.json();
-
         if (d.ok) {
-            out.textContent += '✅ ' + (d.output || 'dump1090 iniciado correctamente') + '\n\n--- LOG EN TIEMPO REAL ---\n';
+            xtApp('<span class="xt-out">✅ ' + esc(d.output || 'dump1090 iniciado') + '</span>');
+            xtApp('<span class="xt-out">--- LOG EN TIEMPO REAL (tail -f /tmp/dump1090.log) ---</span>');
             setStatus('on', 'dump1090 activo · PID en /tmp/dump1090.pid');
             dumpsStarted = true;
-            startPoll();
+            // Lanza tail -f automáticamente en el terminal
+            xtExec('tail -f /tmp/dump1090.log', true);
             btn.textContent = '⟳ Relanzar';
             btn.disabled = false;
         } else {
-            out.textContent += '❌ Error: ' + d.error + '\n';
+            xtApp('<span class="xt-err">❌ Error: ' + esc(d.error) + '</span>');
             setStatus('err', 'Error al iniciar dump1090');
             btn.textContent = '▶ Reintentar';
             btn.disabled = false;
         }
     } catch (e) {
-        out.textContent += '❌ Error de red: ' + e + '\n';
+        xtApp('<span class="xt-err">❌ Error de red: ' + esc(e) + '</span>');
         setStatus('err', 'Error de red');
         btn.textContent = '▶ Reintentar';
         btn.disabled = false;
     }
 }
 
-function startPoll() {
-    stopPoll();
-    pollInterval = setInterval(fetchDump1090Log, 1500);
+// ── Terminal ─────────────────────────────────────────────────────────────────
+let xtHist = [], xtHidx = -1, xtCwd = '/home/pi';
+
+function xtPrStr() { return 'pi@raspberry:' + xtCwd.replace('/home/pi', '~') + '$'; }
+
+function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function xtApp(html) {
+    const o = document.getElementById('xtOut');
+    o.innerHTML += html + '\n';
+    o.scrollTop = o.scrollHeight;
 }
 
-function stopPoll() {
-    clearInterval(pollInterval);
-    pollInterval = null;
+async function xtExec(cmd, silent) {
+    if (!silent) {
+        xtHist.unshift(cmd); xtHidx = -1;
+        document.getElementById('xtInp').value = '';
+        xtApp('<span class="xt-cmd">' + esc(xtPrStr()) + ' ' + esc(cmd) + '</span>');
+    }
+    try {
+        const resp = await fetch('?action=terminal', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'cmd=' + encodeURIComponent('cd ' + xtCwd + ' && ' + cmd)
+        });
+        const dat = await resp.json();
+        if (dat.output) xtApp('<span class="xt-out">' + dat.output + '</span>');
+    } catch (err) {
+        xtApp('<span class="xt-err">Error: ' + esc(err.message) + '</span>');
+    }
+    document.getElementById('xtPr').textContent = xtPrStr();
 }
 
+document.getElementById('xtInp').addEventListener('keydown', async function(e) {
+    if (e.key === 'Escape') return;
+    if (e.key === 'ArrowUp')   { e.preventDefault(); if (xtHidx < xtHist.length - 1) this.value = xtHist[++xtHidx] || ''; return; }
+    if (e.key === 'ArrowDown') { e.preventDefault(); xtHidx > 0 ? this.value = xtHist[--xtHidx] : (xtHidx = -1, this.value = ''); return; }
+    if (e.key !== 'Enter') return;
+
+    const cmd = this.value.trim();
+    if (!cmd) return;
+
+    if (/^\s*clear\s*$/.test(cmd)) { document.getElementById('xtOut').innerHTML = ''; return; }
+
+    if (/^\s*(edit|nano)(\s+\S+)?\s*$/.test(cmd)) {
+        xtApp('<span class="xt-err">Editor no disponible en esta terminal.</span>');
+        this.value = '';
+        return;
+    }
+
+    if (/^\s*(sudo\s+su|su\s*$|top|htop|vim|vi|less|more)\s*/.test(cmd)) {
+        xtApp('<span class="xt-err">Comando interactivo no soportado.</span>');
+        this.value = '';
+        return;
+    }
+
+    if (/^\s*cd(\s|$)/.test(cmd)) {
+        const t = cmd.replace(/^\s*cd\s*/, '').trim() || '~';
+        if (t === '~' || t === '') xtCwd = '/home/pi';
+        else if (t.startsWith('/')) xtCwd = t;
+        else if (t === '..') { const p = xtCwd.split('/').filter(Boolean); p.pop(); xtCwd = '/' + p.join('/') || '/'; }
+        else xtCwd = xtCwd.replace(/\/$/, '') + '/' + t;
+        xtApp('<span class="xt-cmd">' + esc(xtPrStr()) + ' ' + esc(cmd) + '</span>');
+        xtHist.unshift(cmd); xtHidx = -1;
+        this.value = '';
+        document.getElementById('xtPr').textContent = xtPrStr();
+        return;
+    }
+
+    await xtExec(cmd, false);
+});
+
+// ── Helpers log ──────────────────────────────────────────────────────────────
 function fetchDump1090Log() {
     fetch('?action=dump1090-log&t=' + Date.now())
         .then(r => r.text())
         .then(text => {
-            const out = document.getElementById('dump1090Out');
-            out.style.display = 'block';
-            document.getElementById('launchCard').style.display = 'none';
+            const out = document.getElementById('xtOut');
             out.textContent = text;
             out.scrollTop = out.scrollHeight;
         });
 }
 
-// Al cerrar la pestaña, para el polling
-window.addEventListener('beforeunload', stopPoll);
+window.addEventListener('beforeunload', () => clearInterval(pollInterval));
 </script>
 </body>
 </html>
