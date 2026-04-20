@@ -123,7 +123,7 @@ label { font-size:.75rem; color:var(--text-dim); letter-spacing:.1em; text-trans
 .link-btn { background:none; border:none; cursor:pointer; font-family:var(--font-mono); font-size:.7rem; color:var(--text-dim); letter-spacing:.06em; text-decoration:underline; padding:0; transition:color .2s; }
 .link-btn:hover { color:var(--cyan); }
 
-/* ── Modales ── */
+/* ── Modales ──  */
 .modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:9000; align-items:center; justify-content:center; }
 .modal-bg.open { display:flex; }
 .modal-box { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:2rem; width:100%; max-width:400px; }
