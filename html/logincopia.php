@@ -2,7 +2,7 @@
 session_start();
 
 if (!empty($_SESSION['authenticated'])) {
-    header('Location: mmdvm.php');
+    header('Location: mmdvmcopia.php');
     exit;
 }
 
@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'reset
     if (!file_exists($tokenFile))           { echo json_encode(['ok'=>false,'msg'=>'No hay token de restablecimiento activo. Genera uno desde la terminal de la Pi.']); exit; }
     $saved = trim(file_get_contents($tokenFile));
     // Token expira en 30 minutos (timestamp:token)
-    [$ts, $tk] = explode(':', $saved, 2) + ['',''];
+    $parts = explode(':', $saved, 2); $ts = $parts[0] ?? ''; $tk = $parts[1] ?? '';
     if (time() - intval($ts) > 1800)        { unlink($tokenFile); echo json_encode(['ok'=>false,'msg'=>'El token ha expirado. Genera uno nuevo desde la terminal.']); exit; }
     if (!hash_equals($tk, $token))          { echo json_encode(['ok'=>false,'msg'=>'Token incorrecto.']); exit; }
     if ($new1 === '' || strlen($new1) < 6)  { echo json_encode(['ok'=>false,'msg'=>'La contraseña debe tener al menos 6 caracteres.']); exit; }
@@ -88,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === '') {
                 break;
             }
         }
-        if ($ok) { $_SESSION['authenticated'] = true; header('Location: mmdvm.php'); exit; }
+        if ($ok) { $_SESSION['authenticated'] = true; header('Location: mmdvmcopia.php'); exit; }
         else $error = 'Contraseña incorrecta.';
     }
 }
