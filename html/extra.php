@@ -9,7 +9,7 @@
     </style>
 </head>
 <body>
-    <h1><?php echo "Hola José Luis"; ?></h1>
+    <h1></h1>
 
     <?php
     if (isset($_GET['action']) && $_GET['action'] === 'ejecutar_dump') {
