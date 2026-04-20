@@ -720,6 +720,7 @@ button.btn-header { font-family: var(--font-mono); }
   </div>
 </div>
 <button class="btn-header cyan" onclick="xtTtydOpen()">⌨ Terminal</button>
+<button class="btn-header cyan" onclick="extraOpen()">⌨ MENU EXTRA</button>
 <button id="btnReboot" class="btn-header red" onclick="rebootPi()">⏻ Reiniciar Pi</button>
 </div>
 </header>
@@ -1240,6 +1241,14 @@ function xtTtydClose(){
     document.getElementById('xtTtydModal').style.display='none';
     document.getElementById('xtTtydFrame').src='';
 }
+
+function estarOpen(){
+    function abrirExtra() {
+    header("Location: extra.php");
+    exit;
+}
+}
+
 
 /* ── Terminal ── */
 (function(){
