@@ -5,20 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hola</title>
     <style>
-        body{
-            background: #222;
-        }
         .btn-header { background: cyan; padding: 10px; border: none; cursor: pointer; }
     </style>
 </head>
 <body>
-    <h1></h1>
+    <h1><?php echo "Hola José Luis"; ?></h1>
 
     <?php
-    // Si se recibe la petición de ejecutar el script
     if (isset($_GET['action']) && $_GET['action'] === 'ejecutar_dump') {
+        header('Content-Type: application/json');
         $script = '/home/pi/A108/ejecutar_dump1090.sh';
-        $output = shell_exec("bash $script 2>&1");
+
+        if (!file_exists($script)) {
+            echo json_encode(['ok' => false, 'error' => 'Script no encontrado: ' . $script]);
+            exit;
+        }
+        if (!is_executable($script)) {
+            echo json_encode(['ok' => false, 'error' => 'Script sin permiso de ejecución']);
+            exit;
+        }
+
+        $output = shell_exec("sudo bash $script 2>&1");
+
+        if ($output === null) {
+            echo json_encode(['ok' => false, 'error' => 'shell_exec devolvió null (¿sudoers mal configurado o shell_exec deshabilitado?)']);
+            exit;
+        }
+
         echo json_encode(['ok' => true, 'output' => $output]);
         exit;
     }
@@ -29,14 +42,18 @@
     <script>
     function ejecutarDump() {
         fetch('?action=ejecutar_dump')
-            .then(r => r.json())
-            .then(data => {
-                console.log('Script ejecutado:', data.output);
-                alert('Script ejecutado correctamente');
+            .then(r => r.text())           // primero text para ver qué llega
+            .then(raw => {
+                console.log('Respuesta raw:', raw);
+                const data = JSON.parse(raw);
+                if (data.ok) {
+                    alert('✅ Script ejecutado:\n' + (data.output || '(sin salida)'));
+                } else {
+                    alert('❌ Error: ' + data.error);
+                }
             })
             .catch(err => {
-                console.error('Error:', err);
-                alert('Error al ejecutar el script');
+                alert('❌ Error de red o JSON inválido:\n' + err);
             });
     }
     </script>
