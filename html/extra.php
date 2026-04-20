@@ -66,7 +66,7 @@
             <div class="card bg-secondary border-0 h-100">
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">
-                        <i class="bi bi-airplane-fill me-2 text-info" style="color: #ff6600;"></i>DUMP1090
+                        <i class="bi bi-airplane-fill me-2" style="color: #ff6600;"></i>DUMP1090
                     </h5>
                     <p class="card-text text-white-50 small flex-grow-1">Receptor ADS-B · Seguimiento de aeronaves en tiempo real.</p>
                     <a href="/dump1090.php" target="_blank" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
