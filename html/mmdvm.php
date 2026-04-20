@@ -1243,7 +1243,7 @@ function xtTtydClose(){
 }
 
 function extraOpen() {
-    header("Location: extra.php");
+    header("Location: /extra.php");
     exit;
 }
 
