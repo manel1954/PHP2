@@ -1242,11 +1242,9 @@ function xtTtydClose(){
     document.getElementById('xtTtydFrame').src='';
 }
 
-function extraOpen(){
-    function abrirExtra() {
+function extraOpen() {
     header("Location: extra.php");
     exit;
-}
 }
 
 
