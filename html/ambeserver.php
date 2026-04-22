@@ -23,6 +23,15 @@ function getAutoStatus() {
 }
 
 /* =========================
+   AJAX LOG
+   ========================= */
+if (isset($_GET['action']) && $_GET['action'] === 'log') {
+    header('Content-Type: text/plain');
+    system("tail -n 50 " . escapeshellarg($logFile));
+    exit;
+}
+
+/* =========================
    AUTOARRANQUE CONTROL
    ========================= */
 if (isset($_POST['enable_auto'])) {
@@ -219,7 +228,7 @@ a { color:#00ffcc; }
 
 <div class="card">
     <h3>Log (últimas líneas)</h3>
-    <pre><?php system("tail -n 50 /home/pi/AMBE_SERVER/ambe.log"); ?></pre>
+    <pre id="logbox"></pre>
 
     <p>
         🔴 <a href="?stream=1" target="_blank">
@@ -227,6 +236,21 @@ a { color:#00ffcc; }
         </a>
     </p>
 </div>
+
+<script>
+function refreshLog() {
+    fetch('?action=log')
+        .then(r => r.text())
+        .then(text => {
+            const box = document.getElementById('logbox');
+            box.textContent = text;
+            box.scrollTop = box.scrollHeight;
+        });
+}
+
+refreshLog();
+setInterval(refreshLog, 2000);
+</script>
 
 </body>
 </html>
