@@ -61,7 +61,7 @@
 
         <div class="collapse navbar-collapse" id="mainNav">
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link" href="#">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="mmdvm.php" target="_blank">Panel PHPPLUS</a></li>
                 <li class="nav-item"><a class="nav-link" href="#">Enlace 2</a></li>
                 <li class="nav-item"><a class="nav-link" href="#">Enlace 3</a></li>
                 <li class="nav-item"><a class="nav-link" href="#">Enlace 4</a></li>
