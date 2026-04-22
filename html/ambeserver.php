@@ -228,6 +228,9 @@ button:disabled { opacity:0.4; cursor:not-allowed; }
 .stopped  { color: red; }
 .auto-on  { color: cyan; }
 .auto-off { color: orange; }
+#btnAuto { transition: background 0.2s, border-color 0.2s; }
+#btnAuto.auto-is-on  { border: 2px solid red;  color: #ff4444; }
+#btnAuto.auto-is-off { border: 2px solid cyan; color: #00ffcc; }
 pre#logbox { background:black; color:#0f0; padding:10px; height:300px; overflow:auto;
              font-family: monospace; font-size:13px; white-space:pre-wrap; word-break:break-all; }
 a { color:#00ffcc; }
@@ -256,8 +259,9 @@ a { color:#00ffcc; }
         <button onclick="doAction('restart')">🔄 Restart</button>
         <button onclick="doAction('stop')">⏹ Stop</button>
         <button onclick="doAction('clear')">🧹 Clear Log</button>
-        <button onclick="doAction('enable_auto')">⚡ Auto ON</button>
-        <button onclick="doAction('disable_auto')">❌ Auto OFF</button>
+        <button id="btnAuto" class="<?= $autoEnabled ? 'auto-is-on' : 'auto-is-off' ?>" onclick="toggleAuto()">
+            <?= $autoEnabled ? '❌ Auto OFF' : '⚡ Auto ON' ?>
+        </button>
     </div>
 </div>
 
@@ -307,6 +311,19 @@ function refreshStatus() {
             const al = document.getElementById('autoLabel');
             al.textContent = data.auto ? 'ON' : 'OFF';
             al.className   = 'status ' + (data.auto ? 'auto-on' : 'auto-off');
+
+            const btn = document.getElementById('btnAuto');
+            btn.textContent = data.auto ? '❌ Auto OFF' : '⚡ Auto ON';
+            btn.className   = data.auto ? 'auto-is-on' : 'auto-is-off';
+        });
+}
+
+/* ---- Toggle autoarranque ---- */
+function toggleAuto() {
+    fetch('?action=status')
+        .then(r => r.json())
+        .then(data => {
+            doAction(data.auto ? 'disable_auto' : 'enable_auto');
         });
 }
 
