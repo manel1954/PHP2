@@ -3,7 +3,7 @@ if (isset($_GET['api'])) {
     header('Content-Type: application/json; charset=utf-8');
     header('Cache-Control: no-store, no-cache, must-revalidate');
     
-    $url = $_GET['url'] ?? 'http://192.168.1.41/aircraft.json';
+    $url = $_GET['url'] ?? 'http://localhost/dump1090/aircraft.json';
     $rx_lat = floatval($_GET['rx_lat'] ?? 40.324938);
     $rx_lon = floatval($_GET['rx_lon'] ?? -3.868996);
     
@@ -189,7 +189,7 @@ td{padding:.45rem .6rem;border-bottom:1px solid rgba(30,45,61,.4);vertical-align
 </head>
 <body>
 <div class="config">
-    <label>🌐 JSON URL: <input type="text" id="cfgUrl" value="http://192.168.1.41/aircraft.json"></label>
+    <label>🌐 JSON URL: <input type="text" id="cfgUrl" value="http://localhost/dump1090/aircraft.json"></label>
     <label>📍 Lat RX: <input type="number" id="cfgLat" value="40.324938" step="0.0001" style="min-width:100px"></label>
     <label>📍 Lon RX: <input type="number" id="cfgLon" value="-3.868996" step="0.0001" style="min-width:100px"></label>
     <span style="border-right:1px solid var(--border);height:20px"></span>
@@ -213,8 +213,8 @@ td{padding:.45rem .6rem;border-bottom:1px solid rgba(30,45,61,.4);vertical-align
 </div>
 <div class="stats-bar">
     <span>🕐 Actualizado: <b id="lastUpdate">—</b></span>
-    <span>📡 Fuente: <b id="srcInfo">192.168.1.41</b></span>
-    <span style="color:var(--text-dim);font-size:.65rem;margin-left:auto">ⓘ ADS-B Monitor By REM-ESP @ EA4AAOJ</span>
+    <span>📡 Fuente: <b id="srcInfo">localhost</b></span>
+    <span style="color:var(--text-dim);font-size:.65rem;margin-left:auto">ⓘ ADS-B Monitor By REM-ESP @ ADER</span>
 </div>
 <div class="tabs">
     <button class="tab active" onclick="showTab('table')">📋 Tabla</button>
@@ -271,7 +271,7 @@ td{padding:.45rem .6rem;border-bottom:1px solid rgba(30,45,61,.4);vertical-align
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const CFG_KEY = 'adsb_ultimate_cfg_v9';
-let cfg = { url:'http://192.168.1.41/aircraft.json', lat:40.324938, lon:-3.868996, units:'metric', alerts:false, sort:{col:9,asc:true}, filter:'' };
+let cfg = { url:'http://localhost/dump1090/aircraft.json', lat:40.324938, lon:-3.868996, units:'metric', alerts:false, sort:{col:9,asc:true}, filter:'' };
 let rawData = [], map = null, markers = {}, sortCol = 9, sortAsc = true, audioCtx = null, lastEmergencies = new Set(), currentLayer = 'day';
 
 function isCritical(a){
