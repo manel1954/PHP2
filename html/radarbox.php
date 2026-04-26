@@ -33,7 +33,6 @@ if (isset($_POST['action'])) {
             $message = "Radarbox reiniciado";
             break;
 
-        /* 🔥 NUEVO: AUTOARRANQUE */
         case 'enable':
             shell_exec("sudo systemctl enable rbfeeder.service");
             $message = "Arranque automático ACTIVADO";
@@ -55,6 +54,9 @@ if (isset($_POST['save_config'])) {
 
 /* 📊 ESTADO SERVICIO */
 $status = trim(shell_exec("systemctl is-active rbfeeder.service"));
+
+/* 🔌 ESTADO AUTOARRANQUE */
+$enabled = trim(shell_exec("systemctl is-enabled rbfeeder.service")) === "enabled";
 
 /* 📄 CONFIG */
 $config_content = file_exists($config_file) ? file_get_contents($config_file) : "";
@@ -96,9 +98,15 @@ button {
 
 button:hover { background:#475569; }
 
-.start{background:#16a34a;}
-.stop{background:#dc2626;}
-.restart{background:#ca8a04;}
+.start   { background:#16a34a; }
+.stop    { background:#dc2626; }
+.restart { background:#ca8a04; }
+
+/* Toggle autoarranque */
+.autoarranque-on  { background:#2563eb; }
+.autoarranque-off { background:#7c3aed; }
+.autoarranque-on:hover  { background:#1d4ed8; }
+.autoarranque-off:hover { background:#6d28d9; }
 
 textarea {
     width:100%;
@@ -122,8 +130,8 @@ textarea {
     border-radius:8px;
 }
 
-.active{background:#16a34a;}
-.inactive{background:#dc2626;}
+.active   { background:#16a34a; }
+.inactive { background:#dc2626; }
 </style>
 
 <script>
@@ -155,18 +163,20 @@ setInterval(() => {
 
 <form method="post">
 
-<button class="start" name="action" value="start">▶️ Arrancar</button>
-<button class="stop" name="action" value="stop">⏹️ Parar</button>
+<button class="start"   name="action" value="start">▶️ Arrancar</button>
+<button class="stop"    name="action" value="stop">⏹️ Parar</button>
 <button class="restart" name="action" value="restart">🔄 Reiniciar</button>
 
-<!-- 🔥 NUEVOS BOTONES -->
-<button name="action" value="enable" style="background:#2563eb;">
-⚡ Autoarranque ON
-</button>
-
-<button name="action" value="disable" style="background:#7c3aed;">
-❌ Autoarranque OFF
-</button>
+<!-- 🔁 BOTÓN TOGGLE AUTOARRANQUE -->
+<?php if ($enabled): ?>
+    <button class="autoarranque-on" name="action" value="disable">
+        ⚡ Autoarranque ON
+    </button>
+<?php else: ?>
+    <button class="autoarranque-off" name="action" value="enable">
+        ❌ Autoarranque OFF
+    </button>
+<?php endif; ?>
 
 <!-- 📟 TERMINAL -->
 <button type="submit" name="view" value="<?php echo ($view=='terminal') ? 'none' : 'terminal'; ?>">
@@ -182,7 +192,7 @@ setInterval(() => {
 
 <p>
 Estado:
-<span class="<?php echo ($status=='active')?'active':'inactive'; ?>">
+<span class="<?php echo ($status=='active') ? 'active' : 'inactive'; ?>">
 <?php echo $status; ?>
 </span>
 </p>
