@@ -75,17 +75,17 @@
         MENU EXTRA
     </h1>
 
-    <div class="row g-3">
+    <div class="row g-3 justify-content-center">
 
-        <!-- DUMP1090 -->
-        <div class="col-12 col-sm-6 col-md-3">
+        <!-- DUMP1090 CONTROL -->
+        <div class="col-12 col-sm-6 col-lg-4">
             <div class="card bg-secondary border-0 h-100">
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">
-                        <i class="bi bi-airplane-fill me-2" style="color: #00ff15;"></i>DUMP1090
+                        <i class="bi bi-airplane-fill me-2" style="color: #00ff15;"></i>Dump1090 Control
                     </h5>
                     <p class="card-text text-white-50 small flex-grow-1">
-                        Receptor ADS-B · Seguimiento de aeronaves en tiempo real.
+                        Lanzador configurador Dump1090
                     </p>
                     <a href="/dump1090.php" target="_blank" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
                         <i class="bi bi-box-arrow-up-right me-1"></i>Abrir
@@ -94,12 +94,46 @@
             </div>
         </div>
 
-        <!-- RADARBOX -->
-        <div class="col-12 col-sm-6 col-md-3">
+        <!-- DUMP1090 MONITOR -->
+        <div class="col-12 col-sm-6 col-lg-4">
             <div class="card bg-secondary border-0 h-100">
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">
-                        <i class="bi bi-broadcast-pin me-2" style="color:#00d9ff;"></i>RADARBOX
+                        <i class="bi bi-airplane-fill me-2" style="color: #00ff15;"></i>Dump1090 Monitor
+                    </h5>
+                    <p class="card-text text-white-50 small flex-grow-1">
+                        Seguimiento de aeronaves en tiempo real
+                    </p>
+                    <a href="/dump1090monitor.php" target="_blank" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
+                        <i class="bi bi-box-arrow-up-right me-1"></i>Abrir
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- AMBE SERVER -->
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="card bg-secondary border-0 h-100">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">
+                        <i class="bi bi-cpu-fill me-2" style="color:#ff4dff;"></i>AMBE SERVER
+                    </h5>
+                    <p class="card-text text-white-50 small flex-grow-1">
+                        Servidor AMBE · Control de voz digital DMR
+                    </p>
+                    <a href="/ambeserver.php" target="_blank" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
+                        <i class="bi bi-box-arrow-up-right me-1"></i>Abrir
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- RADARBOX -->
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="card bg-secondary border-0 h-100">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">
+                        <i class="bi bi-airplane-engines-fill me-2" style="color:#ff6600;"></i>RADARBOX
                     </h5>
                     <p class="card-text text-white-50 small flex-grow-1">
                         Feeder Radarbox · Tracking ADS-B global.
@@ -112,7 +146,7 @@
         </div>
 
         <!-- FLIGHTRADAR24 -->
-        <div class="col-12 col-sm-6 col-md-3">
+        <div class="col-12 col-sm-6 col-lg-4">
             <div class="card bg-secondary border-0 h-100">
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">
@@ -129,11 +163,11 @@
         </div>
 
         <!-- RADIOSONDE (AUTO_RX) -->
-        <div class="col-12 col-sm-6 col-md-3">
+        <div class="col-12 col-sm-6 col-lg-4">
             <div class="card bg-secondary border-0 h-100">
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">
-                        <i class="bi bi-wind me-2" style="color:#66ffcc;"></i>RADIOSONDE
+                        <i class="bi bi-balloon-fill me-2" style="color:#66ffcc;"></i>RADIOSONDE
                     </h5>
                     <p class="card-text text-white-50 small flex-grow-1">
                         Seguimiento de sondas meteorológicas en tiempo real.
@@ -145,27 +179,9 @@
             </div>
         </div>
 
-        <!-- AMBE SERVER -->
-        <div class="col-12 col-sm-6 col-md-3">
-            <div class="card bg-secondary border-0 h-100">
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">
-                        <i class="bi bi-cpu-fill me-2" style="color:#ff4dff;"></i>AMBE SERVER
-                    </h5>
-                    <p class="card-text text-white-50 small flex-grow-1">
-                        Servidor AMBE · Control de voz digital DMR / DV en tiempo real.
-                    </p>
-                    <a href="/ambeserver.php" target="_blank" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
-                        <i class="bi bi-gear-fill me-1"></i>Abrir
-                    </a>
-                </div>
-            </div>
-        </div>
-
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
