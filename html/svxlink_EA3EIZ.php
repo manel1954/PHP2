@@ -1,32 +1,11 @@
 <?php
-// 🎛️ SvxLink Control Panel - AJAX Edition (Cierre con countdown + Log toggle)
+// 🎛️ SvxLink Control Panel - AJAX Edition
 session_start();
 header('X-Content-Type-Options: nosniff');
 
 $SERVICE = "svxlink";
-$CONFIG_FILES = [
-    "main" => "/usr/local/etc/svxlink/svxlink.conf",
-    "echolink" => "/usr/local/etc/svxlink/svxlink.d/ModuleEchoLink.conf"
-];
 
 $action = $_GET['action'] ?? '';
-
-if ($action === 'config-read') {
-    header('Content-Type: application/json');
-    $key = $_GET['file'] ?? '';
-    if (!isset($CONFIG_FILES[$key])) { echo json_encode(['ok'=>false, 'error'=>'Archivo no válido']); exit; }
-    echo json_encode(['ok'=>true, 'content'=>file_get_contents($CONFIG_FILES[$key])]);
-    exit;
-}
-
-if ($action === 'config-save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    header('Content-Type: application/json');
-    $key = $_POST['file'] ?? ''; $content = $_POST['content'] ?? '';
-    if (!isset($CONFIG_FILES[$key])) { echo json_encode(['ok'=>false, 'error'=>'Archivo no permitido']); exit; }
-    if (!is_writable($CONFIG_FILES[$key])) { echo json_encode(['ok'=>false, 'error'=>'Sin permisos']); exit; }
-    echo json_encode(file_put_contents($CONFIG_FILES[$key], $content) !== false ? ['ok'=>true, 'msg'=>'✅ Guardado'] : ['ok'=>false, 'error'=>'Error']);
-    exit;
-}
 
 if ($action === 'start') {
     shell_exec("sudo systemctl start $SERVICE 2>/dev/null");
@@ -122,21 +101,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ui);height:10
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 @keyframes pulse-amber{0%,100%{opacity:1;box-shadow:0 0 6px var(--amber)}50%{opacity:.6;box-shadow:0 0 2px var(--amber)}}
 .sep{color:var(--border)}
-.ex-tabs{display:flex;gap:.4rem;padding:.6rem 1.4rem;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
 .ex-content{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.tab-pane{flex:1;display:none;flex-direction:column;overflow:hidden}
-.tab-pane.active{display:flex}
 .xterm-out{font-family:var(--font-mono);font-size:.75rem;color:#7a9ab5;background:#060c10;padding:1rem 1.4rem;flex:1;overflow-y:auto;white-space:pre-wrap;word-break:break-all;line-height:1.55}
 .xterm-out::-webkit-scrollbar{width:4px}
 .xterm-out::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-.config-wrap{flex:1;display:flex;flex-direction:column;padding:1rem 1.4rem;overflow:hidden}
-.config-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem}
-.config-path{font-family:var(--font-mono);font-size:.7rem;color:var(--text-dim)}
-.config-actions{display:flex;gap:.5rem}
-.config-select{font-family:var(--font-mono);font-size:.75rem;background:#060c10;border:1px solid var(--border);color:var(--cyan);padding:.4rem .8rem;border-radius:4px;outline:none}
-.config-editor{flex:1;background:#060c10;border:1px solid var(--border);border-radius:4px;padding:.8rem;font-family:var(--font-mono);font-size:.75rem;color:#c9d1d9;resize:none;outline:none;line-height:1.6}
-.config-editor:focus{border-color:var(--cyan);box-shadow:0 0 0 2px rgba(0,212,255,.2)}
-.config-hint{font-size:.7rem;color:var(--text-dim);margin-top:.5rem}
 .launch-card{margin:2rem auto;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:2rem 2.5rem;max-width:480px;text-align:center}
 .launch-icon{font-size:3rem;margin-bottom:1rem}
 .launch-title{font-family:var(--font-orb);font-size:1.1rem;color:var(--cyan);letter-spacing:.08em;margin-bottom:.6rem}
@@ -164,7 +132,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ui);height:10
             <span class="sw-busy-dot"></span>
         </label>
         <span id="svcLabel" style="font-family:var(--font-mono);font-size:.72rem;color:var(--text-dim);letter-spacing:.08em;text-transform:uppercase;min-width:2rem;">OFF</span>
-        
+
         <button class="btn-ex btn-green" id="btnLog" onclick="toggleLogView()">📋 Logs</button>
         <button class="btn-ex btn-red" onclick="cerrarVentana()">✖ Cerrar</button>
     </div>
@@ -189,64 +157,38 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ui);height:10
     <span style="color:var(--text-dim)">PID: <span id="svcPid" style="color:var(--cyan)">—</span></span>
 </div>
 
-<div class="ex-tabs">
-    <button id="tabBtnLog" class="btn-ex btn-active" onclick="switchTab('log')">📋 Terminal</button>
-    <button id="tabBtnCfg" class="btn-ex btn-dim"    onclick="switchTab('cfg')">⚙ Config</button>
-</div>
-
 <div class="ex-content">
-    <div id="paneLog" class="tab-pane active">
-        <div id="launchCard" class="launch-card">
-            <div class="launch-icon">🎛️</div>
-            <div class="launch-title">svxlink · Repetidor</div>
-            <div class="launch-desc">Activa el toggle superior para arrancar el servicio con tu configuración.</div>
-            <div style="margin:1rem 0;display:flex;flex-direction:column;gap:.4rem;align-items:center;">
-                <div class="status-badge"><span class="status-dot" id="cardSvcDot"></span><span id="cardSvcText">Servicio: —</span></div>
-                <div class="status-badge"><span class="status-dot" id="cardAutoDot"></span><span id="cardAutoText">Autostart: —</span></div>
-            </div>
-            <div class="launch-params">
-                ⚙ Servicio: svxlink.service<br>
-                📝 Log:     journalctl -u svxlink<br>
-                ⚙ Config:  /usr/local/etc/svxlink/<br>
-                📄 Archivos: svxlink.conf, ModuleEchoLink.conf
-            </div>
+    <div id="launchCard" class="launch-card">
+        <div class="launch-icon">🎛️</div>
+        <div class="launch-title">svxlink · Repetidor</div>
+        <div class="launch-desc">Activa el toggle superior para arrancar el servicio con tu configuración.</div>
+        <div style="margin:1rem 0;display:flex;flex-direction:column;gap:.4rem;align-items:center;">
+            <div class="status-badge"><span class="status-dot" id="cardSvcDot"></span><span id="cardSvcText">Servicio: —</span></div>
+            <div class="status-badge"><span class="status-dot" id="cardAutoDot"></span><span id="cardAutoText">Autostart: —</span></div>
         </div>
-        <div id="terminalWrap" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
-            <div class="xterm-out" id="xtOut">root@svxlink:~$ Pulsa 📋 Logs para cargar el historial
-</div>
+        <div class="launch-params">
+            ⚙ Servicio: svxlink.service<br>
+            📝 Log:     journalctl -u svxlink<br>
+            ⚙ Config:  /usr/local/etc/svxlink/<br>
+            📄 Archivos: svxlink.conf, ModuleEchoLink.conf
         </div>
     </div>
-
-    <div id="paneCfg" class="tab-pane">
-        <div class="config-wrap">
-            <div class="config-header">
-                <select id="configSelect" class="config-select" onchange="loadConfig()">
-                    <option value="main">svxlink.conf</option>
-                    <option value="echolink">ModuleEchoLink.conf</option>
-                </select>
-                <div class="config-actions">
-                    <button class="btn-ex btn-cyan" onclick="loadConfig()">⟳ Recargar</button>
-                    <button class="btn-ex btn-green" onclick="saveConfig()">💾 Guardar</button>
-                </div>
-            </div>
-            <textarea id="configEditor" class="config-editor" spellcheck="false" placeholder="Cargando configuración…"></textarea>
-            <div class="config-hint">⚠️ Edita los parámetros. Los cambios requieren reiniciar el servicio para aplicar.</div>
-        </div>
+    <div id="terminalWrap" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
+        <div class="xterm-out" id="xtOut">root@svxlink:~$ Pulsa 📋 Logs para cargar el historial
+</div>
     </div>
 </div>
 
 <script>
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 let logVisible = false;
 let logPoll = null;
 
-// 🔽 TOGGLE LOG: Muestra/Oculta terminal + Controla polling
 function toggleLogView() {
     logVisible = !logVisible;
     const wrap = document.getElementById('terminalWrap');
     const launch = document.getElementById('launchCard');
     const btn = document.getElementById('btnLog');
-    
+
     if (logVisible) {
         launch.style.display = 'none';
         wrap.style.display = 'flex';
@@ -318,7 +260,6 @@ function updateAutoState(enabled) {
     document.getElementById('cardAutoText').textContent = 'Autostart: ' + (enabled ? 'ON' : 'OFF');
 }
 
-// 🔽 CIERRE CON CUENTA ATRÁS (5s) + FALLBACK SEGURO
 function cerrarVentana() {
     document.body.innerHTML = `
         <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;
@@ -326,23 +267,20 @@ function cerrarVentana() {
             <div style="font-size:5rem;font-weight:900;color:#00d4ff;margin-bottom:10px;" id="countdownNum">5</div>
             <div style="font-size:1.2rem;margin-bottom:30px;color:#7a9ab5;">Cerrando panel de control...</div>
             <button onclick="window.close()" style="padding:12px 24px;background:#ff4560;color:white;border:none;
-                border-radius:4px;cursor:pointer;font-family:inherit;font-size:1rem;transition:0.2s;" 
+                border-radius:4px;cursor:pointer;font-family:inherit;font-size:1rem;"
                 onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
                 Cerrar ahora
             </button>
         </div>
     `;
-    
     let count = 5;
     const interval = setInterval(() => {
         count--;
         const numEl = document.getElementById('countdownNum');
         if (numEl) numEl.textContent = count;
-        
         if (count <= 0) {
             clearInterval(interval);
             window.close();
-            // Fallback por si el navegador bloquea window.close()
             if (!window.closed) {
                 document.body.innerHTML = `
                     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;
@@ -360,16 +298,6 @@ function cerrarVentana() {
     }, 1000);
 }
 
-function switchTab(tab) {
-    ['log','cfg'].forEach(t=>{
-        document.getElementById('pane'+t.charAt(0).toUpperCase()+t.slice(1)).classList.remove('active');
-        document.getElementById('tabBtn'+t.charAt(0).toUpperCase()+t.slice(1)).className='btn-ex btn-dim';
-    });
-    document.getElementById('pane'+tab.charAt(0).toUpperCase()+tab.slice(1)).classList.add('active');
-    document.getElementById('tabBtn'+tab.charAt(0).toUpperCase()+tab.slice(1)).className='btn-ex btn-active';
-    if(tab==='cfg') loadConfig();
-}
-
 async function toggleService(chk) {
     const wasOn = !chk.checked;
     chk.checked = wasOn;
@@ -379,7 +307,7 @@ async function toggleService(chk) {
     document.getElementById('dotStatus').className = wasOn?'dot-status':'dot-status activating';
     document.getElementById('svcStatus').textContent = wasOn?'DETENIENDO…':'INICIANDO…';
     document.getElementById('svcStatus').style.color = wasOn?'var(--text)':'var(--amber)';
-    
+
     try {
         const r = await fetch('?action='+(wasOn?'stop':'start'));
         const d = await r.json();
@@ -415,7 +343,6 @@ async function checkServiceStatus() {
         const d = await r.json();
         updateStatusBar(d);
     } catch(e) {
-        console.error('Status check failed:', e);
         document.getElementById('dotStatus').className='dot-status err';
         document.getElementById('statusTxt').textContent='Error al comprobar servicio';
         document.getElementById('svcStatus').textContent='ERROR';
@@ -423,37 +350,8 @@ async function checkServiceStatus() {
     }
 }
 
-async function loadConfig() {
-    const editor = document.getElementById('configEditor');
-    const select = document.getElementById('configSelect');
-    editor.value = '⏳ Cargando…'; editor.disabled = true;
-    try {
-        const r = await fetch('?action=config-read&file='+select.value+'&t='+Date.now());
-        const d = await r.json();
-        editor.value = d.ok ? d.content : '⚠ Error: '+d.error;
-    } catch(e) { editor.value = '⚠ Error de red'; }
-    editor.disabled = false;
-}
-
-async function saveConfig() {
-    const editor = document.getElementById('configEditor');
-    const select = document.getElementById('configSelect');
-    editor.disabled = true;
-    try {
-        const r = await fetch('?action=config-save', {
-            method:'POST',
-            headers:{'Content-Type':'application/x-www-form-urlencoded'},
-            body:'file='+encodeURIComponent(select.value)+'&content='+encodeURIComponent(editor.value)
-        });
-        const d = await r.json();
-        alert(d.ok?'✅ '+d.msg:'❌ '+d.error);
-    } catch(e) { alert('❌ Error de red'); } finally { editor.disabled = false; }
-}
-
-// Init
 checkServiceStatus();
 setInterval(checkServiceStatus, 10000);
-if(document.getElementById('paneCfg').classList.contains('active')) loadConfig();
 </script>
 </body>
 </html>
