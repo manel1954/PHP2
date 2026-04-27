@@ -4,10 +4,56 @@
 // Edita: ModuleEchoLink.conf + svxlink.conf
 // =====================================================
 
-$echolink_conf = "/etc/svxlink/svxlink.d/ModuleEchoLink.conf";
-$svxlink_conf  = "/etc/svxlink/svxlink.conf";
 $message       = "";
 $message_type  = "";
+
+// ---- AUTO-DETECCIÓN DE RUTAS ----
+$echolink_candidates = [
+    "/usr/local/etc/svxlink/svxlink.d/ModuleEchoLink.conf",
+    "/etc/svxlink/svxlink.d/ModuleEchoLink.conf",
+    "/etc/svxlink.d/ModuleEchoLink.conf",
+    "/usr/share/svxlink/ModuleEchoLink.conf",
+    "/home/pi/svxlink/ModuleEchoLink.conf",
+];
+$svxlink_candidates = [
+    "/usr/local/etc/svxlink/svxlink.conf",
+    "/etc/svxlink/svxlink.conf",
+    "/etc/svxlink.conf",
+    "/home/pi/svxlink/svxlink.conf",
+];
+
+// Permitir override manual por GET o sesión
+session_start();
+if (isset($_POST['set_paths'])) {
+    $_SESSION['echolink_conf'] = $_POST['custom_echolink'] ?? '';
+    $_SESSION['svxlink_conf']  = $_POST['custom_svxlink']  ?? '';
+}
+if (isset($_SESSION['echolink_conf']) && file_exists($_SESSION['echolink_conf'])) {
+    $echolink_conf = $_SESSION['echolink_conf'];
+} else {
+    $echolink_conf = '';
+    foreach ($echolink_candidates as $c) { if (file_exists($c)) { $echolink_conf = $c; break; } }
+}
+if (isset($_SESSION['svxlink_conf']) && file_exists($_SESSION['svxlink_conf'])) {
+    $svxlink_conf = $_SESSION['svxlink_conf'];
+} else {
+    $svxlink_conf = '';
+    foreach ($svxlink_candidates as $c) { if (file_exists($c)) { $svxlink_conf = $c; break; } }
+}
+
+// Estado de ficheros para diagnóstico
+$diag = [
+    'echolink' => [
+        'path'     => $echolink_conf ?: '(no encontrado)',
+        'exists'   => $echolink_conf && file_exists($echolink_conf),
+        'readable' => $echolink_conf && is_readable($echolink_conf),
+    ],
+    'svxlink' => [
+        'path'     => $svxlink_conf ?: '(no encontrado)',
+        'exists'   => $svxlink_conf && file_exists($svxlink_conf),
+        'readable' => $svxlink_conf && is_readable($svxlink_conf),
+    ],
+];
 
 // ---- AJAX: devolver contenido raw de fichero ----
 if (isset($_GET['rawfile'])) {
@@ -515,6 +561,56 @@ input[type="number"].cell-input::-webkit-inner-spin-button { -webkit-appearance:
 
     <div class="editor-body">
 
+        <!-- ── DIAGNÓSTICO DE FICHEROS ── -->
+        <?php $all_ok = $diag['echolink']['readable'] && $diag['svxlink']['readable']; ?>
+        <div style="background:<?= $all_ok ? '#0d1f10' : '#1f0d0d' ?>;
+                    border:1px solid <?= $all_ok ? '#22c55e' : '#ef4444' ?>;
+                    border-radius:6px; padding:8px 12px; margin-bottom:10px; font-size:.78rem;">
+            <div style="font-weight:700;margin-bottom:4px;color:<?= $all_ok ? '#86efac' : '#fca5a5' ?>">
+                <?= $all_ok ? '✅ Ficheros de configuración cargados correctamente' : '⚠️ Problema leyendo los ficheros' ?>
+            </div>
+            <?php foreach (['echolink'=>'ModuleEchoLink.conf','svxlink'=>'svxlink.conf'] as $k=>$label): ?>
+            <div style="display:flex;gap:6px;align-items:center;margin-top:3px;flex-wrap:wrap">
+                <span style="color:<?= $diag[$k]['readable'] ? '#22c55e' : '#ef4444' ?>">●</span>
+                <span style="color:#7a8aaa"><?= $label ?>:</span>
+                <span style="color:#d0d8f0;font-family:monospace;font-size:.75rem"><?= htmlspecialchars($diag[$k]['path']) ?></span>
+                <?php if (!$diag[$k]['exists']): ?>
+                    <span style="color:#fca5a5;font-weight:700">[NO ENCONTRADO]</span>
+                <?php elseif (!$diag[$k]['readable']): ?>
+                    <span style="color:#fbbf24;font-weight:700">[SIN PERMISO — ejecuta: sudo chmod a+r <?= htmlspecialchars($diag[$k]['path']) ?>]</span>
+                <?php else: ?>
+                    <span style="color:#22c55e">[OK]</span>
+                <?php endif; ?>
+            </div>
+            <?php endforeach; ?>
+            <?php if (!$all_ok): ?>
+            <details style="margin-top:8px;">
+                <summary style="cursor:pointer;color:#f59e0b;font-weight:600;">🔧 Especificar rutas manualmente</summary>
+                <form method="post" style="margin-top:8px;">
+                    <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 8px;align-items:center;margin-bottom:6px;">
+                        <span style="color:#7a8aaa;font-size:.75rem">ModuleEchoLink.conf:</span>
+                        <input type="text" name="custom_echolink"
+                               style="background:#111827;border:1px solid #3a4460;border-radius:4px;padding:4px 8px;color:#d0d8f0;font-family:monospace;font-size:.75rem;width:100%"
+                               value="<?= htmlspecialchars($diag['echolink']['path'] !== '(no encontrado)' ? $diag['echolink']['path'] : '') ?>"
+                               placeholder="/etc/svxlink/svxlink.d/ModuleEchoLink.conf">
+                        <span style="color:#7a8aaa;font-size:.75rem">svxlink.conf:</span>
+                        <input type="text" name="custom_svxlink"
+                               style="background:#111827;border:1px solid #3a4460;border-radius:4px;padding:4px 8px;color:#d0d8f0;font-family:monospace;font-size:.75rem;width:100%"
+                               value="<?= htmlspecialchars($diag['svxlink']['path'] !== '(no encontrado)' ? $diag['svxlink']['path'] : '') ?>"
+                               placeholder="/etc/svxlink/svxlink.conf">
+                    </div>
+                    <button type="submit" name="set_paths" value="1"
+                            style="background:#2563eb;color:#fff;border:none;border-radius:4px;padding:5px 14px;cursor:pointer;font-size:.78rem;">
+                        💾 Aplicar rutas
+                    </button>
+                    <small style="color:#7a8aaa;margin-left:10px;">
+                        Buscar en la Pi: <code style="color:#22d3ee">find / -name "svxlink.conf" 2>/dev/null</code>
+                    </small>
+                </form>
+            </details>
+            <?php endif; ?>
+        </div>
+
         <?php if ($message): ?>
         <div class="msg msg-<?= $message_type ?>"><?= htmlspecialchars($message) ?></div>
         <?php endif; ?>
@@ -813,4 +909,3 @@ document.addEventListener('keydown', e => {
 </script>
 </body>
 </html>
-
