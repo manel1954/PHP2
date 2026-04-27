@@ -556,7 +556,7 @@ input[type="number"].cell-input::-webkit-inner-spin-button { -webkit-appearance:
     <!-- Barra de título -->
     <div class="title-bar">
         <h2>✈️ &nbsp;EDITOR SVXLINK</h2>
-        <a class="btn-close-x" href="menu_extra.php" title="Cerrar">✕</a>
+        <a class="btn-close-x" href="extra.php" title="Cerrar">✕</a>
     </div>
 
     <div class="editor-body">
@@ -809,7 +809,7 @@ input[type="number"].cell-input::-webkit-inner-spin-button { -webkit-appearance:
 
         <!-- ── BOTONES SALIR / GUARDAR ── -->
         <div style="display:flex;gap:6px;margin-top:6px;">
-            <a href="menu_extra.php"
+            <a href="extra.php"
                style="flex:1;display:block;padding:12px;background:#374151;color:#d0d8f0;
                       border-radius:6px;text-align:center;font-size:.95rem;font-weight:800;
                       letter-spacing:1px;text-decoration:none;">
