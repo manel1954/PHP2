@@ -232,6 +232,15 @@ function switchTab(tab) {
     document.getElementById('tabBtn' + tab.charAt(0).toUpperCase() + tab.slice(1)).className = 'btn-ex btn-active';
 
     if (tab === 'editor') {
+        // Parar servicio antes de abrir el editor
+        const chk = document.getElementById('chkSvc');
+        if (chk.checked) {
+            mostrarAviso('⏹️ Parando svxlink antes de editar…', 'amber');
+            fetch('?action=stop').then(() => {
+                checkServiceStatus();
+                mostrarAviso('✅ svxlink parado. Edita y guarda la configuración.', 'green');
+            });
+        }
         // Cargar iframe solo la primera vez
         const frame = document.getElementById('editorFrame');
         if (!frame.src || frame.src === window.location.href) {
@@ -239,8 +248,20 @@ function switchTab(tab) {
         }
         stopLogPoll();
     } else if (tab === 'terminal') {
+        mostrarAviso('ℹ️ Recuerda arrancar svxlink con el toggle si lo paró el editor.', 'cyan');
         if (logLoaded) startLogPoll();
     }
+}
+
+// ── Aviso temporal en la barra de estado ──
+function mostrarAviso(msg, color) {
+    const el = document.getElementById('statusTxt');
+    const colors = { amber: 'var(--amber)', green: 'var(--green)', cyan: 'var(--cyan)', red: 'var(--red)' };
+    const prev = el.textContent;
+    const prevColor = el.style.color;
+    el.textContent = msg;
+    el.style.color = colors[color] || 'var(--text)';
+    setTimeout(() => { el.textContent = prev; el.style.color = prevColor; }, 4000);
 }
 
 // ── Llamado desde el iframe cuando pulsa X o SALIR ──
