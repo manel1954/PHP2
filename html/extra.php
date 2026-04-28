@@ -197,17 +197,17 @@
             </div>
         </div>
 
-        <!-- ✏️ SVXLINK EDITOR -->
+        <!-- 🔷 BLUETOOTH -->
         <div class="col-12 col-sm-6 col-lg-3">
             <div class="card bg-secondary border-0 h-100">
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">
-                        <i class="bi bi-pencil-square me-2" style="color:#00d4ff;"></i>SVXLINK EDITOR
+                        <i class="bi bi-bluetooth me-2" style="color:#00d4ff;"></i>Bluetooth
                     </h5>
                     <p class="card-text text-white-50 small flex-grow-1">
-                        Editor de configuración · EchoLink · svxlink.conf
+                        Gestión de dispositivos Bluetooth
                     </p>
-                    <a href="/svxlink_editor.php" target="_blank" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
+                    <a href="/bluetooth.php" target="_blank" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
                         <i class="bi bi-box-arrow-up-right me-1"></i>Abrir
                     </a>
                 </div>
