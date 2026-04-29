@@ -205,9 +205,9 @@ header('X-Content-Type-Options: nosniff');
         <label style="font-size:0.9rem;color:#aaa">Velocidad:</label>
         <select id="baudSelect" class="baud-select">
           <option value="115200">115200 (seguro)</option>
-          <option value="230400">230400</option>
+          <!-- <option value="230400">230400</option>
           <option value="460800" selected>460800 (recomendado)</option>
-          <option value="921600">921600 (rápido)</option>
+          <option value="921600">921600 (rápido)</option> -->
         </select>
       </div>
 
