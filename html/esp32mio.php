@@ -385,15 +385,18 @@ header('X-Content-Type-Options: nosniff');
           write:     (msg) => { if (msg && msg.trim()) log(msg); },
         };
 
-        esploader = new window.ESPLoader({
-          transport,
-          baudrate:    baudRate,
-          romBaudrate: 115200,
-          terminal,
-        });
+esploader = new window.ESPLoader({
+  transport,
+  baudrate:    115200,
+  romBaudrate: 115200,
+  terminal,
+});
 
-        log('⏳ Conectando con el chip...', 'info');
-        const chip = await esploader.main();
+log('⏳ Conectando con el chip...', 'info');
+// Conectar sin subir el stub
+await esploader.connect();
+await esploader.detectChip();
+const chip = esploader.chip.CHIP_NAME;
         log(`✅ Chip detectado: ${chip}`, 'success');
         updateStatus(`✅ Conectado — ${chip}`, 'success');
         els.btnConnect.classList.add('hidden');
