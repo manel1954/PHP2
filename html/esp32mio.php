@@ -12,7 +12,7 @@ header('X-Content-Type-Options: nosniff');
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🔧 ESP32 Flash Tool Web</title>
 
-  <!-- Polyfill Buffer inline (necesario para esptool-js en el navegador) -->
+  <!-- Polyfill Buffer inline -->
   <script>
   (function() {
     function BufferPolyfill(arg, encoding) {
@@ -102,6 +102,8 @@ header('X-Content-Type-Options: nosniff');
     .btn.warning       { background: var(--warning); color: #111; }
     .btn.warning:hover { background: #F57C00; }
     .btn.info          { background: var(--info); }
+    .btn.release       { background: #607D8B; }
+    .btn.release:hover { background: #455A64; }
 
     .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin: 15px 0; }
 
@@ -212,6 +214,7 @@ header('X-Content-Type-Options: nosniff');
       <div class="btn-group">
         <button id="btnConnect"    class="btn">🔌 Conectar ESP32</button>
         <button id="btnDisconnect" class="btn danger hidden">🔌 Desconectar</button>
+        <button id="btnRelease"    class="btn release">🔓 Liberar Puerto</button>
         <button id="btnReset"      class="btn warning">🔄 Reset ESP32</button>
       </div>
     </div>
@@ -291,9 +294,6 @@ header('X-Content-Type-Options: nosniff');
   </footer>
 
   <script>
-    // ================================
-    // 🧠 ESTADO GLOBAL
-    // ================================
     let port          = null;
     let esploader     = null;
     let transport     = null;
@@ -306,6 +306,7 @@ header('X-Content-Type-Options: nosniff');
       statusText:        $('statusText'),
       btnConnect:        $('btnConnect'),
       btnDisconnect:     $('btnDisconnect'),
+      btnRelease:        $('btnRelease'),
       btnReset:          $('btnReset'),
       btnErase:          $('btnErase'),
       btnFlash:          $('btnFlash'),
@@ -325,9 +326,6 @@ header('X-Content-Type-Options: nosniff');
       loadingOverlay:    $('loadingOverlay'),
     };
 
-    // ================================
-    // 📝 LOGGING
-    // ================================
     const ts = () => `[${new Date().toLocaleTimeString('es-ES')}]`;
 
     function log(msg, type = 'info') {
@@ -366,7 +364,39 @@ header('X-Content-Type-Options: nosniff');
     }
 
     // ================================
-    // 🔌 CONEXIÓN (sin stub — ROM mode)
+    // 🔓 LIBERAR PUERTO
+    // ================================
+    async function releasePort() {
+      log('🔓 Liberando puerto...', 'warning');
+      try {
+        if (transport) {
+          try { await transport.disconnect(); } catch(e) {}
+          transport = null;
+        }
+        if (port) {
+          try { await port.close(); } catch(e) {}
+          port = null;
+        }
+        esploader = null;
+        updateStatus('🔓 Puerto liberado — puedes reconectar', 'info');
+        els.btnConnect.classList.remove('hidden');
+        els.btnDisconnect.classList.add('hidden');
+        els.btnFlash.disabled  = true;
+        els.btnVerify.disabled = true;
+        log('✅ Puerto liberado correctamente', 'success');
+      } catch (err) {
+        log(`⚠️ Error al liberar: ${err.message}`, 'warning');
+        // Forzar reset de estado aunque haya error
+        transport = null; port = null; esploader = null;
+        updateStatus('🔓 Estado reseteado', 'info');
+        els.btnConnect.classList.remove('hidden');
+        els.btnDisconnect.classList.add('hidden');
+        updateFlashButtonState();
+      }
+    }
+
+    // ================================
+    // 🔌 CONEXIÓN (ROM mode sin stub)
     // ================================
     async function connectPort() {
       try {
@@ -382,7 +412,6 @@ header('X-Content-Type-Options: nosniff');
           write:     (msg) => { if (msg && msg.trim()) log(msg); },
         };
 
-        // Siempre 115200 para ROM mode (más estable sin stub)
         esploader = new window.ESPLoader({
           transport,
           baudrate:    115200,
@@ -392,18 +421,13 @@ header('X-Content-Type-Options: nosniff');
         });
 
         log('⏳ Conectando con el chip (ROM mode)...', 'info');
-
-        // Conectar usando ROM, sin subir stub
         await esploader.connect('default_reset', 7, true); // skipStub = true
         log('✅ Conectado en ROM mode', 'success');
 
-        // Detectar chip
-        const chipMagic = await esploader.readReg(0x40001000);
         await esploader.detectChip();
         const chipName = esploader.chip ? esploader.chip.CHIP_NAME : 'ESP32';
         log(`✅ Chip: ${chipName}`, 'success');
 
-        // Leer MAC
         try {
           const mac = await esploader.chip.readMac(esploader);
           log(`   MAC: ${mac}`, 'info');
@@ -416,8 +440,10 @@ header('X-Content-Type-Options: nosniff');
 
       } catch (err) {
         log(`❌ Error conexión: ${err.message}`, 'error');
-        if (err.message?.includes('in use')) {
-          log('💡 Puerto ocupado: cierra el Monitor Serie / Arduino IDE', 'warning');
+        if (err.message?.includes('already open')) {
+          log('💡 Puerto ocupado — pulsa 🔓 Liberar Puerto y vuelve a intentarlo', 'warning');
+        } else if (err.message?.includes('in use')) {
+          log('💡 Puerto en uso por otra app — cierra Arduino IDE / Monitor Serie', 'warning');
         }
         updateStatus('❌ Error de conexión', 'error');
         port = null; transport = null; esploader = null;
@@ -688,10 +714,12 @@ header('X-Content-Type-Options: nosniff');
         return;
       }
 
-      log('✅ esptool-js listo (ROM mode — sin stub)', 'success');
+      log('✅ esptool-js listo', 'success');
+      log('💡 Si el puerto aparece ocupado, pulsa 🔓 Liberar Puerto', 'info');
 
       els.btnConnect.onclick    = connectPort;
       els.btnDisconnect.onclick = disconnectPort;
+      els.btnRelease.onclick    = releasePort;
       els.btnReset.onclick      = resetESP32;
       els.btnErase.onclick      = eraseFlash;
       els.btnFlash.onclick      = flashPartitions;
@@ -710,11 +738,14 @@ header('X-Content-Type-Options: nosniff');
         }
       });
 
-      window.addEventListener('beforeunload', () => { if (transport) transport.disconnect(); });
+      window.addEventListener('beforeunload', () => {
+        if (transport) { try { transport.disconnect(); } catch(e) {} }
+        if (port)      { try { port.close(); } catch(e) {} }
+      });
+
       log('✅ Listo. Conecta el ESP32 y selecciona los archivos .bin');
     }
 
-    // Esperar a que el módulo ESM cargue ESPLoader y Transport
     window.addEventListener('load', () => {
       let elapsed = 0;
       const check = setInterval(() => {
