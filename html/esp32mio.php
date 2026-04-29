@@ -12,8 +12,14 @@ header('X-Content-Type-Options: nosniff');
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🔧 ESP32 Flash Tool Web</title>
 <!-- Polyfill Buffer para navegador -->
-<script src="https://cdn.jsdelivr.net/npm/buffer@6/index.min.js"></script>
-<script>window.Buffer = Buffer.Buffer;</script>
+<script src="buffer.min.js"></script>
+<script>
+  if (typeof Buffer === 'undefined') {
+    window.Buffer = bufferModule.Buffer;
+  } else if (Buffer.from === undefined) {
+    window.Buffer = Buffer.Buffer || bufferModule.Buffer;
+  }
+</script>
   <!-- Cargar esptool-js como ES module y exponer globalmente -->
   <script type="module">
     import { ESPLoader, Transport } from './esptool-bundle.js';
