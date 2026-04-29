@@ -13,7 +13,7 @@ header('X-Content-Type-Options: nosniff');
   <title>🔧 ESP32 Flash Tool Web</title>
 
   <!-- esptool-js oficial de Espressif -->
-  <script src="https://unpkg.com/esptool-js@0.4.3/bundle.js"></script>
+  <script src="esptool-bundle.js"></script>
 
   <style>
     :root {
