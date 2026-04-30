@@ -1,5 +1,5 @@
 <?php
-// esp32.php - Programador ESP32 Web con esptool-js real (sin stub)
+// esp32.php - Programador ESP32 Web con esptool-js real
 // Requiere: HTTPS o localhost + Chrome/Edge con Web Serial API
 
 header('X-Frame-Options: SAMEORIGIN');
@@ -289,7 +289,7 @@ header('X-Content-Type-Options: nosniff');
   </main>
 
   <footer>
-    <p>🔐 Web Serial API • Chrome/Edge/Brave (HTTPS) • esptool-js (ROM mode)</p>
+    <p>🔐 Web Serial API • Chrome/Edge/Brave (HTTPS) • esptool-js</p>
     <p>🔗 <?php echo htmlspecialchars((isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF']); ?></p>
   </footer>
 
@@ -369,7 +369,6 @@ header('X-Content-Type-Options: nosniff');
     async function releasePort() {
       log('🔓 Liberando puertos...', 'warning');
 
-      // 1. Cancelar reader/writer del transport
       if (transport) {
         try {
           if (transport.reader) {
@@ -381,26 +380,19 @@ header('X-Content-Type-Options: nosniff');
         transport = null;
       }
 
-      // 2. Cerrar puerto actual
       if (port) {
         try { await port.close(); } catch(e) {}
         port = null;
       }
 
-      // 3. Cerrar TODOS los puertos concedidos por el navegador
+      // Cerrar TODOS los puertos concedidos por el navegador
       try {
         const ports = await navigator.serial.getPorts();
         for (const p of ports) {
-          try {
-            await p.close();
-            log(`✅ Puerto cerrado: VID=${p.getInfo().usbVendorId} PID=${p.getInfo().usbProductId}`, 'success');
-          } catch(e) {
-            // Si ya estaba cerrado, no pasa nada
-          }
+          try { await p.close(); } catch(e) {}
         }
       } catch(e) {}
 
-      // 4. Reset completo del estado
       transport = null; port = null; esploader = null;
 
       updateStatus('🔓 Puerto liberado — pulsa Conectar', 'info');
@@ -412,17 +404,14 @@ header('X-Content-Type-Options: nosniff');
     }
 
     // ================================
-    // 🔌 CONEXIÓN (ROM mode sin stub)
+    // 🔌 CONEXIÓN — syncStubDetected = true evita doble apertura
     // ================================
     async function connectPort() {
       try {
-        // Cerrar puertos previos antes de abrir uno nuevo
-        log('🔍 Cerrando puertos previos...', 'info');
+        // Cerrar puertos previos silenciosamente
         try {
           const ports = await navigator.serial.getPorts();
-          for (const p of ports) {
-            try { await p.close(); } catch(e) {}
-          }
+          for (const p of ports) { try { await p.close(); } catch(e) {} }
         } catch(e) {}
 
         log('🔍 Solicitando puerto serie...');
@@ -445,20 +434,15 @@ header('X-Content-Type-Options: nosniff');
           debugLogging: false,
         });
 
-        log('⏳ Conectando con el chip (ROM mode)...', 'info');
-        await esploader.connect('default_reset', 7, true); // skipStub = true
-        log('✅ Conectado en ROM mode', 'success');
+        // ⚡ CLAVE: decirle a esptool que el stub ya está activo
+        // Así main() no intenta subirlo (evita timeout y doble open del puerto)
+        esploader.syncStubDetected = true;
 
-        await esploader.detectChip();
-        const chipName = esploader.chip ? esploader.chip.CHIP_NAME : 'ESP32';
-        log(`✅ Chip: ${chipName}`, 'success');
+        log('⏳ Conectando con el chip...', 'info');
+        const chip = await esploader.main();
+        log(`✅ Chip: ${chip}`, 'success');
 
-        try {
-          const mac = await esploader.chip.readMac(esploader);
-          log(`   MAC: ${mac}`, 'info');
-        } catch(e) {}
-
-        updateStatus(`✅ Conectado — ${chipName} (ROM mode)`, 'success');
+        updateStatus(`✅ Conectado — ${chip}`, 'success');
         els.btnConnect.classList.add('hidden');
         els.btnDisconnect.classList.remove('hidden');
         updateFlashButtonState();
@@ -468,7 +452,7 @@ header('X-Content-Type-Options: nosniff');
         if (err.message?.includes('already open')) {
           log('💡 Puerto ocupado — pulsa 🔓 Liberar Puerto y vuelve a intentarlo', 'warning');
         } else if (err.message?.includes('in use')) {
-          log('💡 Puerto en uso por otra app — cierra Arduino IDE / Monitor Serie', 'warning');
+          log('💡 Puerto en uso — cierra Arduino IDE / Monitor Serie', 'warning');
         }
         updateStatus('❌ Error de conexión', 'error');
         port = null; transport = null; esploader = null;
@@ -476,12 +460,8 @@ header('X-Content-Type-Options: nosniff');
     }
 
     async function disconnectPort() {
-      try {
-        if (transport) await transport.disconnect();
-      } catch(e) {}
-      try {
-        if (port) await port.close();
-      } catch(e) {}
+      try { if (transport) await transport.disconnect(); } catch(e) {}
+      try { if (port) await port.close(); } catch(e) {}
       transport = null; esploader = null; port = null;
       updateStatus('🔌 Desconectado', 'info');
       els.btnConnect.classList.remove('hidden');
@@ -716,7 +696,7 @@ header('X-Content-Type-Options: nosniff');
     // ================================
     function init() {
       els.loadingOverlay.style.display = 'none';
-      log('🚀 ESP32 Flash Tool Web cargado (ROM mode)');
+      log('🚀 ESP32 Flash Tool Web cargado');
       log(`🔗 URL: ${window.location.href}`);
 
       if (!('serial' in navigator)) {
