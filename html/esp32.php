@@ -17,6 +17,7 @@ $protocol = $is_https ? "HTTPS (Seguro)" : "HTTP (No seguro)";
 *{ margin:0; padding:0; box-sizing:border-box; }
 body{ background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; max-width:1100px; margin:auto; padding:20px; }
 header{ text-align:center; margin-bottom:25px; }
+header h1{ margin-bottom: 15px; display: block; }
 .env-info { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; }
 .badge { padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; border: 1px solid transparent; }
 .badge-success { background: rgba(76, 175, 80, 0.15); color: #81c784; border-color: #4CAF50; }
@@ -45,7 +46,7 @@ button{ background:var(--primary); color:white; } button:hover{ opacity:.9; } bu
 </head>
 <body>
 <header>
-    <h1>ESP32 Web Flash Tool</h1>
+    <h1>Programador WEB-ESP32 by @ REM . ADER</h1>
     <div class="env-info">
         <span class="badge badge-success">IP: <?php echo $server_ip; ?></span>
         <span class="badge <?php echo $is_https ? 'badge-success' : 'badge-warning'; ?>">Protocolo: <?php echo $protocol; ?></span>
@@ -61,11 +62,16 @@ button{ background:var(--primary); color:white; } button:hover{ opacity:.9; } bu
         <button id="disconnectBtn" class="danger hidden">❌ Desconectar</button>
         <button id="eraseBtn" class="warning">🗑️ Borrar Flash</button>
         <button id="flashBtn" class="success" disabled>🚀 Programar</button>
+
         <select id="baudRate">
             <option value="115200">115200</option>
             <option value="460800" selected>460800 ⚡</option>
             <option value="921600">921600 🚀</option>
         </select>
+
+        <a href="https://raw.githubusercontent.com/manel1954/PHPPLUS/main/esp32/firmware.zip" style="text-decoration: none; margin-left: auto;">
+            <button type="button" style="background-color: #673AB7;">📥 Descarga firmware</button>
+        </a>
     </div>
     <div id="progressContainer" class="progress-wrapper hidden">
         <div class="progress-bar"><div id="progressFill" class="progress-fill">0%</div></div>
