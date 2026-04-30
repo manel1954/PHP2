@@ -202,12 +202,12 @@ header('X-Content-Type-Options: nosniff');
       </div>
 
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px">
-        <label style="font-size:0.9rem;color:#aaa">Velocidad flash:</label>
+        <label style="font-size:0.9rem;color:#aaa">Velocidad:</label>
         <select id="baudSelect" class="baud-select">
-          <option value="115200">115200 (seguro)</option>
+          <option value="115200" selected>115200 (ROM mode)</option>
           <option value="230400">230400</option>
-          <option value="460800" selected>460800 (recomendado)</option>
-          <option value="921600">921600 (rápido)</option>
+          <option value="460800">460800</option>
+          <option value="921600">921600</option>
         </select>
       </div>
 
@@ -289,7 +289,7 @@ header('X-Content-Type-Options: nosniff');
   </main>
 
   <footer>
-    <p>🔐 Web Serial API • Chrome/Edge/Brave (HTTPS) • esptool-js</p>
+    <p>🔐 Web Serial API • Chrome/Edge/Brave (HTTPS) • esptool-js (ROM mode)</p>
     <p>🔗 <?php echo htmlspecialchars((isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF']); ?></p>
   </footer>
 
@@ -403,7 +403,7 @@ header('X-Content-Type-Options: nosniff');
     }
 
     // ================================
-    // 🔌 CONEXIÓN CON STUB REAL
+    // 🔌 CONEXIÓN — runStub() sobreescrito para saltar stub
     // ================================
     async function connectPort() {
       try {
@@ -425,18 +425,24 @@ header('X-Content-Type-Options: nosniff');
           write:     (msg) => { if (msg && msg.trim()) log(msg); },
         };
 
-        const baudRate = parseInt(els.baudSelect.value);
-
         esploader = new window.ESPLoader({
           transport,
-          baudrate:    baudRate,
+          baudrate:    115200,
           romBaudrate: 115200,
           terminal,
           debugLogging: false,
         });
 
-        log('⏳ Conectando y subiendo stub...', 'info');
-        const chip = await esploader.main(); // stub real — escritura real
+        // ⚡ CLAVE: sobreescribir runStub para que no suba el stub
+        // Esto evita el timeout y el doble open del puerto
+        esploader.runStub = async function() {
+          log('⏭️ Saltando stub (ROM mode directo)', 'info');
+          this.IS_STUB = false;
+          return this.chip;
+        };
+
+        log('⏳ Conectando con el chip...', 'info');
+        const chip = await esploader.main();
         log(`✅ Chip: ${chip}`, 'success');
 
         updateStatus(`✅ Conectado — ${chip}`, 'success');
@@ -448,8 +454,6 @@ header('X-Content-Type-Options: nosniff');
         log(`❌ Error conexión: ${err.message}`, 'error');
         if (err.message?.includes('already open')) {
           log('💡 Puerto ocupado — pulsa 🔓 Liberar Puerto y vuelve a intentarlo', 'warning');
-        } else if (err.message?.includes('Timeout')) {
-          log('💡 Timeout — prueba con velocidad 115200 o pulsa BOOT en el ESP32 al conectar', 'warning');
         } else if (err.message?.includes('in use')) {
           log('💡 Puerto en uso — cierra Arduino IDE / Monitor Serie', 'warning');
         }
@@ -549,9 +553,6 @@ header('X-Content-Type-Options: nosniff');
 
       } catch (err) {
         log(`❌ Error en flash: ${err.message}`, 'error');
-        if (err.message?.includes('Timeout')) {
-          log('💡 Prueba con velocidad menor (115200)', 'warning');
-        }
         updateStatus('❌ Error en programación', 'error');
       } finally {
         setTimeout(() => {
@@ -698,7 +699,7 @@ header('X-Content-Type-Options: nosniff');
     // ================================
     function init() {
       els.loadingOverlay.style.display = 'none';
-      log('🚀 ESP32 Flash Tool Web cargado');
+      log('🚀 ESP32 Flash Tool Web cargado (ROM mode)');
       log(`🔗 URL: ${window.location.href}`);
 
       if (!('serial' in navigator)) {
