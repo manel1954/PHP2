@@ -289,7 +289,7 @@ header('X-Content-Type-Options: nosniff');
   </main>
 
   <footer>
-    <p>🔐 Web Serial API • Chrome/Edge/Brave (HTTPS) • esptool-js</p>
+    <p>🔐 Web Serial API • Chrome/Edge/Brave (HTTPS) • esptool-js (ROM mode)</p>
     <p>🔗 <?php echo htmlspecialchars((isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF']); ?></p>
   </footer>
 
@@ -385,7 +385,6 @@ header('X-Content-Type-Options: nosniff');
         port = null;
       }
 
-      // Cerrar TODOS los puertos concedidos por el navegador
       try {
         const ports = await navigator.serial.getPorts();
         for (const p of ports) {
@@ -404,7 +403,7 @@ header('X-Content-Type-Options: nosniff');
     }
 
     // ================================
-    // 🔌 CONEXIÓN — syncStubDetected = true evita doble apertura
+    // 🔌 CONEXIÓN — runStub() sobreescrito para saltar stub
     // ================================
     async function connectPort() {
       try {
@@ -434,9 +433,13 @@ header('X-Content-Type-Options: nosniff');
           debugLogging: false,
         });
 
-        // ⚡ CLAVE: decirle a esptool que el stub ya está activo
-        // Así main() no intenta subirlo (evita timeout y doble open del puerto)
-        esploader.syncStubDetected = true;
+        // ⚡ CLAVE: sobreescribir runStub para que no suba el stub
+        // Esto evita el timeout y el doble open del puerto
+        esploader.runStub = async function() {
+          log('⏭️ Saltando stub (ROM mode directo)', 'info');
+          this.IS_STUB = false;
+          return this.chip;
+        };
 
         log('⏳ Conectando con el chip...', 'info');
         const chip = await esploader.main();
@@ -696,7 +699,7 @@ header('X-Content-Type-Options: nosniff');
     // ================================
     function init() {
       els.loadingOverlay.style.display = 'none';
-      log('🚀 ESP32 Flash Tool Web cargado');
+      log('🚀 ESP32 Flash Tool Web cargado (ROM mode)');
       log(`🔗 URL: ${window.location.href}`);
 
       if (!('serial' in navigator)) {
