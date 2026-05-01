@@ -446,14 +446,5 @@
         "fg": "white",
         "fila": 19,
         "columna": 2
-    },
-    {
-        "nombre": "LANZAR MMDVM",
-        "url": "",
-        "bg": "#e74c3c",
-        "fg": "white",
-        "fila": 19,
-        "columna": 3,
-        "local": true
     }
 ]
