@@ -485,7 +485,7 @@ button.btn-header { font-family: var(--font-mono); }
 .dot.active { background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 2s infinite; }
 .dot.error { background: var(--red); box-shadow: 0 0 8px var(--red); }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-.section-divider { width: 1px; height: 20px; background: var(--border); margin: 0 .5rem; }
+.section-divider { width: 1px; height: 20px; background: var(--border); margin: 0 .2rem; }
 .controls-section { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; margin-bottom: 2rem; }
 @media (max-width:800px) { .controls-section { grid-template-columns: 1fr; } }
 .service-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.2rem 1.6rem; }
