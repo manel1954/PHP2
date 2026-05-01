@@ -7,10 +7,10 @@ session_start();
 
 // --- Rutas a los ficheros INI ---
 $INI_FILES = [
-    'MMDVMHost'  => '/home/pi/MMDVMHost.ini',
-    'MMDVMYSF'   => '/home/pi/MMDVMYSF.ini',
-    'MMDVMDSTAR' => '/home/pi/MMDVMDSTAR.ini',
-    'MMDVMNXDN'  => '/home/pi/MMDVMNXDN.ini',
+    'MMDVMHost'  => '/home/pi/MMDVMHost/MMDVMHost.ini',
+    'MMDVMYSF'   => '/home/pi/MMDVMHost/MMDVMYSF.ini',
+    'MMDVMDSTAR' => '/home/pi/MMDVMHost/MMDVMDSTAR.ini',
+    'MMDVMNXDN'  => '/home/pi/MMDVMHost/MMDVMNXDN.ini',
 ];
 
 // --- Mapa de campos: campo => [ fichero => [sección, clave] ] ---
