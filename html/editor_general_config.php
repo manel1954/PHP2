@@ -14,20 +14,58 @@ $INI_FILES = [
 // ── Mapa: campo => [ [file_key, section, ini_key], ... ]
 // Usamos arrays de arrays para poder repetir el mismo fichero
 // con distintas secciones (DStarGateway aparece 3 veces).
+// Para cada campo se intentará escribir en todos los ficheros donde la
+// clave ya exista (ini_write_batch respeta la flag $only_if_exists=true
+// para los ficheros que no sean MMDVMHost).
 $WRITE_MAP = [
     'Callsign'    => [
-        ['MMDVMHost',    'General',    'Callsign'],
-        ['MMDVMYSF',     'General',    'Callsign'],
-        ['MMDVMDSTAR',   'General',    'Callsign'],
-        ['MMDVMNXDN',    'General',    'Callsign'],
+        ['MMDVMHost',  'General', 'Callsign'],
+        ['MMDVMYSF',   'General', 'Callsign'],
+        ['MMDVMDSTAR', 'General', 'Callsign'],
+        ['MMDVMNXDN',  'General', 'Callsign'],
     ],
-    'Id'          => [['MMDVMHost', 'General', 'Id']],
-    'RXFrequency' => [['MMDVMHost', 'Info',    'RXFrequency']],
-    'TXFrequency' => [['MMDVMHost', 'Info',    'TXFrequency']],
-    'Latitude'    => [['MMDVMHost', 'Info',    'Latitude']],
-    'Longitude'   => [['MMDVMHost', 'Info',    'Longitude']],
-    'Location'    => [['MMDVMHost', 'Info',    'Location']],
-    'URL'         => [['MMDVMHost', 'Info',    'URL']],
+    'Id'          => [
+        ['MMDVMHost',  'General', 'Id'],
+        ['MMDVMYSF',   'General', 'Id'],
+        ['MMDVMDSTAR', 'General', 'Id'],
+        ['MMDVMNXDN',  'General', 'Id'],
+    ],
+    'RXFrequency' => [
+        ['MMDVMHost',  'Info', 'RXFrequency'],
+        ['MMDVMYSF',   'Info', 'RXFrequency'],
+        ['MMDVMDSTAR', 'Info', 'RXFrequency'],
+        ['MMDVMNXDN',  'Info', 'RXFrequency'],
+    ],
+    'TXFrequency' => [
+        ['MMDVMHost',  'Info', 'TXFrequency'],
+        ['MMDVMYSF',   'Info', 'TXFrequency'],
+        ['MMDVMDSTAR', 'Info', 'TXFrequency'],
+        ['MMDVMNXDN',  'Info', 'TXFrequency'],
+    ],
+    'Latitude'    => [
+        ['MMDVMHost',  'Info', 'Latitude'],
+        ['MMDVMYSF',   'Info', 'Latitude'],
+        ['MMDVMDSTAR', 'Info', 'Latitude'],
+        ['MMDVMNXDN',  'Info', 'Latitude'],
+    ],
+    'Longitude'   => [
+        ['MMDVMHost',  'Info', 'Longitude'],
+        ['MMDVMYSF',   'Info', 'Longitude'],
+        ['MMDVMDSTAR', 'Info', 'Longitude'],
+        ['MMDVMNXDN',  'Info', 'Longitude'],
+    ],
+    'Location'    => [
+        ['MMDVMHost',  'Info', 'Location'],
+        ['MMDVMYSF',   'Info', 'Location'],
+        ['MMDVMDSTAR', 'Info', 'Location'],
+        ['MMDVMNXDN',  'Info', 'Location'],
+    ],
+    'URL'         => [
+        ['MMDVMHost',  'Info', 'URL'],
+        ['MMDVMYSF',   'Info', 'URL'],
+        ['MMDVMDSTAR', 'Info', 'URL'],
+        ['MMDVMNXDN',  'Info', 'URL'],
+    ],
 ];
 
 // ── Para leer valores del formulario (primer fichero que tenga el campo)
@@ -73,7 +111,7 @@ function ini_read_value(string $filepath, string $section, string $key): ?string
  *
  * Retorna array de errores (vacío = todo OK).
  */
-function ini_write_batch(string $filepath, array $changes): array {
+function ini_write_batch(string $filepath, array $changes, bool $only_if_exists = false): array {
     $errors = [];
 
     if (!file_exists($filepath))  { return ["❌ No encontrado: $filepath"]; }
@@ -129,8 +167,9 @@ function ini_write_batch(string $filepath, array $changes): array {
 
         $skey = strtolower($sec);
         if (isset($section_line[$skey])) {
+            // Si only_if_exists y la clave no estaba en el fichero → saltar
+            if ($only_if_exists) continue;
             // Insertar justo después de la última línea de esa sección
-            // Buscamos el índice correcto: después del [header] y todas sus claves
             $insert_after = $section_line[$skey];
             for ($j = $insert_after + 1; $j < count($output); $j++) {
                 $t = trim($output[$j]);
@@ -196,8 +235,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
 
     $errors  = [];
     $written = [];
+    $mmdvmhost_path = $INI_FILES['MMDVMHost'];
     foreach ($batch as $path => $changes) {
-        $errs = ini_write_batch($path, $changes);
+        // Para MMDVMHost siempre crea la clave si no existe.
+        // Para el resto, solo actualiza claves que ya estén en el fichero.
+        $only_if_exists = ($path !== $mmdvmhost_path);
+        $errs = ini_write_batch($path, $changes, $only_if_exists);
         if (empty($errs)) {
             $written[] = basename($path) . " (" . count($changes) . " campos)";
         } else {
@@ -306,7 +349,7 @@ body { background: var(--bg-base); color: var(--text-main); font-family: var(--f
 
 <div class="page-header">
     <div class="page-header-inner">
-        <a href="mmdvm.php" class="btn-back"><i class="bi bi-arrow-left"></i> Panel ADER</a>
+        <a href="extra.php" class="btn-back"><i class="bi bi-arrow-left"></i> Menu Extra</a>
         <div>
             <h1><i class="bi bi-sliders"></i> &nbsp;EDITOR GENERAL</h1>
             <span class="badge-subtitle">MMDVMHost · YSF · D-STAR · NXDN</span>
@@ -331,18 +374,18 @@ body { background: var(--bg-base); color: var(--text-main); font-family: var(--f
                 <div class="section-label">Identificación de estación</div>
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
-                        <label class="form-label">Callsign <span class="badge-ini">MMDVMHost · YSF · DSTAR · NXDN</span></label>
+                        <label class="form-label">Callsign <span class="badge-ini">Los 4 ficheros</span></label>
                         <input type="text" name="Callsign" class="form-control"
                                value="<?= htmlspecialchars($form_values['Callsign']) ?>"
                                placeholder="Ej: EA3EIZ" maxlength="20">
-                        <div class="form-hint">[General] Callsign= en los 4 ficheros MMDVM</div>
+                        <div class="form-hint">[General] Callsign= en los 4 ficheros</div>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">DMR Id <span class="badge-ini">MMDVMHost</span></label>
+                        <label class="form-label">DMR Id <span class="badge-ini">Los 4 ficheros</span></label>
                         <input type="text" name="Id" class="form-control"
                                value="<?= htmlspecialchars($form_values['Id']) ?>"
                                placeholder="Ej: 214317526" pattern="[0-9]*">
-                        <div class="form-hint">[General] Id= en MMDVMHost.ini</div>
+                        <div class="form-hint">[General] Id= en los 4 ficheros (si existe)</div>
                     </div>
                 </div>
                 </div>
@@ -350,54 +393,54 @@ body { background: var(--bg-base); color: var(--text-main); font-family: var(--f
                 <div class="section-label">Frecuencias</div>
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
-                        <label class="form-label">RX Frecuencia (Hz) <span class="badge-ini">MMDVMHost</span></label>
+                        <label class="form-label">RX Frecuencia (Hz) <span class="badge-ini">Los 4 ficheros</span></label>
                         <input type="text" name="RXFrequency" class="form-control"
                                value="<?= htmlspecialchars($form_values['RXFrequency']) ?>"
                                placeholder="Ej: 430500000" pattern="[0-9]*">
-                        <div class="form-hint">[Info] RXFrequency=</div>
+                        <div class="form-hint">[Info] RXFrequency= en los 4 ficheros (si existe)</div>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">TX Frecuencia (Hz) <span class="badge-ini">MMDVMHost</span></label>
+                        <label class="form-label">TX Frecuencia (Hz) <span class="badge-ini">Los 4 ficheros</span></label>
                         <input type="text" name="TXFrequency" class="form-control"
                                value="<?= htmlspecialchars($form_values['TXFrequency']) ?>"
                                placeholder="Ej: 430500000" pattern="[0-9]*">
-                        <div class="form-hint">[Info] TXFrequency=</div>
+                        <div class="form-hint">[Info] TXFrequency= en los 4 ficheros (si existe)</div>
                     </div>
                 </div>
 
                 <div class="section-label">Posición geográfica</div>
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
-                        <label class="form-label">Latitud <span class="badge-ini">MMDVMHost</span></label>
+                        <label class="form-label">Latitud <span class="badge-ini">Los 4 ficheros</span></label>
                         <input type="text" name="Latitude" class="form-control"
                                value="<?= htmlspecialchars($form_values['Latitude']) ?>"
                                placeholder="Ej: 41.3851">
-                        <div class="form-hint">[Info] Latitude=</div>
+                        <div class="form-hint">[Info] Latitude= en los 4 ficheros (si existe)</div>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Longitud <span class="badge-ini">MMDVMHost</span></label>
+                        <label class="form-label">Longitud <span class="badge-ini">Los 4 ficheros</span></label>
                         <input type="text" name="Longitude" class="form-control"
                                value="<?= htmlspecialchars($form_values['Longitude']) ?>"
                                placeholder="Ej: 2.1734">
-                        <div class="form-hint">[Info] Longitude=</div>
+                        <div class="form-hint">[Info] Longitude= en los 4 ficheros (si existe)</div>
                     </div>
                 </div>
 
                 <div class="section-label">Información pública</div>
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
-                        <label class="form-label">Location <span class="badge-ini">MMDVMHost</span></label>
+                        <label class="form-label">Location <span class="badge-ini">Los 4 ficheros</span></label>
                         <input type="text" name="Location" class="form-control"
                                value="<?= htmlspecialchars($form_values['Location']) ?>"
                                placeholder="Ej: Barcelona, Spain">
-                        <div class="form-hint">[Info] Location=</div>
+                        <div class="form-hint">[Info] Location= en los 4 ficheros (si existe)</div>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">URL <span class="badge-ini">MMDVMHost</span></label>
+                        <label class="form-label">URL <span class="badge-ini">Los 4 ficheros</span></label>
                         <input type="text" name="URL" class="form-control"
                                value="<?= htmlspecialchars($form_values['URL']) ?>"
                                placeholder="Ej: www.associacioader.com">
-                        <div class="form-hint">[Info] URL=</div>
+                        <div class="form-hint">[Info] URL= en los 4 ficheros (si existe)</div>
                     </div>
                 </div>
 
