@@ -27,6 +27,12 @@ $WRITE_MAP = [
     'Username'    => [
         ['DStarGateway', 'IRCDDB 1',   'Username'],
     ],
+    'IRCDDB1_Enabled'  => [
+        ['DStarGateway', 'IRCDDB 1',   'Enabled'],
+    ],
+    'IRCDDB1_Hostname' => [
+        ['DStarGateway', 'IRCDDB 1',   'Hostname'],
+    ],
     'Id'          => [['MMDVMHost', 'General', 'Id']],
     'RXFrequency' => [['MMDVMHost', 'Info',    'RXFrequency']],
     'TXFrequency' => [['MMDVMHost', 'Info',    'TXFrequency']],
@@ -39,7 +45,9 @@ $WRITE_MAP = [
 // ── Para leer valores del formulario (primer fichero que tenga el campo)
 $READ_MAP = [
     'Callsign'    => ['MMDVMHost',    'General',    'Callsign'],
-    'Username'    => ['DStarGateway', 'IRCDDB 1',   'Username'],
+    'Username'         => ['DStarGateway', 'IRCDDB 1', 'Username'],
+    'IRCDDB1_Enabled'  => ['DStarGateway', 'IRCDDB 1', 'Enabled'],
+    'IRCDDB1_Hostname' => ['DStarGateway', 'IRCDDB 1', 'Hostname'],
     'Id'          => ['MMDVMHost',    'General',    'Id'],
     'RXFrequency' => ['MMDVMHost',    'Info',       'RXFrequency'],
     'TXFrequency' => ['MMDVMHost',    'Info',       'TXFrequency'],
@@ -241,7 +249,8 @@ $form_values = read_form_values($READ_MAP, $INI_FILES);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
     $post_fields = [
-        'Callsign', 'Username', 'Id', 'RXFrequency', 'TXFrequency',
+        'Callsign', 'Username', 'IRCDDB1_Enabled', 'IRCDDB1_Hostname',
+        'Id', 'RXFrequency', 'TXFrequency',
         'Latitude', 'Longitude', 'Location', 'URL'
     ];
 
@@ -415,20 +424,36 @@ body { background: var(--bg-base); color: var(--text-main); font-family: var(--f
                     </div>
                 </div>
 
-                <div class="section-label dstar">D-Star Gateway</div>
+                <div class="section-label dstar">D-Star Gateway · IRCDDB 1</div>
                 <div class="row g-3 mb-3">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label class="form-label">Username <span class="badge-ini-dstar">DStarGateway</span></label>
                         <input type="text" name="Username" class="form-control dstar-field"
                                value="<?= htmlspecialchars($form_values['Username']) ?>"
                                placeholder="Ej: EA3EIZ" maxlength="20">
-                        <div class="form-hint">[IRCDDB 1] Username= en DStarGateway.ini</div>
+                        <div class="form-hint">[IRCDDB 1] Username=</div>
                     </div>
-                    <div class="col-md-6 d-flex align-items-end pb-1">
+                    <div class="col-md-4">
+                        <label class="form-label">Hostname <span class="badge-ini-dstar">DStarGateway</span></label>
+                        <input type="text" name="IRCDDB1_Hostname" class="form-control dstar-field"
+                               value="<?= htmlspecialchars($form_values['IRCDDB1_Hostname']) ?>"
+                               placeholder="Ej: ircv4.openquad.net">
+                        <div class="form-hint">[IRCDDB 1] Hostname=</div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Enabled <span class="badge-ini-dstar">DStarGateway</span></label>
+                        <select name="IRCDDB1_Enabled" class="form-control dstar-field">
+                            <option value="1" <?= ($form_values['IRCDDB1_Enabled'] === '1') ? 'selected' : '' ?>>1 – Activo</option>
+                            <option value="0" <?= ($form_values['IRCDDB1_Enabled'] === '0') ? 'selected' : '' ?>>0 – Inactivo</option>
+                        </select>
+                        <div class="form-hint">[IRCDDB 1] Enabled=</div>
+                    </div>
+                </div>
+                <div class="row g-3 mb-1">
+                    <div class="col-12">
                         <div class="form-hint" style="color:rgba(191,0,255,.7);line-height:1.6;">
                             <i class="bi bi-info-circle"></i>
-                            El Callsign también escribe en<br>
-                            DStarGateway.ini → [General] Callsign=
+                            El Callsign también escribe en DStarGateway.ini → [General] Callsign= y [Repeater 1] Callsign=
                         </div>
                     </div>
                 </div>
@@ -566,9 +591,10 @@ body { background: var(--bg-base); color: var(--text-main); font-family: var(--f
                         <div style="color:var(--violet);">↳ DStarGateway [General]</div>
                     </div>
                 </div>
-                <div style="margin-bottom:.6rem;"><span style="color:var(--violet);">Username</span>
+                <div style="margin-bottom:.6rem;">
+                    <span style="color:var(--violet);">Username · Hostname · Enabled</span>
                     <div style="color:var(--text-muted);padding-left:.8rem;">
-                        <div style="color:var(--violet);">↳ DStarGateway [General]</div>
+                        <div style="color:var(--violet);">↳ DStarGateway [IRCDDB 1]</div>
                     </div>
                 </div>
                 <div style="margin-bottom:.6rem;"><span style="color:var(--cyan);">Id</span>
