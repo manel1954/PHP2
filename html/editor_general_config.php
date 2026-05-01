@@ -217,16 +217,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
     }
 }
 
-// Estado de ficheros
-$file_status = [];
-foreach ($INI_FILES as $key => $path) {
-    $exists   = file_exists($path);
-    $writable = $exists && is_writable($path);
-    $owner    = $exists ? (posix_getpwuid(fileowner($path))['name'] ?? '?') : '?';
-    $perms    = $exists ? substr(sprintf('%o', fileperms($path)), -4) : '?';
-    $file_status[$key] = compact('path','exists','writable','owner','perms');
-}
-$proc_user = posix_getpwuid(posix_geteuid())['name'] ?? '?';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -318,11 +308,10 @@ body { background: var(--bg-base); color: var(--text-main); font-family: var(--f
     </div>
 </div>
 
-<div class="container-fluid py-4 px-4">
+<div class="container py-4">
 <div class="row g-4">
 
-    <!-- ── Formulario ─────────────────────────────────── -->
-    <div class="col-lg-8">
+    <div class="col-lg-8 mx-auto">
 
         <?php foreach ($messages as $msg): ?>
         <div class="ader-alert ader-alert-<?= $msg['type'] ?>"><?= htmlspecialchars($msg['text']) ?></div>
@@ -418,79 +407,6 @@ body { background: var(--bg-base); color: var(--text-main); font-family: var(--f
             </form>
         </div>
     </div><!-- /col-lg-8 -->
-
-    <!-- ── Columna derecha ────────────────────────────── -->
-    <div class="col-lg-4">
-
-        <!-- Estado de ficheros -->
-        <div class="ader-card">
-            <div class="ader-card-title"><i class="bi bi-file-earmark-code"></i> ESTADO DE FICHEROS</div>
-            <div style="font-family:var(--font-mono);font-size:.68rem;color:var(--text-muted);margin-bottom:.6rem;">
-                Proceso web: <span style="color:var(--amber);"><?= htmlspecialchars($proc_user) ?></span>
-            </div>
-            <table class="fst">
-                <thead><tr><th>Fichero</th><th>Permisos</th><th>Propietario</th><th>W</th></tr></thead>
-                <tbody>
-                <?php foreach ($file_status as $key => $s):
-                            ?>
-                    <tr>
-                        <td><?= $key ?></td>
-                        <td><?= $s['exists'] ? htmlspecialchars($s['perms']) : '<span class="pill pill-err">NO</span>' ?></td>
-                        <td><?= $s['exists'] ? htmlspecialchars($s['owner']) : '—' ?></td>
-                        <td>
-                            <?php if (!$s['exists']): ?>
-                                <span class="pill pill-err">NO</span>
-                            <?php elseif ($s['writable']): ?>
-                                <span class="pill pill-ok">OK</span>
-                            <?php else: ?>
-                                <span class="pill pill-warn">NO</span>
-                            <?php endif; ?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="4" style="font-size:.62rem;color:#444e5f;padding-top:0;padding-bottom:.4rem;word-break:break-all;">
-                            <?= htmlspecialchars($s['path']) ?>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
-        <!-- Mapa de campos -->
-        <div class="ader-card">
-            <div class="ader-card-title"><i class="bi bi-diagram-3"></i> MAPA DE CAMPOS</div>
-            <div style="font-family:var(--font-mono);font-size:.72rem;line-height:1.9;">
-                <div style="margin-bottom:.6rem;"><span style="color:var(--cyan);">Callsign</span>
-                    <div style="color:var(--text-muted);padding-left:.8rem;">
-                        <div>↳ MMDVMHost [General]</div>
-                        <div>↳ MMDVMYSF [General]</div>
-                        <div>↳ MMDVMDSTAR [General]</div>
-                        <div>↳ MMDVMNXDN [General]</div>
-                        </div>
-                </div>
-                </div>
-                <div style="margin-bottom:.6rem;"><span style="color:var(--cyan);">Id</span>
-                    <div style="color:var(--text-muted);padding-left:.8rem;"><div>↳ MMDVMHost [General]</div></div>
-                </div>
-                <div style="margin-bottom:.6rem;"><span style="color:var(--cyan);">RXFrequency · TXFrequency · Latitude · Longitude · Location · URL</span>
-                    <div style="color:var(--text-muted);padding-left:.8rem;"><div>↳ MMDVMHost [Info]</div></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Permisos -->
-        <div class="ader-card" style="border-color:rgba(255,179,0,.3);">
-            <div class="ader-card-title" style="color:var(--amber);">
-                <i class="bi bi-shield-exclamation"></i> PERMISOS
-            </div>
-            <pre style="background:#0d1117;border:1px solid var(--border);border-radius:5px;padding:.6rem;font-size:.67rem;color:var(--green);margin:0;overflow-x:auto;">sudo chown pi:www-data \
-  /home/pi/MMDVMHost/*.ini
-sudo chmod 664 \
-  /home/pi/MMDVMHost/*.ini
-</pre>
-        </div>
-
-    </div><!-- /col-lg-4 -->
 </div>
 </div>
 
