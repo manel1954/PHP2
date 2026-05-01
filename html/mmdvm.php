@@ -736,9 +736,10 @@ button.btn-header { font-family: var(--font-mono); }
 <div class="ctrl-header-top">
 <img src="Logo_ea3eiz.png" alt="EA3EIZ" style="height:40px;width:auto;">
 <h1>PANEL SISTEMAS DIGITALES RADIOAFICIONADOS PHPPLUS</h1>
+<br>
 </div>
 <div class="ctrl-header-btns">
-<a href="edit_ini.php?file=displaydriver" class="btn-header cyan"> 📄 Configurar Display-Driver </a>
+<!-- <a href="edit_ini.php?file=displaydriver" class="btn-header cyan"> 📄 Configurar Display-Driver </a> -->
 <a href="?action=backup-configs" class="btn-header amber"> 💾 Hacer copia de seguridad </a>
 <button onclick="openRestore()" class="btn-header cyan"> 📂 Restaurar copia de seguridad </button>
 <div class="dropdown-wrap" id="dropActualizaciones">
