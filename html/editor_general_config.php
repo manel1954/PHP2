@@ -251,6 +251,10 @@ body { background: var(--bg-base); color: var(--text-main); font-family: var(--f
     background: linear-gradient(135deg,#0d1117,#161b22);
     border-bottom: 1px solid var(--cyan);
     padding: 1.25rem 2rem;
+}
+.page-header-inner {
+    max-width: 960px;
+    margin: 0 auto;
     display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
 }
 .page-header h1 { font-family: var(--font-hud); font-size: 1.4rem; color: var(--cyan); margin: 0; letter-spacing:.1em; text-shadow: 0 0 12px rgba(0,229,255,.45); }
@@ -301,10 +305,12 @@ body { background: var(--bg-base); color: var(--text-main); font-family: var(--f
 <body>
 
 <div class="page-header">
-    <a href="extra.php" class="btn-back"><i class="bi bi-arrow-left"></i> Menu Extra</a>
-    <div>
-        <h1><i class="bi bi-sliders"></i> &nbsp;EDITOR GENERAL</h1>
-        <span class="badge-subtitle">MMDVMHost · YSF · D-STAR · NXDN</span>
+    <div class="page-header-inner">
+        <a href="extra.php" class="btn-back"><i class="bi bi-arrow-left"></i> Menu Extra</a>
+        <div>
+            <h1><i class="bi bi-sliders"></i> &nbsp;EDITOR GENERAL</h1>
+            <span class="badge-subtitle">MMDVMHost · YSF · D-STAR · NXDN</span>
+        </div>
     </div>
 </div>
 
