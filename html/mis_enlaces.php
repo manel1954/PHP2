@@ -1,13 +1,20 @@
 <?php
-// mis_enlaces.php - Panel de enlaces rápidos
-// Lee los datos de enlaces.json (mismo directorio)
+// mis_enlaces.php  –  Panel de enlaces rápidos
+// Posicionado explícito en CSS Grid usando fila/columna del JSON
 
 define('JSON_FILE', __DIR__ . '/enlaces.json');
 
 $enlaces = [];
 if (file_exists(JSON_FILE)) {
-    $raw = file_get_contents(JSON_FILE);
-    $enlaces = json_decode($raw, true) ?? [];
+    $enlaces = json_decode(file_get_contents(JSON_FILE), true) ?? [];
+}
+
+// Calcular dimensiones del grid desde los datos
+$maxCol  = 3;
+$maxFila = 1;
+foreach ($enlaces as $e) {
+    $maxCol  = max($maxCol,  (int)($e['columna'] ?? 1));
+    $maxFila = max($maxFila, (int)($e['fila']    ?? 1));
 }
 ?>
 <!DOCTYPE html>
@@ -19,17 +26,15 @@ if (file_exists(JSON_FILE)) {
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg:       #1e1e1e;
-            --surface:  #2b2b2b;
-            --border:   #3a3a3a;
-            --text:     #e0e0e0;
-            --dim:      #888;
-            --radius:   4px;
+            --bg:     #1e1e1e;
+            --dim:    #888;
+            --radius: 4px;
+            --cols:   <?= $maxCol ?>;
         }
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             background: var(--bg);
-            color: var(--text);
+            color: #e0e0e0;
             font-family: 'Share Tech Mono', monospace;
             min-height: 100vh;
             padding: 0 0 40px;
@@ -39,97 +44,72 @@ if (file_exists(JSON_FILE)) {
         header {
             background: linear-gradient(135deg, #111 0%, #1c1c1c 100%);
             border-bottom: 2px solid #444;
-            padding: 22px 40px 18px;
+            padding: 20px 36px 16px;
             display: flex;
             align-items: center;
-            gap: 18px;
+            gap: 16px;
         }
-        header .logo-badge {
+        .logo-badge {
             font-family: 'Orbitron', sans-serif;
-            font-size: 11px;
-            font-weight: 700;
+            font-size: 10px; font-weight: 700;
             color: #00e5ff;
             background: rgba(0,229,255,.08);
             border: 1px solid rgba(0,229,255,.3);
             border-radius: 3px;
-            padding: 4px 10px;
-            letter-spacing: 2px;
-            white-space: nowrap;
+            padding: 4px 10px; letter-spacing: 2px;
         }
         header h1 {
             font-family: 'Orbitron', sans-serif;
-            font-size: 22px;
-            font-weight: 900;
-            letter-spacing: 6px;
-            color: #fff;
+            font-size: 20px; font-weight: 900;
+            letter-spacing: 6px; color: #fff;
         }
-        header .callsign {
+        .callsign {
             font-family: 'Orbitron', sans-serif;
-            font-size: 13px;
-            color: #00e5ff;
-            letter-spacing: 3px;
-            opacity: .7;
+            font-size: 12px; color: #00e5ff;
+            letter-spacing: 3px; opacity: .65;
         }
         .btn-editor {
             margin-left: auto;
             font-family: 'Orbitron', sans-serif;
-            font-size: 9px;
-            letter-spacing: 2px;
-            padding: 6px 14px;
-            border-radius: var(--radius);
-            border: 1px solid #444;
-            background: #2a2a2a;
-            color: #888;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all .2s;
-            white-space: nowrap;
+            font-size: 9px; letter-spacing: 2px;
+            padding: 6px 14px; border-radius: var(--radius);
+            border: 1px solid #444; background: #252525; color: #888;
+            text-decoration: none; transition: all .2s; white-space: nowrap;
         }
         .btn-editor:hover { background: #333; color: #fff; border-color: #00e5ff55; }
 
-        /* ── Search ── */
+        /* ── Buscador ── */
         .search-wrap {
-            padding: 16px 30px 8px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            padding: 14px 28px 6px;
+            display: flex; align-items: center; gap: 10px;
         }
         .search-wrap input {
-            flex: 1;
-            background: #222;
-            border: 1px solid #444;
-            border-radius: var(--radius);
-            color: #ccc;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 13px;
-            padding: 7px 14px;
-            outline: none;
-            transition: border-color .2s;
-            max-width: 420px;
+            flex: 1; max-width: 400px;
+            background: #222; border: 1px solid #444;
+            border-radius: var(--radius); color: #ccc;
+            font-family: 'Share Tech Mono', monospace; font-size: 13px;
+            padding: 7px 13px; outline: none; transition: border-color .2s;
         }
-        .search-wrap input:focus { border-color: #00e5ff88; }
-        .stats { font-size: 11px; color: var(--dim); white-space: nowrap; }
+        .search-wrap input:focus { border-color: #00e5ff66; }
+        #contador { font-size: 11px; color: var(--dim); white-space: nowrap; }
 
-        /* ── Grid ── */
+        /* ── Grid con posicionado explícito ── */
         .grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(<?= $maxCol ?>, 1fr);
+            grid-template-rows: repeat(<?= $maxFila ?>, auto);
             gap: 5px 8px;
-            padding: 12px 30px;
+            padding: 12px 28px;
         }
+
+        /* ── Botones ── */
         .btn-link {
             display: block;
-            width: 100%;
-            padding: 7px 12px;
-            border: none;
-            border-radius: var(--radius);
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 11.5px;
-            text-align: center;
-            text-decoration: none;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            padding: 7px 10px;
+            border: none; border-radius: var(--radius);
+            font-family: 'Share Tech Mono', monospace; font-size: 11.5px;
+            text-align: center; text-decoration: none;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
             cursor: pointer;
             transition: filter .15s, transform .1s, box-shadow .15s;
             position: relative;
@@ -137,25 +117,30 @@ if (file_exists(JSON_FILE)) {
         .btn-link:hover {
             filter: brightness(1.35);
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0,0,0,.5);
+            box-shadow: 0 4px 14px rgba(0,0,0,.55);
             z-index: 2;
         }
         .btn-link:active { transform: translateY(0); filter: brightness(1.1); }
-        .btn-local { cursor: not-allowed; opacity: .55; }
+
+        .btn-local { cursor: not-allowed; opacity: .5; }
         .btn-local::after {
             content: '⚠ local';
-            position: absolute;
-            right: 6px; top: 50%;
+            position: absolute; right: 6px; top: 50%;
             transform: translateY(-50%);
             font-size: 9px; opacity: .7;
         }
-        .btn-wrap.hidden { display: none; }
+
+        /* Celda vacía – ocupa el espacio pero no se ve */
+        .cell-empty { visibility: hidden; }
+
+        /* Ocultar al filtrar */
+        .btn-wrap.hidden .btn-link { opacity: .1; pointer-events: none; }
 
         /* ── Footer ── */
-        footer { margin-top: 28px; display: flex; justify-content: center; }
+        footer { margin-top: 24px; display: flex; justify-content: center; }
         .btn-salir {
             font-family: 'Orbitron', sans-serif;
-            font-size: 12px; letter-spacing: 3px;
+            font-size: 11px; letter-spacing: 3px;
             padding: 9px 40px; border-radius: var(--radius);
             border: none; cursor: pointer;
             background: #c0392b; color: white;
@@ -163,12 +148,14 @@ if (file_exists(JSON_FILE)) {
         }
         .btn-salir:hover { background: #27ae60; transform: scale(1.04); }
 
+        /* ── Responsive ── */
         @media (max-width: 700px) {
-            .grid { grid-template-columns: repeat(2, 1fr); padding: 10px 12px; }
-            header h1 { font-size: 16px; letter-spacing: 3px; }
-            header { padding: 16px; gap: 10px; }
+            .grid { grid-template-columns: repeat(2, 1fr) !important; }
+            header h1 { font-size: 15px; letter-spacing: 3px; }
         }
-        @media (max-width: 460px) { .grid { grid-template-columns: 1fr; } }
+        @media (max-width: 440px) {
+            .grid { grid-template-columns: 1fr !important; }
+        }
     </style>
 </head>
 <body>
@@ -183,44 +170,60 @@ if (file_exists(JSON_FILE)) {
 <div class="search-wrap">
     <span>🔍</span>
     <input type="text" id="buscar" placeholder="Filtrar enlaces..." autocomplete="off" oninput="filtrar(this.value)">
-    <span class="stats" id="contador"></span>
+    <span id="contador"></span>
 </div>
 
 <div class="grid" id="grid">
-<?php if (empty($enlaces)): ?>
-    <p style="color:#666;padding:40px;grid-column:1/-1;text-align:center;">
-        No hay enlaces.
-        <a href="editor_enlaces.php" style="color:#00e5ff">→ Abre el editor para añadir</a>
-    </p>
-<?php else: ?>
-    <?php foreach ($enlaces as $e):
-        $nombre = htmlspecialchars($e['nombre'] ?? '');
-        $url    = htmlspecialchars($e['url']    ?? '');
-        $bg     = htmlspecialchars($e['bg']     ?? '#333');
-        $fg     = htmlspecialchars($e['fg']     ?? '#fff');
-        $local  = !empty($e['local']);
-        $key    = strtolower($e['nombre'] ?? '');
-    ?>
-        <div class="btn-wrap" data-nombre="<?= htmlspecialchars($key) ?>">
-            <?php if ($local || $url === ''): ?>
-                <span class="btn-link btn-local"
-                      style="background:<?= $bg ?>;color:<?= $fg ?>;"
-                      title="Acción local – no disponible en web">
-                    <?= $nombre ?>
-                </span>
-            <?php else: ?>
-                <a class="btn-link"
-                   href="<?= $url ?>"
-                   target="_blank"
-                   rel="noopener noreferrer"
-                   style="background:<?= $bg ?>;color:<?= $fg ?>;"
-                   title="<?= $url ?>">
-                    <?= $nombre ?>
-                </a>
-            <?php endif; ?>
-        </div>
-    <?php endforeach; ?>
-<?php endif; ?>
+<?php
+// Construir mapa de posiciones para detectar celdas vacías
+$ocupadas = [];
+foreach ($enlaces as $e) {
+    $f = (int)($e['fila']    ?? 1);
+    $c = (int)($e['columna'] ?? 1);
+    $ocupadas["$f,$c"] = true;
+}
+
+// Renderizar: primero los botones reales con posición explícita
+foreach ($enlaces as $idx => $e):
+    $nombre = htmlspecialchars($e['nombre'] ?? '');
+    $url    = htmlspecialchars($e['url']    ?? '');
+    $bg     = htmlspecialchars($e['bg']     ?? '#333');
+    $fg     = htmlspecialchars($e['fg']     ?? '#fff');
+    $local  = !empty($e['local']);
+    $fila   = (int)($e['fila']    ?? 1);
+    $col    = (int)($e['columna'] ?? 1);
+    $key    = strtolower($e['nombre'] ?? '');
+    $style  = "grid-row:$fila;grid-column:$col;";
+?>
+    <div class="btn-wrap" data-nombre="<?= htmlspecialchars($key) ?>" style="<?= $style ?>">
+        <?php if ($local || $url === ''): ?>
+            <span class="btn-link btn-local"
+                  style="background:<?= $bg ?>;color:<?= $fg ?>;"
+                  title="Acción local – no disponible en web">
+                <?= $nombre ?>
+            </span>
+        <?php else: ?>
+            <a class="btn-link"
+               href="<?= $url ?>"
+               target="_blank" rel="noopener noreferrer"
+               style="background:<?= $bg ?>;color:<?= $fg ?>;"
+               title="<?= $url ?>">
+                <?= $nombre ?>
+            </a>
+        <?php endif; ?>
+    </div>
+<?php endforeach; ?>
+
+<?php
+// Rellenar celdas vacías para que el grid quede uniforme
+for ($f = 1; $f <= $maxFila; $f++):
+    for ($c = 1; $c <= $maxCol; $c++):
+        if (!isset($ocupadas["$f,$c"])): ?>
+    <div class="cell-empty" style="grid-row:<?= $f ?>;grid-column:<?= $c ?>"></div>
+        <?php endif;
+    endfor;
+endfor;
+?>
 </div>
 
 <footer>
@@ -228,8 +231,8 @@ if (file_exists(JSON_FILE)) {
 </footer>
 
 <script>
-    const items = document.querySelectorAll('.btn-wrap');
-    const total = <?= count($enlaces) ?>;
+    const items  = document.querySelectorAll('.btn-wrap');
+    const total  = <?= count($enlaces) ?>;
 
     function actualizar() {
         let visible = 0;
@@ -238,8 +241,8 @@ if (file_exists(JSON_FILE)) {
             (visible < total ? visible + ' de ' : '') + total + ' enlaces';
     }
 
-    function filtrar(texto) {
-        const q = texto.toLowerCase().trim();
+    function filtrar(q) {
+        q = q.toLowerCase().trim();
         items.forEach(el => {
             el.classList.toggle('hidden', q !== '' && !el.dataset.nombre.includes(q));
         });
