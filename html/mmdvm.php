@@ -738,7 +738,7 @@ button.btn-header { font-family: var(--font-mono); }
 <h1>PANEL SISTEMAS DIGITALES RADIOAFICIONADOS PHPPLUS</h1>
 </div>
 <div class="ctrl-header-btns">
-<!-- <a href="edit_ini.php?file=displaydriver" class="btn-header cyan"> 📄 Configurar Display-Driver </a> -->
+<a href="editor_general_config.php?file=displaydriver" class="btn-header cyan"> 📄 editor general </a>
 <a href="?action=backup-configs" class="btn-header amber"> 💾 Hacer copia de seguridad </a>
 <button onclick="openRestore()" class="btn-header cyan"> 📂 Restaurar copia de seguridad </button>
 <div class="dropdown-wrap" id="dropActualizaciones">
