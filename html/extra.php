@@ -230,6 +230,26 @@
             </div>
         </div>
 
+
+<!-- EDITOR GENERAL -->
+<div class="extra-card">
+    <div class="extra-card-header">
+        <i class="bi bi-sliders" style="color:var(--cyan);"></i>
+        EDITOR GENERAL
+    </div>
+    <div class="extra-card-desc">
+        Configuración global · Callsign · Id · Frecuencias · Posición · URL
+    </div>
+    <a href="editor_general_config.php" target="_blank" class="btn-extra-open">
+        <i class="bi bi-box-arrow-up-right"></i> Abrir
+    </a>
+</div>
+
+
+
+
+
+
     </div>
 </div>
 
