@@ -41,8 +41,11 @@ if ($action) {
                  . ' -rtsp_transport tcp'
                  . ' -i ' . $rtspSafe
                  . ' -an'                          // sin audio (ALSA no disponible)
-                 . ' -c:v copy'                    // sin recodificar
-                 . ' -tag:v hvc1'                  // necesario para HEVC en HLS
+                 . ' -c:v libx264'                 // recodificar HEVC→H264 (compatible navegadores)
+                 . ' -preset ultrafast'             // máxima velocidad en Pi
+                 . ' -tune zerolatency'             // mínima latencia
+                 . ' -crf 28'                       // calidad/tamaño equilibrado
+                 . ' -vf scale=800:448'             // mantener resolución original
                  . ' -f hls'
                  . ' -hls_time 1'                  // segmentos de 1s
                  . ' -hls_list_size 3'             // solo 3 segmentos en lista
