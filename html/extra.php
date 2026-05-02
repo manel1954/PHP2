@@ -230,6 +230,23 @@
             </div>
         </div>
 
+<!-- MIS ENLACES PREFERIDOS -->
+<div class="col-12 col-sm-6 col-lg-3">
+    <div class="card bg-secondary border-0 h-100">
+        <div class="card-body d-flex flex-column">
+            <h5 class="card-title">
+                <i class="bi bi-bookmarks-fill me-2" style="color:#00e5ff;"></i>Mis Enlaces Preferidos
+            </h5>
+            <p class="card-text text-white-50 small flex-grow-1">
+                Panel de acceso rápido a enlaces de radioafición y servicios web.
+            </p>
+            <a href="/mis_enlaces.php" target="_blank" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
+                <i class="bi bi-box-arrow-up-right me-1"></i>Abrir
+            </a>
+        </div>
+    </div>
+</div>
+
         <!-- EDITOR GENERAL
         <div class="col-12 col-sm-6 col-lg-3">
             <div class="card bg-secondary border-0 h-100">
