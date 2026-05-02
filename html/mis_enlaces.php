@@ -228,8 +228,8 @@ endfor;
 
 <footer>
 
-<a href="editor_general_config.php" class="btn-header red"> 📄 editor general </a>
-    <!-- <button class="btn-salir" onclick="window.close()">✕ &nbsp;CERRAR</button> -->
+
+    <button class="btn-salir" <a href="mmdvm.php" class="btn-header red"></a>✕ &nbsp;CERRAR</button>
 </footer>
 
 <script>
