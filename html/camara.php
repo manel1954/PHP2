@@ -7,6 +7,7 @@ define('HLS_URL',  '/hls');
 define('PID_FILE', '/tmp/camara_ffmpeg.pid');
 define('LOG_FILE', '/tmp/camara_ffmpeg.log');
 define('FFMPEG',   '/usr/bin/ffmpeg');
+set_time_limit(60);
 
 $rtsp   = trim($_GET['rtsp']   ?? 'rtsp://rem-esp.spdns.org/2');
 $nombre = trim($_GET['nombre'] ?? 'Cámara');
@@ -52,14 +53,14 @@ if ($action) {
             exec($cmd, $out, $ret);
 
             // Capturar PID del último proceso ffmpeg
-            usleep(600000); // esperar 0.6s a que arranque
+            usleep(2000000); // esperar 2s a que arranque
             exec("pgrep -n ffmpeg", $pidOut);
             $pid = (int)($pidOut[0] ?? 0);
             if ($pid > 0) file_put_contents(PID_FILE, $pid);
 
             // Esperar hasta 4s a que aparezca el .m3u8
             $ok = false;
-            for ($i = 0; $i < 8; $i++) {
+            for ($i = 0; $i < 40; $i++) {
                 usleep(500000);
                 if (file_exists($m3u8) && filesize($m3u8) > 0) { $ok = true; break; }
             }
