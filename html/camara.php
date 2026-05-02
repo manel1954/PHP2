@@ -42,6 +42,7 @@ if ($action) {
                  . ' -i ' . $rtspSafe
                  . ' -an'                          // sin audio (ALSA no disponible)
                  . ' -c:v copy'                    // sin recodificar
+                 . ' -tag:v hvc1'                  // necesario para HEVC en HLS
                  . ' -f hls'
                  . ' -hls_time 1'                  // segmentos de 1s
                  . ' -hls_list_size 3'             // solo 3 segmentos en lista
