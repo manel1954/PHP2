@@ -261,7 +261,8 @@ endfor;
 </div>
 
 <footer>
-    <button class="btn-salir" onclick="window.close()">✕ &nbsp;CERRAR</button>
+    <a href="mmdvm.php" class="btn-salir btn-header red">✕ &nbsp;CERRAR</a>
+
 </footer>
 
 <script>
