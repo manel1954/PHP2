@@ -3,6 +3,7 @@
 // Mismo directorio que enlaces.json y mis_enlaces.php
 
 define('JSON_FILE', '/home/pi/.local/enlaces.json');
+define('CAM_INI',  '/home/pi/.local/camara.ini');
 
 function leerEnlaces(): array {
     if (!file_exists(JSON_FILE)) file_put_contents(JSON_FILE, '[]');
@@ -24,6 +25,30 @@ function sanitizar(array $d): array {
         'columna' => max(1, (int)($d['columna'] ?? 1)),
         'local'   => !empty($d['local']),
     ];
+}
+
+// ── Funciones camara.ini ────────────────────────────────────────
+function leerCamaras(): array {
+    if (!file_exists(CAM_INI)) return [];
+    return parse_ini_file(CAM_INI, true) ?: [];
+}
+
+function guardarCamaras(array $cams): bool {
+    $txt = '';
+    foreach ($cams as $key => $data) {
+        $txt .= "[{$key}]\n";
+        foreach ($data as $k => $v) {
+            $txt .= "{$k} = " . $v . "\n";
+        }
+        $txt .= "\n";
+    }
+    return file_put_contents(CAM_INI, $txt) !== false;
+}
+
+function nombreAClave(string $nombre): string {
+    $clave = strtolower($nombre);
+    $clave = preg_replace('/[^a-z0-9]+/', '_', $clave);
+    return trim($clave, '_');
 }
 
 function respJSON(array $data, int $code = 200): void {
@@ -91,6 +116,30 @@ if ($isAPI) {
             guardarEnlaces($lista);
             respJSON(['ok'=>true, 'msg'=>'Posiciones reasignadas', 'data'=>$lista]);
 
+        // POST ?action=cam_save  body: {key, nombre, rtsp}
+        case 'cam_save':
+            $key    = preg_replace('/[^a-z0-9_]/', '', strtolower(trim($body['key'] ?? '')));
+            $nombre = trim($body['nombre'] ?? '');
+            $rtsp   = trim($body['rtsp']   ?? '');
+            if ($key === '' || $rtsp === '') respJSON(['ok'=>false,'msg'=>'Clave y RTSP requeridos'], 400);
+            $cams = leerCamaras();
+            $cams[$key] = ['nombre' => $nombre, 'rtsp' => $rtsp];
+            guardarCamaras($cams);
+            respJSON(['ok'=>true, 'msg'=>"Cámara '$key' guardada", 'key'=>$key, 'data'=>$cams]);
+
+        // POST ?action=cam_delete  body: {key}
+        case 'cam_delete':
+            $key  = trim($body['key'] ?? '');
+            $cams = leerCamaras();
+            if (!isset($cams[$key])) respJSON(['ok'=>false,'msg'=>'Cámara no encontrada'], 404);
+            unset($cams[$key]);
+            guardarCamaras($cams);
+            respJSON(['ok'=>true, 'msg'=>"Cámara '$key' eliminada", 'data'=>$cams]);
+
+        // GET ?action=cam_list
+        case 'cam_list':
+            respJSON(['ok'=>true, 'data'=>leerCamaras()]);
+
         default:
             respJSON(['ok'=>false,'msg'=>'Acción desconocida'], 400);
     }
@@ -121,12 +170,9 @@ header{
 }
 .badge{font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;color:var(--cyan);background:rgba(0,229,255,.08);border:1px solid rgba(0,229,255,.28);border-radius:3px;padding:3px 9px;letter-spacing:2px}
 header h1{font-family:'Orbitron',sans-serif;font-size:16px;font-weight:900;letter-spacing:5px;color:#fff}
-
 .a-volver{margin-left:auto;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;padding:5px 13px;border-radius:var(--r);border:1px solid #444;background:#252525;color:#888;text-decoration:none;transition:all .2s}
 
 .a-volver-ader{margin-left:auto;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;padding:5px 13px;border-radius:var(--r);border:1px solid #444;background:#f09809;color:#000;text-decoration:none;transition:all .2s}
-
-
 .a-volver:hover{background:#333;color:#fff;border-color:#555}
 
 /* LAYOUT PRINCIPAL */
@@ -224,6 +270,21 @@ input[type=color]{width:36px;height:32px;border:1px solid #444;border-radius:3px
 .modal p{font-size:13px;color:#999;margin-bottom:20px;line-height:1.6}
 .modal-btns{display:flex;gap:9px;justify-content:center}
 
+/* ── Panel Cámaras ── */
+.cam-panel{background:#0e1a1a;border:1px solid rgba(0,229,255,.2);border-radius:var(--r);padding:14px 16px;margin-top:4px}
+.cam-panel-title{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:3px;color:var(--cyan);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.cam-list{display:flex;flex-direction:column;gap:5px;margin-bottom:10px;max-height:130px;overflow-y:auto}
+.cam-item{display:flex;align-items:center;gap:8px;background:#111;border-radius:3px;padding:6px 10px;font-size:11px;font-family:'Share Tech Mono',monospace}
+.cam-item .cam-key{color:var(--cyan);min-width:90px}
+.cam-item .cam-nom{color:#aaa;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cam-item .cam-use{font-family:'Orbitron',sans-serif;font-size:8px;padding:3px 8px;border-radius:3px;border:none;cursor:pointer;background:rgba(0,229,255,.15);color:var(--cyan);transition:all .15s}
+.cam-item .cam-use:hover{background:rgba(0,229,255,.3)}
+.cam-item .cam-del{font-size:12px;background:none;border:none;cursor:pointer;color:#633;padding:2px 5px;transition:all .15s;border-radius:3px}
+.cam-item .cam-del:hover{background:#3d1111;color:#f66}
+.cam-detect{display:none;background:rgba(0,229,255,.06);border:1px solid rgba(0,229,255,.25);border-radius:var(--r);padding:8px 12px;font-size:12px;color:var(--cyan);font-family:'Share Tech Mono',monospace;margin-top:6px;line-height:1.6}
+.cam-detect.show{display:block}
+.cam-detect b{color:#fff}
+
 /* Scrollbar */
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-track{background:#181818}
@@ -238,10 +299,8 @@ input[type=color]{width:36px;height:32px;border:1px solid #444;border-radius:3px
 <header>
     <div class="badge">EDITOR</div>
     <h1>ENLACES</h1>
-    <a href="mmdvm.php" class="a-volver-ader" target="_blank">VOLVER AL PANEL ADER</a>
+        <a href="mmdvm.php" class="a-volver-ader" target="_blank">VOLVER AL PANEL ADER</a>
     <a href="mis_enlaces.php" class="a-volver" target="_blank">↗ VER PANEL ENLACES</a>
-
-    
 </header>
 
 <div class="main">
@@ -324,9 +383,25 @@ input[type=color]{width:36px;height:32px;border:1px solid #444;border-radius:3px
                 <span onclick="document.getElementById('fLocal').click()">⚠ Enlace local (sin URL)</span>
             </div>
 
+            <!-- DETECTOR RTSP -->
+            <div class="cam-detect" id="camDetect">
+                📷 URL RTSP detectada — se guardará en <b>camara.ini</b><br>
+                Clave: <b id="camClavePreview">—</b><br>
+                <small style="color:#555;font-size:10px">El enlace quedará como <b>camara.php?cam=CLAVE</b></small>
+            </div>
+
             <div class="form-btns">
                 <button class="btn btn-save btn-lg" onclick="guardar()">💾 GUARDAR</button>
                 <button class="btn btn-sec  btn-lg" onclick="cancelar()">✕ CANCELAR</button>
+            </div>
+
+            <!-- PANEL CÁMARAS -->
+            <div class="cam-panel">
+                <div class="cam-panel-title">
+                    📷 CÁMARAS EN CAMARA.INI
+                    <span style="color:#555;font-size:10px;margin-left:auto" id="camCount">—</span>
+                </div>
+                <div class="cam-list" id="camList">—</div>
             </div>
         </div>
 
@@ -677,9 +752,107 @@ function esc(s) {
 }
 
 // ═══════════════════════════════════════════════════════════
+//  CÁMARAS (camara.ini)
+// ═══════════════════════════════════════════════════════════
+let camaras = {};
+
+async function cargarCamaras() {
+    const res = await api('cam_list');
+    if (res.ok) { camaras = res.data || {}; renderCamaras(); }
+}
+
+function renderCamaras() {
+    const list  = document.getElementById('camList');
+    const count = document.getElementById('camCount');
+    const keys  = Object.keys(camaras);
+    count.textContent = keys.length + ' cámara' + (keys.length !== 1 ? 's' : '');
+    if (keys.length === 0) {
+        list.innerHTML = '<span style="color:#333;font-size:11px">No hay cámaras configuradas</span>';
+        return;
+    }
+    list.innerHTML = keys.map(k => `
+        <div class="cam-item">
+            <span class="cam-key">${esc(k)}</span>
+            <span class="cam-nom" title="${esc(camaras[k].rtsp || '')}">${esc(camaras[k].nombre || k)}</span>
+            <button class="cam-use" onclick="usarCamara('${esc(k)}')" title="Usar en enlace activo">↑ USAR</button>
+            <button class="cam-del" onclick="borrarCamara('${esc(k)}')" title="Eliminar">🗑</button>
+        </div>`).join('');
+}
+
+// Detectar RTSP al escribir la URL
+document.getElementById('fUrl').addEventListener('input', function() {
+    const val = this.value.trim();
+    const detect = document.getElementById('camDetect');
+    const prev   = document.getElementById('camClavePreview');
+    if (val.startsWith('rtsp://') || val.startsWith('rtsps://')) {
+        const nom   = document.getElementById('fNom').value.trim();
+        const clave = nombreAClave(nom || 'camara');
+        prev.textContent = clave;
+        detect.classList.add('show');
+    } else {
+        detect.classList.remove('show');
+    }
+});
+
+document.getElementById('fNom').addEventListener('input', function() {
+    const url = document.getElementById('fUrl').value.trim();
+    if (url.startsWith('rtsp://') || url.startsWith('rtsps://')) {
+        const clave = nombreAClave(this.value.trim() || 'camara');
+        document.getElementById('camClavePreview').textContent = clave;
+    }
+});
+
+function nombreAClave(nombre) {
+    return nombre.toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '_')
+        .replace(/^_+|_+$/g, '')
+        || 'camara';
+}
+
+// Al guardar: si URL es RTSP, guardar en camara.ini y reemplazar URL
+const _guardarOriginal = guardar;
+guardar = async function() {
+    const urlVal = document.getElementById('fUrl').value.trim();
+    if (urlVal.startsWith('rtsp://') || urlVal.startsWith('rtsps://')) {
+        const nom   = document.getElementById('fNom').value.trim();
+        const clave = nombreAClave(nom || 'camara');
+        // Guardar en camara.ini
+        const res = await api('cam_save', { key: clave, nombre: nom, rtsp: urlVal });
+        if (res.ok) {
+            camaras = res.data;
+            renderCamaras();
+            // Reemplazar URL con camara.php?cam=CLAVE
+            document.getElementById('fUrl').value = 'http://raspberry.local/camara.php?cam=' + clave;
+            document.getElementById('camDetect').classList.remove('show');
+            toast('📷 Cámara guardada en camara.ini como "' + clave + '"', 'ok');
+        } else {
+            toast('Error guardando cámara: ' + res.msg, 'err');
+            return;
+        }
+    }
+    await _guardarOriginal();
+};
+
+async function usarCamara(key) {
+    document.getElementById('fUrl').value = 'http://raspberry.local/camara.php?cam=' + key;
+    document.getElementById('camDetect').classList.remove('show');
+    preview();
+    toast('URL actualizada con cámara "' + key + '"', 'ok');
+}
+
+async function borrarCamara(key) {
+    if (!confirm('¿Eliminar cámara "' + key + '" de camara.ini?')) return;
+    const res = await api('cam_delete', { key });
+    if (res.ok) { camaras = res.data; renderCamaras(); toast(res.msg, 'ok'); }
+    else toast('Error: ' + res.msg, 'err');
+}
+
+// ═══════════════════════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════════════════════
 cargar();
+cargarCamaras();
 preview();
 </script>
 </body>
