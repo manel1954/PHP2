@@ -1,6 +1,5 @@
 <?php
 // camara.php  –  Visor de cámara RTSP en el navegador vía HLS
-// Uso: camara.php?rtsp=rtsp://rem-esp.spdns.org/2&nombre=Camara China
 
 define('HLS_DIR',    '/var/www/html/hls');
 define('HLS_URL',    '/hls');
