@@ -297,7 +297,8 @@ input[type=color]{width:36px;height:32px;border:1px solid #444;border-radius:3px
 <header>
     <div class="badge">EDITOR</div>
     <h1>ENLACES</h1>
-    <a href="mis_enlaces.php" class="a-volver" target="_blank">↗ VER PANEL</a>
+        <a href="mmdvm.php" class="a-volver-ader" target="_blank">VOLVER AL PANEL ADER</a>
+    <a href="mis_enlaces.php" class="a-volver" target="_blank">↗ VER PANEL ENLACES</a>
 </header>
 
 <div class="main">
